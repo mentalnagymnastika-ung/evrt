@@ -151,81 +151,57 @@
 
             <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
                 <div class="flex items-center space-x-2 text-xs font-bold text-slate-700 flex-grow" id="summary-left-container">
-                    <span class="bg-emerald-50 text-emerald-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-emerald-100/60 font-black" id="summary-date">
-                        12.06.
-                    </span>
+                    <span class="bg-emerald-50 text-emerald-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-emerald-100/60 font-black" id="summary-date">Danas</span>
                     <span class="text-slate-300">|</span>
                     <span class="truncate text-slate-600 flex items-center gap-1" id="summary-info">Učitavanje...</span>
-                    <span class="text-slate-300">|</span>
-                    
                     <div class="flex items-center space-x-1.5 text-[10px] shrink-0">
-                        <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-xl flex items-center gap-1" title="Prisutno dece">
-                            P: <span id="header-stat-present" class="font-black">0</span>
-                        </span>
-                        <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-xl flex items-center gap-1" title="Odsutno dece">
-                            O: <span id="header-stat-absent" class="font-black">0</span>
-                        </span>
+                        <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-xl flex items-center gap-1">P: <span id="header-stat-present" class="font-black">0</span></span>
+                        <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-xl flex items-center gap-1">O: <span id="header-stat-absent" class="font-black">0</span></span>
                     </div>
                 </div>
 
                 <div class="hidden flex-grow items-center relative" id="inline-search-container">
-                    <input type="text" id="global-child-search" oninput="handleGlobalSearch()" placeholder="Pretraži dete po imenu..." class="w-full bg-slate-50 text-slate-800 placeholder-slate-400 rounded-xl pl-9 pr-8 py-2 text-xs outline-none border border-slate-200 focus:border-emerald-500 transition-all shadow-sm">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-                    <button onclick="toggleInlineSearch(false)" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer">
-                        <i class="fa-solid fa-xmark text-xs"></i>
-                    </button>
+                    <input type="text" id="global-child-search" oninput="handleGlobalSearch()" placeholder="Pretraži dete..." class="w-full bg-slate-50 text-slate-800 rounded-xl pl-9 pr-8 py-2 text-xs outline-none border border-slate-200 focus:border-emerald-500">
+                    <button onclick="toggleInlineSearch(false)" class="absolute right-2.5 top-2.5 text-slate-400"><i class="fa-solid fa-xmark text-xs"></i></button>
                 </div>
 
                 <div class="flex items-center space-x-2 shrink-0 justify-end">
-                    <button onclick="toggleInlineSearch(true)" id="btn-toggle-search" class="bg-slate-100 hover:bg-slate-200 text-slate-700 w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 cursor-pointer" title="Pretraži decu">
-                        <i class="fa-solid fa-magnifying-glass text-xs sm:text-sm"></i>
-                    </button>
-                    <button onclick="toggleSettingsPanel()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 h-9 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-slate-200">
-                        <i class="fa-solid fa-sliders text-emerald-600"></i>
-                        <span>Podesi</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300" id="settings-chevron"></i>
+                    <button onclick="toggleInlineSearch(true)" id="btn-toggle-search" class="bg-slate-100 text-slate-700 w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200"><i class="fa-solid fa-magnifying-glass text-xs"></i></button>
+                    <button onclick="toggleSettingsPanel()" class="bg-slate-100 text-slate-700 font-bold px-3 py-1.5 h-9 rounded-xl text-xs flex items-center gap-1.5 border border-slate-200">
+                        <i class="fa-solid fa-sliders text-emerald-600"></i> Podesi <i class="fa-solid fa-chevron-down text-[10px]" id="settings-chevron"></i>
                     </button>
                 </div>
             </div>
 
-            <div id="settings-collapsible-panel" class="hidden bg-white border border-slate-200 rounded-3xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 shadow-inner transition-all duration-350">
+            <div id="settings-collapsible-panel" class="hidden bg-white border border-slate-200 rounded-3xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 shadow-inner">
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
-                        <i class="fa-solid fa-user-friends text-emerald-500 mr-1.5"></i> 1. Zamenski vaspitač
+                        <i class="fa-solid fa-user-friends text-emerald-500 mr-1.5"></i> Zamenski vaspitač
                     </label>
-                    <select id="field-substitute-select" onchange="changeSubstituteEducator(); updateSummaryBar();" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-sm">
-                        </select>
+                    <select id="field-substitute-select" onchange="changeSubstituteEducator(); updateSummaryBar();" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800"></select>
                 </div>
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
-                        <i class="fa-solid fa-folder-tree text-emerald-500 mr-1.5"></i> 2. Aktivna grupa / Vrtić
+                        <i class="fa-solid fa-folder-tree text-emerald-500 mr-1.5"></i> Aktivna grupa
                     </label>
-                    <select id="field-group-select" onchange="changeActiveGroup(); updateSummaryBar();" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-sm">
-                        </select>
+                    <select id="field-group-select" onchange="changeActiveGroup(); updateSummaryBar();" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800"></select>
                 </div>
-
                 <div class="sm:col-span-2 border-t border-slate-100 pt-3 mt-1 space-y-2">
                     <div class="flex justify-between items-center">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center">
-                            <i class="fa-solid fa-message-captions text-emerald-500 mr-1.5"></i> 3. Zapažanja o času i tema (Zajednička beleška)
+                            <i class="fa-solid fa-message-captions text-emerald-500 mr-1.5"></i> Zapažanja o času i tema
                         </label>
-                        <button onclick="startVoiceInput('group-general-note')" class="bg-slate-50 hover:bg-emerald-600 text-slate-505 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow border border-slate-200">
+                        <button onclick="startVoiceInput('group-general-note')" class="bg-slate-50 hover:bg-emerald-600 text-slate-505 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition-all shadow border border-slate-200">
                             <i class="fa-solid fa-microphone text-[10px]" id="mic-group-general-note"></i>
                         </button>
                     </div>
-                    <textarea id="group-general-note" rows="3" oninput="updateGroupGeneralNote(this.value); updateSummaryBar();" placeholder="Npr. Današnja tema časa su bili poligoni spretnosti, deca su generalno bila prilično zainteresovana za čas..." class="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 text-slate-800 placeholder-slate-400 shadow-inner"></textarea>
+                    <textarea id="group-general-note" rows="3" oninput="updateGroupGeneralNote(this.value); updateSummaryBar();" placeholder="Upiši temu i zapažanja..." class="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 text-slate-800 placeholder-slate-400"></textarea>
                 </div>
             </div>
 
-            <div id="substitute-alert-bar" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-medium leading-relaxed flex items-center space-x-2.5">
-                <i class="fa-solid fa-circle-exclamation text-base shrink-0 text-amber-600 animate-bounce"></i>
-                <span id="substitute-alert-text">Učitavanje režima zamene...</span>
-            </div>
-
-            <div class="space-y-3" id="children-field-list">
-                </div>
+            <div id="substitute-alert-bar" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium"></div>
+            <div class="space-y-3" id="children-field-list"></div>
         </section>
-
     </main>
 
     <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2.5 z-50 pointer-events-none">
@@ -234,8 +210,7 @@
     </div>
 
     <!-- JAVASCRIPT LOGIKA PORTALA I VASPITAČKOG RADA -->
-    <script>
-        <script>
+<script>
         // =================================================================
         // === 1. SIGURNOSNA LICENCA (VREMENSKO ZAKLJUČAVANJE SISTEMA)  ===
         // =================================================================
