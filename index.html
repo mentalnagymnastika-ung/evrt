@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="UMG Asistent">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23059669'/><text x='50' y='65' font-family='sans-serif' font-size='40' font-weight='bold' fill='white' text-anchor='middle'>UMG</text></svg>">
+    <link class="apple-touch-icon" rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23059669'/><text x='50' y='65' font-family='sans-serif' font-size='40' font-weight='bold' fill='white' text-anchor='middle'>UMG</text></svg>">
     
     <!-- Tailwind CSS za moderan i responzivan dizajn -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -197,9 +197,9 @@
                 </div>
             </div>
 
-            <!-- SKLOPIVI PANEL SA SELEKTORIMA (Sadrži samo potrebna polja i spojenu belešku) -->
+            <!-- SKLOPIVI PANEL SA SELEKTORIMA -->
             <div id="settings-collapsible-panel" class="hidden bg-white border border-slate-200 rounded-3xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 shadow-inner transition-all duration-350">
-                <!-- Korak 1: Zamenski vaspitač (Glavni vaspitač grupe je uklonjen iz vizuelnog menija) -->
+                <!-- Korak 1: Zamenski vaspitač -->
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
                         <i class="fa-solid fa-user-friends text-emerald-500 mr-1.5"></i> 1. Zamenski vaspitač
@@ -208,7 +208,7 @@
                         <!-- Dinamički se popunjava -->
                     </select>
                 </div>
-                <!-- Korak 2: Izbor grupe (Podeljen na Moje grupe i Zamene) -->
+                <!-- Korak 2: Izbor grupe -->
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
                         <i class="fa-solid fa-folder-tree text-emerald-500 mr-1.5"></i> 2. Aktivna grupa / Vrtić
@@ -218,17 +218,25 @@
                     </select>
                 </div>
 
-                <!-- Korak 3: Zapažanja o času i tema (Zajednička beleška - Spojeno i olakšano polje sa snimačem glasa) -->
-                <div class="sm:col-span-2 border-t border-slate-100 pt-3 mt-1 space-y-2">
+                <!-- Korak 3: Tema časa (Polje koje je falilo, a potrebno je kodu) -->
+                <div class="sm:col-span-2 border-t border-slate-100 pt-3 space-y-1">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center">
+                        <i class="fa-solid fa-book-open text-emerald-500 mr-1.5"></i> 3. Tema časa / Naziv aktivnosti
+                    </label>
+                    <input type="text" id="field-class-theme" oninput="updateClassTheme(this.value); updateSummaryBar();" placeholder="Npr. Poligoni spretnosti sa elementima balansa" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-sm">
+                </div>
+
+                <!-- Korak 4: Zapažanja o času i tema (Zajednička beleška) -->
+                <div class="sm:col-span-2 border-t border-slate-100 pt-3 space-y-2">
                     <div class="flex justify-between items-center">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center">
-                            <i class="fa-solid fa-message-captions text-emerald-500 mr-1.5"></i> 3. Zapažanja o času i tema (Zajednička beleška)
+                            <i class="fa-solid fa-message-captions text-emerald-500 mr-1.5"></i> 4. Zapažanja o času (Zajednička beleška)
                         </label>
-                        <button onclick="startVoiceInput('group-general-note')" class="bg-slate-50 hover:bg-emerald-600 text-slate-505 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow border border-slate-200">
+                        <button onclick="startVoiceInput('group-general-note')" class="bg-slate-50 hover:bg-emerald-600 text-slate-550 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow border border-slate-200">
                             <i class="fa-solid fa-microphone text-[10px]" id="mic-group-general-note"></i>
                         </button>
                     </div>
-                    <textarea id="group-general-note" rows="3" oninput="updateGroupGeneralNote(this.value); updateSummaryBar();" placeholder="Npr. Današnja tema časa su bili poligoni spretnosti, deca su generalno bila prilično zainteresovana za čas..." class="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 text-slate-800 placeholder-slate-400 shadow-inner"></textarea>
+                    <textarea id="group-general-note" rows="3" oninput="updateGroupGeneralNote(this.value); updateSummaryBar();" placeholder="Npr. Današnja tema časa su bili poligoni spretnosti, deca su generalno bila prilično zainteresovana..." class="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 text-slate-800 placeholder-slate-400 shadow-inner"></textarea>
                 </div>
             </div>
 
@@ -634,8 +642,13 @@
                 });
             };
 
-            populateList(fieldEducatorSelect, activeEducator);
-            populateList(welcomeEducatorSelect, activeEducator);
+            // Sigurnosna provera za element koji možda ne postoji u HTML-u
+            if (fieldEducatorSelect) {
+                populateList(fieldEducatorSelect, activeEducator);
+            }
+            if (welcomeEducatorSelect) {
+                populateList(welcomeEducatorSelect, activeEducator);
+            }
         }
 
         // POPUNJAVANJE DROPDOWNA ZA ZAMENSKOG VASPITAČA (Samo ostali licencirani radnici)
@@ -761,8 +774,11 @@
                         </div>
                     `;
                 }
-                document.getElementById('header-stat-present').innerText = "0";
-                document.getElementById('header-stat-absent').innerText = "0";
+                const hPresent = document.getElementById('header-stat-present');
+                if (hPresent) hPresent.innerText = "0";
+                const hAbsent = document.getElementById('header-stat-absent');
+                if (hAbsent) hAbsent.innerText = "0";
+                
                 const alertBar = document.getElementById('substitute-alert-bar');
                 if (alertBar) alertBar.classList.add('hidden');
                 return;
@@ -808,8 +824,17 @@
             }
 
             const record = appState.dailyRecords[key];
-            document.getElementById('field-class-theme').value = record.theme || "";
-            document.getElementById('group-general-note').value = record.generalNote || "";
+            
+            // SIGURNE DODELE VREDNOSTI (Bezbedno od null greške ako elementi nisu u HTML-u)
+            const themeInput = document.getElementById('field-class-theme');
+            if (themeInput) {
+                themeInput.value = record.theme || "";
+            }
+            
+            const generalNoteInput = document.getElementById('group-general-note');
+            if (generalNoteInput) {
+                generalNoteInput.value = record.generalNote || "";
+            }
 
             populateSubstituteSelect(activeGroup);
 
@@ -1052,6 +1077,7 @@
             }
         }
 
+        // Postavljanje brze ocene časa
         function setQuickScore(childId, score) {
             const key = getRecordKey();
             if (appState.dailyRecords[key] && appState.dailyRecords[key].children[childId]) {
