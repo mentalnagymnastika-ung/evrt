@@ -146,25 +146,44 @@
         <!-- ======================================================= -->
         <section id="tab-field" class="space-y-4 lg:h-full lg:overflow-y-auto custom-scrollbar pb-8 hidden">
             
-            <!-- PAMETNA KOMPAKTNA TRAKA SA SAŽETKOM ČASA (Uvijek vidljiva, izuzetno štedi prostor) -->
+            <!-- PAMETNA KOMPAKTNA TRAKA SA SAŽETKOM ČASA I INLINE BRZOM PRETRAGOM -->
             <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
-                <div class="flex items-center space-x-2 text-xs font-bold text-slate-700">
+                <!-- Sažetak časa (Sakriva se kada je pretraga aktivna) -->
+                <div class="flex items-center space-x-2 text-xs font-bold text-slate-700 flex-grow" id="summary-left-container">
                     <span class="bg-emerald-50 text-emerald-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-emerald-100/60" id="summary-date">
                         Danas
                     </span>
                     <span class="text-slate-300">|</span>
                     <span class="truncate text-slate-600" id="summary-info">Učitavanje...</span>
                 </div>
-                <button onclick="toggleSettingsPanel()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-slate-200">
-                    <i class="fa-solid fa-sliders text-emerald-600"></i>
-                    <span>Podesi čas</span>
-                    <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300" id="settings-chevron"></i>
-                </button>
+
+                <!-- Integrisani inline pretraživač (Prikazuje se umesto sažetka kada se klikne lupica) -->
+                <div class="hidden flex-grow items-center relative" id="inline-search-container">
+                    <input type="text" id="global-child-search" oninput="handleGlobalSearch()" placeholder="Pretraži dete po imenu..." class="w-full bg-slate-50 text-slate-800 placeholder-slate-400 rounded-xl pl-9 pr-8 py-2 text-xs outline-none border border-slate-200 focus:border-emerald-500 transition-all shadow-sm">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                    <button onclick="toggleInlineSearch(false)" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Kontrolni tasteri sa desne strane trake -->
+                <div class="flex items-center space-x-2 shrink-0 justify-end">
+                    <!-- Elegantni taster pretrage (Lupica) -->
+                    <button onclick="toggleInlineSearch(true)" id="btn-toggle-search" class="bg-slate-100 hover:bg-slate-200 text-slate-700 w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 cursor-pointer" title="Pretraži decu">
+                        <i class="fa-solid fa-magnifying-glass text-xs sm:text-sm"></i>
+                    </button>
+                    <!-- Taster za sklopivi panel postavki -->
+                    <button onclick="toggleSettingsPanel()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 h-9 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-slate-200">
+                        <i class="fa-solid fa-sliders text-emerald-600"></i>
+                        <span>Podesi</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300" id="settings-chevron"></i>
+                    </button>
+                </div>
             </div>
 
-            <!-- SKLOPIVI PANEL SA SELEKTORIMA (Sakriven po defaultu da oslobodi prostor) -->
+            <!-- SKLOPIVI PANEL SA SELEKTORIMA (Otvara se preko tastera "Podesi") -->
             <div id="settings-collapsible-panel" class="hidden bg-white border border-slate-200 rounded-3xl p-4 grid grid-cols-1 sm:grid-cols-4 gap-4 shadow-inner transition-all duration-300">
-                <!-- Korak 1: Datum časa (Premešten na prvo mesto i popunjava se direktno iz sistema) -->
+                <!-- Korak 1: Datum časa -->
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
                         <i class="fa-solid fa-calendar-day text-emerald-500 mr-1.5"></i> 1. Datum časa
@@ -204,21 +223,7 @@
                 <span id="substitute-alert-text">Učitavanje režima zamene...</span>
             </div>
 
-            <!-- Globalna pretraga dece za vaspitača -->
-            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-3xl p-4 md:p-5 text-slate-800 shadow-md flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border border-emerald-100">
-                <div class="space-y-1">
-                    <h3 class="text-sm font-black flex items-center tracking-wide text-emerald-900">
-                        <i class="fa-solid fa-magnifying-glass mr-2 text-emerald-600 text-base"></i> Brzi pretraživač dece
-                    </h3>
-                    <p class="text-[10px] text-slate-500 font-medium">Upišite ime deteta kako biste ga odmah pronašli i uneli podatke, bez obzira na grupu.</p>
-                </div>
-                <div class="relative flex-grow max-w-md">
-                    <input type="text" id="global-child-search" oninput="handleGlobalSearch()" placeholder="Pretraži dete po imenu (npr. Igor)..." class="w-full bg-white text-slate-800 placeholder-slate-400 rounded-xl pl-10 pr-4 py-3 text-xs outline-none border border-slate-200 focus:border-emerald-500 transition-all shadow-sm">
-                    <i class="fa-solid fa-search absolute left-3.5 top-3.5 text-slate-400 text-xs pointer-events-none"></i>
-                </div>
-            </div>
-
-            <!-- Brza statistika -->
+            <!-- Brza statistika prisutnosti -->
             <div class="flex justify-between items-center bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
                 <div class="flex items-center space-x-3 text-xs font-bold text-slate-600">
                     <span>Prisutno dece: <span id="stat-present" class="text-sm font-black text-emerald-600">0</span></span>
@@ -846,7 +851,7 @@
                         </div>
 
                         <!-- Glasovni unos zabeleške -->
-                        <div class="relative flex items-center bg-slate-50 rounded-xl border border-slate-250 p-2">
+                        <div class="relative flex items-center bg-slate-50 rounded-xl border border-slate-200 p-2">
                             <input type="text" id="note-child-${child.id}" value="${tr.note || ''}" 
                                    oninput="updateChildNote('${child.id}', this.value)" 
                                    placeholder="Diktirajte ili upišite opasku za ${child.name.split(' ')[0]}..." 
@@ -983,6 +988,33 @@
             if (summaryDate) summaryDate.innerHTML = `<i class="fa-solid fa-calendar-day mr-1"></i> ${dateVal || 'Danas'}`;
             if (summaryInfo) {
                 summaryInfo.innerHTML = `👤 <span class="font-bold text-slate-800">${educatorVal || 'Vaspitač'}</span> | 🏫 <span class="font-bold text-slate-800">${groupVal || 'Nema grupe'}</span> ${themeVal ? ' | 📝 ' + themeVal : ''}`;
+            }
+        }
+
+        // TOGGLING INLINE PRETRAGE (Zamenjuje sažetak poljem za unos)
+        function toggleInlineSearch(show) {
+            const summaryLeft = document.getElementById('summary-left-container');
+            const inlineSearch = document.getElementById('inline-search-container');
+            const searchBtn = document.getElementById('btn-toggle-search');
+            const searchInput = document.getElementById('global-child-search');
+
+            if (show) {
+                summaryLeft.classList.add('hidden');
+                inlineSearch.classList.remove('hidden');
+                inlineSearch.classList.add('flex');
+                searchBtn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            } else {
+                summaryLeft.classList.remove('hidden');
+                inlineSearch.classList.add('hidden');
+                inlineSearch.classList.remove('flex');
+                searchBtn.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                if (searchInput) {
+                    searchInput.value = '';
+                    handleGlobalSearch(); // Resetuje filter i prikazuje svu decu
+                }
             }
         }
 
