@@ -61,7 +61,7 @@
         <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl border border-slate-100 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                 <h3 class="font-black text-slate-900 text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-square-plus text-emerald-600 text-base"></i> Dodaj novi vrtić / ustanovu
+                    <i class="fa-solid fa-hotel text-emerald-600 text-base"></i> Dodaj novi vrtić / ustanovu
                 </h3>
                 <button onclick="closeKindergartenModal()" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -161,6 +161,49 @@
         </div>
     </div>
 
+    <div id="modal-add-child-screen" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-xl w-full shadow-2xl border border-slate-100 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-black text-slate-900 text-sm flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-blue-900 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-user-plus text-[10px]"></i></span>
+                    Upis i Registracija dece u izabranu grupu
+                </h3>
+                <button onclick="closeAddChildModal()" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar pr-1">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3 shadow-inner">
+                    <span class="text-xs font-black text-slate-800 uppercase tracking-wide block border-b border-slate-200 pb-1.5">Pojedinačni ručni upis člana</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input type="text" id="new-child-name" placeholder="Ime i prezime deteta..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none text-slate-800 shadow-sm">
+                        <input type="text" id="new-child-parent" placeholder="Ime roditelja/staratelja..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none text-slate-800 shadow-sm">
+                        <input type="text" id="new-child-phone" placeholder="Telefon roditelja..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none text-slate-800 shadow-sm">
+                        <input type="email" id="new-child-email" placeholder="Email roditelja..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none text-slate-800 shadow-sm">
+                    </div>
+                    <div class="flex justify-end">
+                        <button onclick="addChildToGroup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition-all shadow-md">
+                            <i class="fa-solid fa-user-plus mr-1"></i> Sačuvaj člana
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-purple-50/40 border border-purple-100 rounded-xl space-y-2.5">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-file-excel text-purple-600 text-base"></i>
+                        <span class="text-xs font-black text-purple-900 uppercase tracking-wide">Grupni uvoz spiska iz Excel-a / CSV-a</span>
+                    </div>
+                    <p class="text-[10px] text-purple-700/80 leading-tight">Učitajte tabelu u kojoj kolone sadrže podatke: <b>Ime i prezime</b>, <b>Telefon</b> i <b>Email</b>.</p>
+                    <div class="flex items-center justify-start">
+                        <button onclick="document.getElementById('excel-import-input').click()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-2 shadow-sm cursor-pointer">
+                            <i class="fa-solid fa-file-import"></i> Uvezi iz Excel / CSV tabele
+                        </button>
+                        <input type="file" id="excel-import-input" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleExcelImport(event)">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <nav class="bg-white text-slate-800 shadow-sm py-3.5 px-4 md:px-6 shrink-0 border-b border-slate-200/80 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="goToHomePortal()">
@@ -228,54 +271,23 @@
                 <div id="accordion-g" class="accordion-content px-5 pb-5 space-y-3 border-t border-slate-100 pt-4">
                     <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Izaberite klikom na grupu za rad sa decom:</span>
                     <div id="groups-grid-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-72 overflow-y-auto custom-scrollbar pr-1">
-                        </div>
+                    </div>
                 </div>
             </div>
 
             <div id="step-children-card" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden opacity-40 pointer-events-none transition-all duration-300">
-                <div onclick="toggleAccordion('accordion-c')" class="flex justify-between items-center p-5 cursor-pointer hover:bg-slate-50/80 transition-all">
-                    <h3 class="text-sm font-bold text-slate-900 flex items-center select-none">
+                <div class="flex justify-between items-center p-5 border-b border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center select-none" id="children-list-header-title">
                         <span class="w-6 h-6 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs font-black mr-2">3</span>
-                        <i class="fa-solid fa-address-card text-purple-600 mr-2"></i> Upis i Registracija dece
+                        <i class="fa-solid fa-address-card text-purple-600 mr-2"></i> Upisani članovi grupe
                     </h3>
-                    <i id="arrow-accordion-c" class="fa-solid fa-chevron-down text-slate-400 text-xs arrow-rotate"></i>
+                    <button onclick="openAddChildModal()" class="w-8 h-8 bg-blue-900 hover:bg-blue-950 text-white rounded-full flex items-center justify-center shadow-md transition-all cursor-pointer" title="Upiši i registruj novu decu">
+                        <i class="fa-solid fa-user-plus text-xs"></i>
+                    </button>
                 </div>
 
-                <div id="accordion-c" class="accordion-content px-5 pb-5 space-y-5 border-t border-slate-100 pt-4">
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3 shadow-inner">
-                        <span class="text-xs font-black text-slate-800 uppercase tracking-wide block border-b border-slate-200 pb-1.5">Pojedinačni ručni upis člana</span>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <input type="text" id="new-child-name" placeholder="Ime i prezime deteta..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none text-slate-800 shadow-sm">
-                            <input type="text" id="new-child-parent" placeholder="Ime roditelja/staratelja..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none text-slate-800 shadow-sm">
-                            <input type="text" id="new-child-phone" placeholder="Telefon roditelja..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none text-slate-800 shadow-sm">
-                            <input type="email" id="new-child-email" placeholder="Email roditelja..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none text-slate-800 shadow-sm">
-                        </div>
-                        <div class="flex justify-end">
-                            <button onclick="addChildToGroup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs transition-all shadow-md">
-                                <i class="fa-solid fa-user-plus mr-1.5"></i> Registruj i sačuvaj dete
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="p-4 bg-purple-50/40 border border-purple-100 rounded-xl space-y-2.5">
-                        <div class="flex items-center space-x-2">
-                            <i class="fa-solid fa-file-excel text-purple-600 text-base"></i>
-                            <span class="text-xs font-black text-purple-900 uppercase tracking-wide">Grupni uvoz spiska iz Excel-a / CSV-a</span>
-                        </div>
-                        <p class="text-[10px] text-purple-700/80 leading-tight">Učitajte tabelu u kojoj kolone sadrže podatke: <b>Ime i prezime</b>, <b>Telefon</b> i <b>Email</b>. Sistem automatski prepoznaje podatke.</p>
-                        
-                        <div class="flex items-center justify-start">
-                            <button onclick="document.getElementById('excel-import-input').click()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-2 shadow-sm cursor-pointer">
-                                <i class="fa-solid fa-file-import"></i> Uvezi iz Excel / CSV tabele
-                            </button>
-                            <input type="file" id="excel-import-input" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleExcelImport(event)">
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" id="children-list-header-title">Upisani članovi:</h4>
-                        <div class="space-y-2 max-h-56 overflow-y-auto custom-scrollbar pr-1" id="editor-children-list">
-                        </div>
+                <div class="p-5">
+                    <div class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-1" id="editor-children-list">
                     </div>
                 </div>
             </div>
@@ -284,52 +296,64 @@
 
         <section class="lg:col-span-5 space-y-6 lg:h-full lg:overflow-y-auto custom-scrollbar pb-8">
             
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 space-y-5">
-                <div class="flex items-center space-x-3 border-b border-slate-100 pb-3">
-                    <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg shadow-inner">
-                        <i class="fa-solid fa-arrow-up-right-dots"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-900">Kontrolni centar i bezbednost</h3>
-                        <p class="text-[10px] text-slate-400">Upravljanje kadrovima, lozinkama i sistemskom bazom.</p>
-                    </div>
-                </div>
-
-                <div class="space-y-2.5">
-                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide"><i class="fa-solid fa-user-shield mr-1 text-purple-600"></i> Registracija vaspitača / instruktora</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="new-educator-name" placeholder="Npr. Maja Vučković" class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none text-slate-800 shadow-inner">
-                        <button onclick="addNewEducator()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-sm transition-all shrink-0">Dodaj</button>
-                    </div>
-                    <div class="space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar pr-1 pt-1" id="settings-educator-list"></div>
-                </div>
-
-                <div class="p-4 bg-purple-50/40 border border-purple-100 rounded-xl space-y-3 shadow-inner">
-                    <span class="block text-xs font-black text-purple-900 uppercase tracking-wide"><i class="fa-solid fa-key mr-1"></i> Autorizacioni PIN kodovi</span>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="space-y-1">
-                            <label class="block text-[10px] font-bold text-slate-500">Pedagog PIN (P-PIN):</label>
-                            <div class="flex gap-1.5">
-                                <input type="text" id="settings-pedagog-pin" placeholder="Pedagog lozinka..." class="w-full bg-white border border-purple-200 rounded-xl px-2.5 py-2 text-xs font-mono font-bold text-slate-800">
-                                <button onclick="savePedagogPin()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-2.5 py-2 rounded-xl text-[10px] shrink-0" title="Sačuvaj Pedagog PIN">Snimi</button>
-                            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div onclick="toggleAccordion('accordion-admin-panel')" class="flex justify-between items-center p-5 cursor-pointer hover:bg-slate-50/80 transition-all">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg shadow-inner">
+                            <i class="fa-solid fa-arrow-up-right-dots"></i>
                         </div>
-                        <div class="space-y-1">
-                            <label class="block text-[10px] font-bold text-slate-500">Uprava PIN (A-PIN):</label>
-                            <div class="flex gap-1.5">
-                                <input type="text" id="settings-admin-pin" placeholder="Admin lozinka..." class="w-full bg-white border border-purple-200 rounded-xl px-2.5 py-2 text-xs font-mono font-bold text-slate-800">
-                                <button onclick="saveAdminPin()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-2.5 py-2 rounded-xl text-[10px] shrink-0" title="Sačuvaj Admin PIN">Snimi</button>
-                            </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">Kontrolni centar i bezbednost</h3>
+                            <p class="text-[10px] text-slate-400">Upravljanje kadrovima, lozinkama i bazom.</p>
                         </div>
                     </div>
+                    <i id="arrow-accordion-admin-panel" class="fa-solid fa-chevron-down text-slate-400 text-xs arrow-rotate"></i>
                 </div>
 
-                <div class="space-y-2 pt-1">
-                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide"><i class="fa-solid fa-database mr-1 text-teal-600"></i> Rezervna kopija i prenos baze</label>
-                    <p class="text-[10px] text-slate-400 leading-tight">Redovno preuzimajte rezervnu kopiju. Viber kod omogućava prenos kompletne baze direktno na drugi uređaj.</p>
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <button onclick="exportDatabaseFile()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm"><i class="fa-solid fa-file-export mr-1"></i> Preuzmi JSON</button>
-                        <button onclick="copyDatabaseAsTextCode()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm"><i class="fa-solid fa-copy mr-1"></i> Viber Kod</button>
+                <div id="accordion-admin-panel" class="accordion-content open px-5 pb-5 space-y-5 border-t border-slate-100 pt-4">
+                    <div class="space-y-2.5">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide"><i class="fa-solid window-restore mr-1 text-purple-600"></i> Registracija vaspitača / instruktora</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-educator-name" placeholder="Npr. Maja Vučković" class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none text-slate-800 shadow-inner">
+                            <button onclick="addNewEducator()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-sm transition-all shrink-0">Dodaj</button>
+                        </div>
+                        <div class="space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar pr-1 pt-1" id="settings-educator-list"></div>
+                    </div>
+
+                    <div class="p-4 bg-purple-50/40 border border-purple-100 rounded-xl space-y-3 shadow-inner">
+                        <span class="block text-xs font-black text-purple-900 uppercase tracking-wide"><i class="fa-solid fa-key mr-1"></i> Autorizacioni PIN kodovi</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-500">Pedagog PIN (P-PIN):</label>
+                                <div class="flex gap-1.5">
+                                    <input type="text" id="settings-pedagog-pin" placeholder="Pedagog lozinka..." class="w-full bg-white border border-purple-200 rounded-xl px-2.5 py-2 text-xs font-mono font-bold text-slate-800">
+                                    <button onclick="savePedagogPin()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-2.5 py-2 rounded-xl text-[10px] shrink-0" title="Sačuvaj">Snimi</button>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-500">Uprava PIN (A-PIN):</label>
+                                <div class="flex gap-1.5">
+                                    <input type="text" id="settings-admin-pin" placeholder="Admin lozinka..." class="w-full bg-white border border-purple-200 rounded-xl px-2.5 py-2 text-xs font-mono font-bold text-slate-800">
+                                    <button onclick="saveAdminPin()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-2.5 py-2 rounded-xl text-[10px] shrink-0" title="Sačuvaj">Snimi</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 pt-1">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide"><i class="fa-solid fa-database mr-1 text-teal-600"></i> Rezervna kopija i prenos baze</label>
+                        <p class="text-[10px] text-slate-400 leading-tight">Redovno preuzimajte kopije. JSON fajl možete učitati ispod da vratite celokupno stanje baze podataka.</p>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <button onclick="exportDatabaseFile()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm"><i class="fa-solid fa-file-export mr-1"></i> Preuzmi JSON</button>
+                            
+                            <button onclick="document.getElementById('json-import-input').click()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer">
+                                <i class="fa-solid fa-file-import"></i> Učitaj JSON
+                            </button>
+                            <input type="file" id="json-import-input" class="hidden" accept=".json" onchange="importDatabaseFile(event)">
+                        </div>
+                        <div class="pt-1">
+                            <button onclick="copyDatabaseAsTextCode()" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2 rounded-xl transition-all shadow-sm"><i class="fa-solid fa-copy mr-1"></i> Generiši Viber Kod</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -363,13 +387,28 @@ let selectedKindergartenId = null;
 let selectedGroupId = null;
 
 window.addEventListener('DOMContentLoaded', () => {
+    loadLocalDataToState();
+    
+    if (localStorage.getItem('umg_admin_authenticated') === 'true') {
+        isAuthorized = true;
+        const ps = document.getElementById('password-screen');
+        if (ps) ps.classList.add('hidden');
+    }
+
+    populateKindergartenSelects(); 
+    populateEducatorSelects();
+    renderSettingsEducatorList();
+    initFirebaseCloudSync();
+});
+
+// Čuvanje i učitavanje iz localStorage u lokalnu strukturu
+function loadLocalDataToState() {
     const stored = {
         kindergartens: localStorage.getItem('umg_field_kindergartens'),
         groups: localStorage.getItem('umg_field_groups'),
         educators: localStorage.getItem('umg_field_educators'),
         records: localStorage.getItem('umg_field_records'),
         reports: localStorage.getItem('umg_field_reports_archive'),
-        adminAuth: localStorage.getItem('umg_admin_authenticated'),
         pinPed: localStorage.getItem('umg_pedagog_pin'),
         pinAdm: localStorage.getItem('umg_admin_pin')
     };
@@ -382,47 +421,54 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (stored.pinPed) appState.pedagogPin = stored.pinPed;
     if (stored.pinAdm) appState.adminPin = stored.pinAdm;
-    
-    if (stored.adminAuth === 'true') {
-        isAuthorized = true;
-        const ps = document.getElementById('password-screen');
-        if (ps) ps.classList.add('hidden');
-    }
+}
 
-    populateKindergartenSelects(); 
-    populateEducatorSelects();
-    renderSettingsEducatorList();
-    initFirebaseCloudSync();
-});
+function saveStateToLocalStorage() {
+    localStorage.setItem('umg_field_kindergartens', JSON.stringify(appState.kindergartens));
+    localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+    localStorage.setItem('umg_field_educators', JSON.stringify(appState.educators));
+    localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
+    localStorage.setItem('umg_field_reports_archive', JSON.stringify(appState.savedReports));
+    localStorage.setItem('umg_pedagog_pin', appState.pedagogPin);
+    localStorage.setItem('umg_admin_pin', appState.adminPin);
+}
 
 // ACCORDION KONTROLE
 function toggleAccordion(id) {
-    const parentCard = document.getElementById(id).closest('.pointer-events-none');
-    if (parentCard) return;
     const content = document.getElementById(id);
+    const trigger = document.getElementById('arrow-' + id);
+    if (!content) return;
     if (content.classList.contains('open')) {
         content.classList.remove('open');
+        if (trigger) trigger.closest('.flex').classList.remove('open');
     } else {
         content.classList.add('open');
+        if (trigger) trigger.closest('.flex').classList.add('open');
     }
 }
 function openAccordionDirectly(id) {
     const content = document.getElementById(id);
-    if (content && !content.classList.contains('open')) content.classList.add('open');
+    const trigger = document.getElementById('arrow-' + id);
+    if (content && !content.classList.contains('open')) {
+        content.classList.add('open');
+        if (trigger) trigger.closest('.flex').classList.add('open');
+    }
 }
 function closeAccordionDirectly(id) {
     const content = document.getElementById(id);
-    if (content && content.classList.contains('open')) content.classList.remove('open');
+    const trigger = document.getElementById('arrow-' + id);
+    if (content && content.classList.contains('open')) {
+        content.classList.remove('open');
+        if (trigger) trigger.closest('.flex').classList.remove('open');
+    }
 }
 
-// MODAL - VRTIĆ
+// MODALI KONTROLE
 function openKindergartenModal() { document.getElementById('modal-add-kindergarten').classList.remove('hidden'); }
 function closeKindergartenModal() {
     document.getElementById('modal-add-kindergarten').classList.add('hidden');
     document.getElementById('new-kindergarten-name').value = '';
 }
-
-// MODAL - DODAVANJE GRUPE
 function openAddGroupModal() {
     if (!selectedKindergartenId) return showToast("Prvo izaberite aktivni vrtić!", "warning");
     document.getElementById('new-group-name').value = '';
@@ -431,56 +477,50 @@ function openAddGroupModal() {
 }
 function closeAddGroupModal() { document.getElementById('modal-add-group').classList.add('hidden'); }
 
-// MODAL - IZMENA GRUPE
 function openEditGroupModalDirectly(groupId) {
     const group = appState.groups.find(g => g.id === groupId);
     if (!group) return;
-
     document.getElementById('modal-edit-group-id').value = group.id;
     document.getElementById('modal-edit-group-name').value = group.name || '';
     document.getElementById('modal-edit-group-age').value = group.ageGroup || '3-4 godine';
     document.getElementById('modal-edit-group-year').value = group.yearGroup || '';
-    
     const modalEduSelect = document.getElementById('modal-edit-group-educator');
-    modalEduSelect.innerHTML = '<option value="">-- Bez vaspitača --</option>' + 
-        appState.educators.map(edu => `<option value="${edu}">${edu}</option>`).join('');
+    modalEduSelect.innerHTML = '<option value="">-- Bez vaspitača --</option>' + appState.educators.map(edu => `<option value="${edu}">${edu}</option>`).join('');
     modalEduSelect.value = group.educator || '';
-
     document.getElementById('modal-edit-group').classList.remove('hidden');
 }
 function closeEditGroupModal() { document.getElementById('modal-edit-group').classList.add('hidden'); }
+function openAddChildModal() {
+    if (!selectedGroupId) return showToast("Prvo izaberite aktivnu grupu iznad klikom na nju!", "warning");
+    document.getElementById('modal-add-child-screen').classList.remove('hidden');
+}
+function closeAddChildModal() { document.getElementById('modal-add-child-screen').classList.add('hidden'); }
 
 function saveGroupModifications() {
     const gid = document.getElementById('modal-edit-group-id').value;
     const group = appState.groups.find(g => g.id === gid);
     if (!group) return;
-
     const newName = document.getElementById('modal-edit-group-name').value.trim();
     if (!newName) return showToast("Naziv grupe ne može biti prazan!", "warning");
-
     group.name = newName;
     group.ageGroup = document.getElementById('modal-edit-group-age').value;
     group.yearGroup = document.getElementById('modal-edit-group-year').value.trim();
     group.educator = document.getElementById('modal-edit-group-educator').value;
-
     localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
     updateCloudGroup(group);
-    
     closeEditGroupModal();
     renderGroupsGrid();
     if (selectedGroupId === gid) selectActiveGroup(gid);
-    showToast("Podaci o grupi (uzrast/generacija) uspešno ažurirani!");
+    showToast("Podaci o grupi uspešno ažurirani!");
 }
 
-// UPRAVLJANJE VRTIĆIMA
+// USTANOVE LOGIKA
 function createNewKindergarten() {
     const name = document.getElementById('new-kindergarten-name').value.trim();
     if (!name) return showToast("Unesite naziv ustanove!", "warning");
-
     const newK = { id: `k-${Date.now()}`, name: name };
     appState.kindergartens.push(newK);
     localStorage.setItem('umg_field_kindergartens', JSON.stringify(appState.kindergartens));
-    
     closeKindergartenModal();
     populateKindergartenSelects();
     showToast(`Vrtić "${name}" uspešno registrovan!`);
@@ -508,13 +548,11 @@ function onKindergartenChange() {
     if (selectedKindergartenId) {
         stepGroupsCard.classList.remove('opacity-40', 'pointer-events-none');
         renderGroupsGrid();
-        openAccordionDirectly('accordion-g');
     } else {
         stepGroupsCard.classList.add('opacity-40', 'pointer-events-none');
         stepChildrenCard.classList.add('opacity-40', 'pointer-events-none');
-        closeAccordionDirectly('accordion-g');
-        closeAccordionDirectly('accordion-c');
         selectedGroupId = null;
+        renderChildrenList(null);
     }
 }
 
@@ -531,7 +569,7 @@ function deleteActiveKindergarten() {
     }
 }
 
-// UPRAVLJANJE GRUPAMA (KROZ KARTICE)
+// GRUPE LOGIKA
 function createNewGroup() {
     const name = document.getElementById('new-group-name').value.trim();
     if (!name) return showToast("Unesite naziv grupe!", "warning");
@@ -549,7 +587,6 @@ function createNewGroup() {
     appState.groups.push(newGroup);
     localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
     updateCloudGroup(newGroup);
-
     closeAddGroupModal();
     renderGroupsGrid();
     showToast(`Grupa "${name}" uspešno kreirana!`);
@@ -558,7 +595,6 @@ function createNewGroup() {
 function renderGroupsGrid() {
     const container = document.getElementById('groups-grid-container');
     if (!container) return;
-    
     const filteredGroups = appState.groups.filter(g => g.kindergartenId === selectedKindergartenId);
     
     if (filteredGroups.length === 0) {
@@ -569,7 +605,6 @@ function renderGroupsGrid() {
             </div>
         `;
         document.getElementById('step-children-card').classList.add('opacity-40', 'pointer-events-none');
-        closeAccordionDirectly('accordion-c');
         return;
     }
 
@@ -589,7 +624,7 @@ function renderGroupsGrid() {
                         ${genLabel}
                     </div>
                     <div class="text-[10px] text-slate-500 font-medium">${g.ageGroup} • ${g.educator || 'Nema vaspitača'}</div>
-                    <div class="text-[10px] text-purple-700 font-bold"><i class="fa-solid fa-child mr-1"></i> ${childCount} upisanih članova</div>
+                    <div class="text-[10px] text-purple-700 font-bold"><i class="fa-solid fa-child mr-1"></i> ${childCount} članova</div>
                 </div>
                 <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                     <button onclick="event.stopPropagation(); openEditGroupModalDirectly('${g.id}')" class="w-7 h-7 text-purple-600 hover:bg-purple-100 rounded-lg flex items-center justify-center transition-all" title="Izmeni grupu">
@@ -607,21 +642,21 @@ function renderGroupsGrid() {
 function selectActiveGroup(groupId) {
     selectedGroupId = groupId;
     renderGroupsGrid();
-    
     const stepChildrenCard = document.getElementById('step-children-card');
     if (!stepChildrenCard) return;
-
     stepChildrenCard.classList.remove('opacity-40', 'pointer-events-none');
-    openAccordionDirectly('accordion-c');
     
     const group = appState.groups.find(g => g.id === selectedGroupId);
     if (!group) return;
-
     const titleEl = document.getElementById('children-list-header-title');
     if (titleEl) {
-        titleEl.innerHTML = `Upisani članovi grupe <span class="text-purple-700 font-black">"${group.name}"</span>:`;
+        titleEl.innerHTML = `
+            <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs font-black"><i class="fa-solid fa-address-card"></i></span>
+                <span>Članovi grupe <span class="text-purple-700 font-black">"${group.name}"</span></span>
+            </div>
+        `;
     }
-
     renderChildrenList(group);
 }
 
@@ -633,16 +668,15 @@ function deleteGroupDirectly(groupId) {
         if (selectedGroupId === groupId) {
             selectedGroupId = null;
             document.getElementById('step-children-card').classList.add('opacity-40', 'pointer-events-none');
-            closeAccordionDirectly('accordion-c');
         }
         renderGroupsGrid();
         showToast("Grupa uspešno obrisana.", "warning");
     }
 }
 
-// UPRAVLJANJE DECOM i EXCEL IMPORT
+// UPIS I IMPORT DECE
 function addChildToGroup() {
-    if (!selectedGroupId) return showToast("Prvo izaberite aktivnu grupu iznad klikom na nju!", "warning");
+    if (!selectedGroupId) return showToast("Prvo izaberite aktivnu grupu!", "warning");
     const group = appState.groups.find(g => g.id === selectedGroupId);
     if (!group) return;
 
@@ -650,9 +684,8 @@ function addChildToGroup() {
     const parentIn = document.getElementById('new-child-parent');
     const phoneIn = document.getElementById('new-child-phone');
     const emailIn = document.getElementById('new-child-email');
-
     const name = nameIn ? nameIn.value.trim() : '';
-    if (!name) return showToast("Ime deteta je obavezno polje!", "warning");
+    if (!name) return showToast("Ime deteta je obavezno!", "warning");
 
     if (!group.children) group.children = [];
     group.children.push({
@@ -665,7 +698,6 @@ function addChildToGroup() {
 
     localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
     updateCloudGroup(group);
-
     nameIn.value = ''; parentIn.value = ''; phoneIn.value = ''; emailIn.value = '';
     renderChildrenList(group);
     renderGroupsGrid();
@@ -673,11 +705,7 @@ function addChildToGroup() {
 }
 
 function handleExcelImport(event) {
-    if (!selectedGroupId) {
-        showToast("Morate izabrati grupu klikom na karticu pre uvoza!", "warning");
-        event.target.value = '';
-        return;
-    }
+    if (!selectedGroupId) { showToast("Morate izabrati grupu pre uvoza!", "warning"); event.target.value = ''; return; }
     const file = event.target.files[0];
     if (!file) return;
 
@@ -688,8 +716,7 @@ function handleExcelImport(event) {
             const workbook = XLSX.read(data, { type: 'array' });
             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
             const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-            if (jsonData.length === 0) return showToast("Izabrana tabela je prazna!", "warning");
+            if (jsonData.length === 0) return showToast("Tabela je prazna!", "warning");
 
             const group = appState.groups.find(g => g.id === selectedGroupId);
             if (!group) return;
@@ -719,13 +746,11 @@ function handleExcelImport(event) {
                 updateCloudGroup(group);
                 renderChildrenList(group);
                 renderGroupsGrid();
-                showToast(`Uspešno uvezeno ${importedCount} dece iz tabele!`);
+                showToast(`Uspešno uvezeno ${importedCount} dece!`);
             } else {
-                showToast("Sistem nije pronašao kolonu sa imenima (npr. 'Ime i prezime')!", "warning");
+                showToast("Sistem nije pronašao kolonu sa imenima!", "warning");
             }
-        } catch (err) {
-            showToast("Greška pri čitanju tabele. Proverite format!", "warning");
-        }
+        } catch (err) { showToast("Greška pri čitanju tabele!", "warning"); }
         event.target.value = '';
     };
     reader.readAsArrayBuffer(file);
@@ -734,12 +759,12 @@ function handleExcelImport(event) {
 function renderChildrenList(group) {
     const listEl = document.getElementById('editor-children-list');
     if (!listEl) return;
-    if (!group.children || group.children.length === 0) {
-        listEl.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-4">Nema upisane dece u ovoj grupi.</p>';
+    if (!group || !group.children || group.children.length === 0) {
+        listEl.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-6">Nema upisane dece u ovoj grupi. Kliknite na taster "+" iznad da ih upišete.</p>';
         return;
     }
     listEl.innerHTML = group.children.map(c => `
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs hover:shadow-sm transition-all">
             <div>
                 <div class="font-bold text-slate-900 text-sm">${c.name}</div>
                 <div class="text-slate-500 font-medium">Roditelj: ${c.parent || '/'} • Tel: ${c.phone || '/'}</div>
@@ -765,7 +790,7 @@ function removeChildFromGroup(childId) {
     }
 }
 
-// VASPITAČI I PIN KODOVI
+// VASPITAČI I PIN LOGIKA
 function addNewEducator() {
     const input = document.getElementById('new-educator-name');
     const name = input ? input.value.trim() : '';
@@ -777,12 +802,10 @@ function addNewEducator() {
     populateEducatorSelects(); renderSettingsEducatorList();
     showToast("Vaspitač uspešno unet.");
 }
-
 function populateEducatorSelects() {
     const newSelect = document.getElementById('new-group-educator');
     if (newSelect) newSelect.innerHTML = '<option value="">-- Izaberite vaspitača --</option>' + appState.educators.map(edu => `<option value="${edu}">${edu}</option>`).join('');
 }
-
 function renderSettingsEducatorList() {
     const listEl = document.getElementById('settings-educator-list');
     if (listEl) {
@@ -794,7 +817,6 @@ function renderSettingsEducatorList() {
         `).join('');
     }
 }
-
 function deleteEducator(name) {
     if (confirm(`Ukloniti vaspitača ${name}?`)) {
         appState.educators = appState.educators.filter(e => e !== name);
@@ -812,12 +834,10 @@ function verifySecureAccess() {
         document.getElementById('password-error-msg').classList.remove('hidden');
     }
 }
-
 function lockSecureTab() {
     isAuthorized = false; localStorage.setItem('umg_admin_authenticated', 'false');
     document.getElementById('password-screen').classList.remove('hidden');
 }
-
 function goToHomePortal() { window.location.href = "index.html"; }
 function savePedagogPin() {
     appState.pedagogPin = document.getElementById('settings-pedagog-pin').value.trim();
@@ -830,12 +850,66 @@ function saveAdminPin() {
     showToast("A-PIN sačuvan.");
 }
 
-// REZERVNE KOPIJE
+// ==========================================
+// REZERVNE KOPIJE (IZVOZ I NOVI UVOZ JSON)
+// ==========================================
 function exportDatabaseFile() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState));
     const a = document.createElement('a'); a.setAttribute("href", dataStr);
     a.setAttribute("download", `UMG_BAZA_${new Date().toISOString().slice(0,10)}.json`);
     a.click();
+}
+
+// POTPUNA NOVA FUNKCIJA ZA UČITAVANJE (UVOZ) JSON FAJLA
+function importDatabaseFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            
+            // Bazična validacija strukture fajla da osiguramo da je pravi JSON
+            if (importedData && (importedData.kindergartens || importedData.groups || importedData.educators)) {
+                
+                if (confirm("Pažnja! Učitavanjem ovog fajla prebrisat ćete trenutne lokalne podatke na ovom uređaju. Nastaviti?")) {
+                    // Prepisivanje globalnog stanja aplikacije
+                    appState.kindergartens = importedData.kindergartens || [];
+                    appState.groups = importedData.groups || [];
+                    appState.educators = importedData.educators || [];
+                    appState.dailyRecords = importedData.dailyRecords || {};
+                    appState.savedReports = importedData.savedReports || {};
+                    if (importedData.pedagogPin) appState.pedagogPin = importedData.pedagogPin;
+                    if (importedData.adminPin) appState.adminPin = importedData.adminPin;
+
+                    // Sinhronizacija u localStorage
+                    saveStateToLocalStorage();
+
+                    // Resetovanje selekcija i kompletno osvežavanje korisničkog interfejsa
+                    selectedKindergartenId = null;
+                    selectedGroupId = null;
+                    
+                    populateKindergartenSelects();
+                    populateEducatorSelects();
+                    renderSettingsEducatorList();
+                    
+                    // Osvežavanje input polja za PIN kodove u Kontrolnom Centru
+                    document.getElementById('settings-pedagog-pin').value = appState.pedagogPin;
+                    document.getElementById('settings-admin-pin').value = appState.adminPin;
+
+                    showToast("Baza podataka uspešno učitana i obnovljena!");
+                }
+            } else {
+                showToast("Fajl nema ispravnu strukturu UMG baze!", "warning");
+            }
+        } catch (err) {
+            showToast("Greška pri čitanju JSON datoteke!", "warning");
+        }
+        // Resetovanje inputa da omogući ponovno učitavanje istog fajla ako zatreba
+        event.target.value = '';
+    };
+    reader.readAsText(file);
 }
 
 function copyDatabaseAsTextCode() {
@@ -844,6 +918,7 @@ function copyDatabaseAsTextCode() {
     navigator.clipboard.writeText(encoded).then(() => showToast("Viber kod kopiran!"));
 }
 
+// CLOUD SYNCHRONIZATION
 function initFirebaseCloudSync() {
     try {
         if (typeof __app_id !== 'undefined') appId = __app_id;
