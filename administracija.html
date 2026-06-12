@@ -705,17 +705,56 @@ function addChildToGroup() {
 }
 
 function handleExcelImport(event) {
-    if (!selectedGroupId) { showToast("Morate izabrati grupu pre uvoza!", "warning"); event.target.value = ''; return; }
+    if (!selectedGroupId) { 
+        showToast("Morate izabrati grupu pre uvoza!", "warning"); 
+        event.target.value = ''; 
+        return; 
+    }
     const file = event.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+            let jsonData = [];
+            
+            // Provera da li je u pitanju CSV fajl (tvoj slučaj)
+            if (file.name.endsWith('.csv')) {
+                const text = e.target.result;
+                // Delimo fajl na redove i čistimo prazne prostore
+                const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+                
+                if (lines.length < 2) {
+                    showToast("Tabela je prazna!", "warning");
+                    return;
+                }
+
+                // Određivanje separatora (zarez ili tačka-zarez)
+                let separator = ',';
+                if (lines[0].includes(';')) {
+                    separator = ';';
+                }
+
+                // Čitanje zaglavlja iz prvog reda
+                const headers = lines[0].split(separator).map(h => h.replace(/["']/g, "").trim());
+                
+                // Prolazak kroz ostale redove i pravljenje objekata
+                for (let i = 1; i < lines.length; i++) {
+                    const columns = lines[i].split(separator).map(c => c.replace(/["']/g, "").trim());
+                    let rowObj = {};
+                    headers.forEach((header, index) => {
+                        rowObj[header] = columns[index] || '';
+                    });
+                    jsonData.push(rowObj);
+                }
+            } else {
+                // Ako je u pitanju standardni Excel (.xlsx ili .xls)
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                jsonData = XLSX.utils.sheet_to_json(worksheet);
+            }
+
             if (jsonData.length === 0) return showToast("Tabela je prazna!", "warning");
 
             const group = appState.groups.find(g => g.id === selectedGroupId);
@@ -723,13 +762,16 @@ function handleExcelImport(event) {
             if (!group.children) group.children = [];
 
             let importedCount = 0;
+            
             jsonData.forEach((row) => {
-                let fullName = row['Ime i prezime'] || row['Ime'] || row['Prezime i ime'] || row['Name'] || '';
-                let phone = row['Telefon'] || row['Tel'] || row['Kontakt'] || row['Phone'] || '';
+                // Prepoznavanje kolona na osnovu tvog fajla na srpskom jeziku
+                let fullName = row['Ime i prezime deteta'] || row['Ime i prezime'] || row['Ime'] || row['Prezime i ime'] || '';
+                let parent = row['Ime roditelja'] || row['Roditelj'] || row['Staratelj'] || '';
+                let phone = row['Telefon roditelja'] || row['Telefon'] || row['Tel'] || row['Kontakt'] || '';
                 let email = row['Email'] || row['E-mail'] || row['Mejl'] || '';
-                let parent = row['Roditelj'] || row['Staratelj'] || '';
 
-                if (fullName) {
+                // Čišćenje i uvoz ako ime postoji
+                if (fullName && fullName.trim() !== '') {
                     group.children.push({
                         id: `c-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
                         name: fullName.toString().trim(),
@@ -742,18 +784,33 @@ function handleExcelImport(event) {
             });
 
             if (importedCount > 0) {
+                // Čuvanje u lokalnu bazu i osvežavanje ekrana
                 localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-                updateCloudGroup(group);
+                
+                // Sinhronizacija sa cloudom ukoliko je aktivna
+                if (typeof updateCloudGroup === 'function') {
+                    updateCloudGroup(group);
+                }
+                
                 renderChildrenList(group);
                 renderGroupsGrid();
                 showToast(`Uspešno uvezeno ${importedCount} dece!`);
             } else {
-                showToast("Sistem nije pronašao kolonu sa imenima!", "warning");
+                showToast("Sistem nije pronašao kolonu sa imenima dece!", "warning");
             }
-        } catch (err) { showToast("Greška pri čitanju tabele!", "warning"); }
+        } catch (err) { 
+            console.error(err);
+            showToast("Greška pri čitanju tabele!", "warning"); 
+        }
         event.target.value = '';
     };
-    reader.readAsArrayBuffer(file);
+
+    // Ako je CSV čitamo ga kao tekst sa UTF-8 podrškom za naša slova (Š, Đ, Č, Ć, Ž)
+    if (file.name.endsWith('.csv')) {
+        reader.readAsText(file, 'UTF-8');
+    } else {
+        reader.readAsArrayBuffer(file);
+    }
 }
 
 function renderChildrenList(group) {
