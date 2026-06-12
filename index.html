@@ -20,6 +20,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
     
+    <!-- Link ka manifestu za PWA instalaciju -->
+    <link rel="manifest" href="manifest.json">
+    
     <!-- Firebase Compat SDKs za automatsku sinhronizaciju na oblaku (v10.8.0) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -62,7 +65,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen lg:h-screen lg:overflow-hidden select-none">
 
-    <!-- Glavno zaglavlje platforme (Premium svetao dizajn) -->
+    <!-- Glavno zaglavlje platforme (Premium svijetli dizajn) -->
     <nav class="bg-white text-slate-800 shadow-sm py-4 px-4 md:px-6 shrink-0 border-b border-slate-200/80">
         <div class="max-w-7xl mx-auto flex flex-row justify-between items-center">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('welcome')">
@@ -78,7 +81,7 @@
             <div class="flex items-center space-x-2">
                 <!-- Indikator statusa sinhronizacije na oblaku -->
                 <div class="text-[9px] font-black px-2.5 py-2 rounded-xl flex items-center gap-1.5 transition-all duration-300" id="sync-status">
-                    <i class="fa-solid fa-cloud-slash text-slate-400"></i> Lokalno
+                    <i class="fa-solid fa-cloud-slash text-slate-450"></i> Lokalno
                 </div>
                 <!-- Brzi povratak na Welcome stranu -->
                 <button onclick="switchTab('welcome')" id="btn-logout" class="text-xs font-black px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer border border-slate-200 hidden">
@@ -107,7 +110,7 @@
                 </div>
             </div>
 
-            <!-- Glavna forma za vaspitače na terenu -->
+            <!-- Glavna forma za vaspitače na terenu (Svijetle, premium boje) -->
             <div class="bg-white p-8 rounded-[2rem] border border-slate-200/80 max-w-sm w-full shadow-lg space-y-5">
                 <div class="space-y-1.5">
                     <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Izaberi svoj profil:</label>
@@ -237,14 +240,23 @@
     </main>
 
     <!-- Toast obaveštenja -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-2xl border border-slate-800 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2.5 z-50 pointer-events-none">
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2.5 z-50 pointer-events-none">
         <i class="fa-solid fa-circle-check text-emerald-400 text-sm" id="toast-icon"></i>
         <span id="toast-text" class="text-xs font-bold tracking-wide">Učitavanje...</span>
     </div>
 
     <!-- JAVASCRIPT LOGIKA PORTALA I VASPITAČKOG RADA -->
     <script>
-        // Definicija 11 oblasti sa kategorizacijom
+        // =================================================================
+        // === 1. SIGURNOSNA LICENCA (VREMENSKO ZAKLJUČAVANJE SISTEMA)  ===
+        // =================================================================
+        const LICENSE_CONFIG = {
+            expirationDate: "2026-09-01", 
+            clientName: "Predškolska Ustanova klijenta",
+            supportContact: "podrska@mentalgimnastika.rs"
+        };
+
+        // Definicija 11 ključnih oblasti sa kategorizacijom
         const areas = [
             { id: 1, name: "Memorija (Radna, Dugotrajna, Kratkotrajna)", short: "Memorija i prisećanje", desc: "Sposobnost skladištenja i pronalaženja informacija.", default: 75, icon: "fa-brain", category: "cognitive" },
             { id: 2, name: "Grafo-motorika i koordinacija oko-ruka", short: "Grafo-motorika", desc: "Preciznost pokreta ruke, držanje olovke i vizuelno-motorna kontrola.", default: 75, icon: "fa-pen-clip", category: "motor" },
@@ -313,6 +325,12 @@
 
         // INICIJALIZACIJA pri pokretanju
         window.addEventListener('DOMContentLoaded', () => {
+            // PROVERI LICENCU ODMAH
+            if (checkLicenseExpired()) {
+                showLicenseExpiredScreen();
+                return;
+            }
+
             // Učitavanje iz localStorage
             const savedGroups = localStorage.getItem('umg_field_groups');
             if (savedGroups) appState.groups = JSON.parse(savedGroups);
@@ -341,6 +359,35 @@
             setupPWAAndServiceWorker();
         });
 
+        // PROVERA ISTEKA VREMENSKE LICENCE
+        function checkLicenseExpired() {
+            const today = new Date();
+            const expirationLimit = new Date(LICENSE_CONFIG.expirationDate);
+            return today > expirationLimit;
+        }
+
+        // EKRAN BLOKADE LICENCE
+        function showLicenseExpiredScreen() {
+            document.body.className = "bg-slate-900 text-slate-100 flex items-center justify-center min-h-screen p-4";
+            document.body.innerHTML = `
+                <div class="bg-slate-950 p-8 rounded-3xl border border-rose-500/30 max-w-md w-full text-center shadow-2xl space-y-6">
+                    <div class="w-20 h-20 bg-rose-500/10 text-rose-500 rounded-2xl flex items-center justify-center mx-auto text-3xl">
+                        <i class="fa-solid fa-hourglass-end animate-pulse"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="text-xl font-black text-rose-400">Licenca za korišćenje je istekla</h2>
+                        <p class="text-xs text-slate-400 leading-relaxed">Pristup aplikaciji UMG Asistent za ustanovu <strong class="text-slate-200">${LICENSE_CONFIG.clientName}</strong> je onemogućen jer je ugovorni ili probni period završen.</p>
+                    </div>
+                    <div class="p-4 bg-slate-900 rounded-xl text-left border border-slate-800 text-[11px] text-slate-500 leading-relaxed font-sans">
+                        Za produženje ugovora, tehničku podršku i reizdavanje licenci, molimo kontaktirajte nas direktno putem e-mail adrese.
+                    </div>
+                    <a href="mailto:${LICENSE_CONFIG.supportContact}" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition-all shadow-lg flex items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-envelope mr-2"></i> Kontaktiraj tehničku podršku
+                    </a>
+                </div>
+            `;
+        }
+
         // DINAMIČKI PWA GENERATOR (Omogućava Add to Home Screen bez posebnih fajlova!)
         function setupPWAAndServiceWorker() {
             try {
@@ -348,7 +395,7 @@
                 const manifest = {
                     "name": "UMG Terenski Asistent",
                     "short_name": "UMG Asistent",
-                    "start_url": window.location.href,
+                    "start_url": "index.html",
                     "display": "standalone",
                     "background_color": "#ffffff",
                     "theme_color": "#059669",
@@ -435,10 +482,10 @@
 
             if (isOnline) {
                 el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-emerald-600 animate-pulse"></i> Sinhronizovano`;
-                el.className = "text-[9px] font-black px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-sm";
+                el.className = "text-[9px] font-black px-2.5 py-2 rounded-xl flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-sm";
             } else {
-                el.innerHTML = `<i class="fa-solid fa-cloud-slash text-slate-400"></i> Lokalni režim`;
-                el.className = "text-[9px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-500";
+                el.innerHTML = `<i class="fa-solid fa-cloud-slash text-slate-400"></i> Lokalno`;
+                el.className = "text-[9px] font-bold px-2.5 py-2 rounded-xl flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-500";
             }
         }
 
@@ -555,9 +602,6 @@
                 const logoutBtn = document.getElementById('btn-logout');
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
 
-                // Promjena teme tijela u svijetlu za radni mod
-                document.body.className = "bg-slate-50 text-slate-800 flex flex-col min-h-screen lg:h-screen lg:overflow-hidden select-none";
-
                 populateGroupSelects();
                 loadOrCreateDailyRecord();
                 switchTab('field');
@@ -587,6 +631,13 @@
                 activeGroupId = select.value;
                 loadOrCreateDailyRecord();
             }
+        }
+
+        // DOBIJANJE KLJUČA zapisa (datum_grupaId) - ISPRAVLJENO!
+        function getRecordKey() {
+            const dateInput = document.getElementById('field-class-date');
+            const date = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+            return `${date}_${activeGroupId}`;
         }
 
         // UČITAVANJE ILI KREIRANJE DNEVNOG ZAPISA
@@ -782,7 +833,7 @@
                                    placeholder="Diktirajte ili upišite opasku za ${child.name.split(' ')[0]}..." 
                                    class="w-full pr-12 pl-3 py-1.5 text-xs bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 font-medium">
                             <button onclick="startVoiceInput('note-child-${child.id}', '${child.id}')" 
-                                    class="absolute right-2 bg-white hover:bg-emerald-600 hover:text-white text-slate-500 w-9 h-9 rounded-full flex items-center justify-center shadow border border-slate-200 transition-all cursor-pointer">
+                                    class="absolute right-2 bg-white hover:bg-emerald-600 hover:text-white text-slate-505 w-9 h-9 rounded-full flex items-center justify-center shadow border border-slate-200 transition-all cursor-pointer">
                                 <i class="fa-solid fa-microphone text-xs" id="mic-note-child-${child.id}"></i>
                             </button>
                         </div>
@@ -973,9 +1024,6 @@
                 
                 const logoutBtn = document.getElementById('btn-logout');
                 if (logoutBtn) logoutBtn.classList.add('hidden');
-                
-                // Vraćanje tijela u neutralno tamnu pozadinu za Welcome ekran
-                document.body.className = "bg-slate-900 text-slate-100 flex flex-col min-h-screen lg:h-screen lg:overflow-hidden select-none";
             }
         }
 
