@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="UMG Asistent">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23059669'/><text x='50' y='65' font-family='sans-serif' font-size='40' font-weight='bold' fill='white' text-anchor='middle'>UMG</text></svg>">
+    <link class="apple-touch-icon" rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23059669'/><text x='50' y='65' font-family='sans-serif' font-size='40' font-weight='bold' fill='white' text-anchor='middle'>UMG</text></svg>">
     
     <!-- Tailwind CSS za moderan i responzivan dizajn -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -84,8 +84,8 @@
                 <div class="text-[9px] font-black px-2.5 py-2 rounded-xl flex items-center gap-1.5 transition-all duration-300" id="sync-status">
                     <i class="fa-solid fa-cloud-slash text-slate-400"></i> Lokalno
                 </div>
-                <!-- Brzi povratak na Welcome stranu -->
-                <button onclick="switchTab('welcome')" id="btn-logout" class="text-xs font-black px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer border border-slate-200 hidden">
+                <!-- Brzi povratak na Welcome stranu / Resetovanje aplikacije -->
+                <button onclick="logout()" id="btn-logout" class="text-xs font-black px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer border border-slate-200 hidden" title="Odjavi se">
                     <i class="fa-solid fa-sign-out-alt"></i>
                 </button>
             </div>
@@ -197,9 +197,9 @@
                 </div>
             </div>
 
-            <!-- SKLOPIVI PANEL SA SELEKTORIMA (Sadrži samo potrebna polja i spojenu belešku) -->
+            <!-- SKLOPIVI PANEL SA SELEKTORIMA -->
             <div id="settings-collapsible-panel" class="hidden bg-white border border-slate-200 rounded-3xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 shadow-inner transition-all duration-350">
-                <!-- Korak 1: Zamenski vaspitač (Glavni vaspitač grupe je uklonjen iz vizuelnog menija) -->
+                <!-- Korak 1: Zamenski vaspitač -->
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
                         <i class="fa-solid fa-user-friends text-emerald-500 mr-1.5"></i> 1. Zamenski vaspitač
@@ -208,7 +208,7 @@
                         <!-- Dinamički se popunjava -->
                     </select>
                 </div>
-                <!-- Korak 2: Izbor grupe (Podeljen na Moje grupe i Zamene) -->
+                <!-- Korak 2: Izbor grupe -->
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
                         <i class="fa-solid fa-folder-tree text-emerald-500 mr-1.5"></i> 2. Aktivna grupa / Vrtić
@@ -218,24 +218,37 @@
                     </select>
                 </div>
 
-                <!-- Korak 3: Zapažanja o času i tema (Zajednička beleška - Spojeno i olakšano polje sa snimačem glasa) -->
-                <div class="sm:col-span-2 border-t border-slate-100 pt-3 mt-1 space-y-2">
+                <!-- Korak 3: Tema časa -->
+                <div class="sm:col-span-2 border-t border-slate-100 pt-3 space-y-1">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center">
+                        <i class="fa-solid fa-book-open text-emerald-500 mr-1.5"></i> 3. Tema časa / Naziv aktivnosti
+                    </label>
+                    <input type="text" id="field-class-theme" oninput="updateClassTheme(this.value); updateSummaryBar();" placeholder="Npr. Poligoni spretnosti sa elementima balansa" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-sm">
+                </div>
+
+                <!-- Korak 4: Zapažanja o času i tema (Zajednička beleška) -->
+                <div class="sm:col-span-2 border-t border-slate-100 pt-3 space-y-2">
                     <div class="flex justify-between items-center">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center">
-                            <i class="fa-solid fa-message-captions text-emerald-500 mr-1.5"></i> 3. Zapažanja o času i tema (Zajednička beleška)
+                            <i class="fa-solid fa-message-captions text-emerald-500 mr-1.5"></i> 4. Zapažanja o času (Zajednička beleška)
                         </label>
-                        <button onclick="startVoiceInput('group-general-note')" class="bg-slate-50 hover:bg-emerald-600 text-slate-505 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow border border-slate-200">
+                        <button onclick="startVoiceInput('group-general-note')" class="bg-slate-50 hover:bg-emerald-600 text-slate-550 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow border border-slate-200">
                             <i class="fa-solid fa-microphone text-[10px]" id="mic-group-general-note"></i>
                         </button>
                     </div>
-                    <textarea id="group-general-note" rows="3" oninput="updateGroupGeneralNote(this.value); updateSummaryBar();" placeholder="Npr. Današnja tema časa su bili poligoni spretnosti, deca su generalno bila prilično zainteresovana za čas..." class="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 text-slate-800 placeholder-slate-400 shadow-inner"></textarea>
+                    <textarea id="group-general-note" rows="3" oninput="updateGroupGeneralNote(this.value); updateSummaryBar();" placeholder="Npr. Današnja tema časa su bili poligoni spretnosti, deca su generalno bila prilično zainteresovana..." class="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 text-slate-800 placeholder-slate-400 shadow-inner"></textarea>
                 </div>
             </div>
 
-            <!-- SIGNALNA ZONA ZA DETEKCIJU ZAMENE -->
-            <div id="substitute-alert-bar" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-medium leading-relaxed flex items-center space-x-2.5">
-                <i class="fa-solid fa-circle-exclamation text-base shrink-0 text-amber-600 animate-bounce"></i>
-                <span id="substitute-alert-text">Učitavanje režima zamene...</span>
+            <!-- SIGNALNA ZONA ZA DETEKCIJU ZAMENE (Sa ugrađenim dugmetom za zatvaranje) -->
+            <div id="substitute-alert-bar" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-medium leading-relaxed flex items-center justify-between gap-3 shadow-sm transition-all">
+                <div class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-circle-exclamation text-base shrink-0 text-amber-600 animate-bounce"></i>
+                    <span id="substitute-alert-text">Učitavanje režima zamene...</span>
+                </div>
+                <button onclick="dismissSubstituteAlert()" class="text-amber-500 hover:text-amber-800 p-1 rounded-lg hover:bg-amber-100/60 transition-all cursor-pointer shrink-0" title="Zatvori obaveštenje">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
             </div>
 
             <!-- DINAMIČKA LISTA DECE U GRUPI (Sklopivi harmonika meni) -->
@@ -330,6 +343,10 @@
         // Pamti koje su dječije kartice trenutno proširene (da se ne zatvore pri sync-u)
         let expandedChildIds = new Set();
         
+        // Stanje zatvorenosti alert prozora za zamenu (kako ne bi dosađivao na svaki klik)
+        let isSubstituteAlertDismissed = false;
+        let lastAlertGroupId = "";
+
         // Firebase Cloud Storage sistemske promenljive
         let db = null;
         let auth = null;
@@ -370,11 +387,15 @@
             const savedRecords = localStorage.getItem('umg_field_records');
             if (savedRecords) appState.dailyRecords = JSON.parse(savedRecords);
 
+            // Obnova aktivnog vaspitača iz prošle sesije ako postoji
             const savedSelectedEducator = localStorage.getItem('umg_active_educator');
-            if (savedSelectedEducator && appState.educators.includes(savedSelectedEducator)) {
+            if (savedSelectedEducator) {
                 activeEducator = savedSelectedEducator;
-            } else if (appState.educators.length > 0) {
-                activeEducator = appState.educators[0];
+                
+                const logoutBtn = document.getElementById('btn-logout');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+                
+                switchTab('field');
             }
 
             populateEducatorSelects();
@@ -402,9 +423,9 @@
                     </div>
                     <div class="space-y-2">
                         <h2 class="text-xl font-black text-slate-900">Licenca za korišćenje je istekla</h2>
-                        <p class="text-xs text-slate-500 leading-relaxed">Pristup aplikaciji UMG Asistent za ustanovu <strong class="text-slate-800">${LICENSE_CONFIG.clientName}</strong> je onemogućen jer je ugovorni ili probni period završen.</p>
+                        <p class="text-xs text-slate-505 leading-relaxed">Pristup aplikaciji UMG Asistent za ustanovu <strong class="text-slate-800">${LICENSE_CONFIG.clientName}</strong> je onemogućen jer je ugovorni ili probni period završen.</p>
                     </div>
-                    <div class="p-4 bg-slate-50 rounded-xl text-left border border-slate-200 text-[11px] text-slate-500 leading-relaxed font-sans">
+                    <div class="p-4 bg-slate-50 rounded-xl text-left border border-slate-200 text-[11px] text-slate-505 leading-relaxed font-sans">
                         Za produženje ugovora, tehničku podršku i reizdavanje licenci, molimo kontaktirajte nas direktno putem e-mail adrese.
                     </div>
                     <a href="mailto:${LICENSE_CONFIG.supportContact}" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md flex items-center justify-center cursor-pointer">
@@ -417,7 +438,7 @@
         // DINAMIČKI PWA GENERATOR
         function setupPWAAndServiceWorker() {
             try {
-                const manifest = {
+                const mapObj = {
                     "name": "UMG Terenski Asistent",
                     "short_name": "UMG Asistent",
                     "start_url": "index.html",
@@ -433,7 +454,7 @@
                         }
                     ]
                 };
-                const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+                const blob = new Blob([JSON.stringify(mapObj)], {type: 'application/json'});
                 const manifestURL = URL.createObjectURL(blob);
                 const link = document.createElement('link');
                 link.rel = 'manifest';
@@ -454,7 +475,7 @@
             }
         }
 
-        // INICIJALIZACIJA FIREBASE SA OFFLINE PERSISTENCIJOM (Spremi za rad bez interneta)
+        // INICIJALIZACIJA FIREBASE SA OFFLINE PERSISTENCIJOM
         function initFirebaseCloudSync() {
             try {
                 if (typeof __app_id !== 'undefined') {
@@ -530,9 +551,18 @@
                     const data = doc.data();
                     if (data.educators) {
                         appState.educators = data.educators;
+                        
+                        // Obnavljamo aktivnog vaspitača iz lokalnog skladišta ako je već bio prijavljen
+                        const savedSelectedEducator = localStorage.getItem('umg_active_educator');
+                        if (savedSelectedEducator && appState.educators.includes(savedSelectedEducator)) {
+                            activeEducator = savedSelectedEducator;
+                        } else if (!activeEducator && appState.educators.length > 0) {
+                            activeEducator = appState.educators[0];
+                        }
+
                         populateEducatorSelects();
-                        const activeGroup = appState.groups.find(g => g.id === activeGroupId);
-                        if (activeGroup) populateSubstituteSelect(activeGroup);
+                        populateGroupSelects(); 
+                        loadOrCreateDailyRecord();
                     }
                 }
             }, (err) => console.error(err));
@@ -605,13 +635,18 @@
             }
 
             if (fieldSelect.options.length > 0) {
-                const prevSelected = activeGroupId;
-                const exists = Array.from(fieldSelect.options).some(opt => opt.value === prevSelected);
-                if (exists && prevSelected) {
-                    fieldSelect.value = prevSelected;
+                // Ako je aktivna grupa vec ranije odabrana i prisutna u opcijama, zadržavamo je.
+                // U suprotnom, prioritet dajemo prvoj sopstvenoj grupi ovog vaspitača.
+                const exists = Array.from(fieldSelect.options).some(opt => opt.value === activeGroupId);
+                if (exists && activeGroupId) {
+                    fieldSelect.value = activeGroupId;
                 } else {
-                    activeGroupId = fieldSelect.options[0].value;
-                    fieldSelect.selectedIndex = 0;
+                    if (myGroups.length > 0) {
+                        activeGroupId = myGroups[0].id;
+                    } else {
+                        activeGroupId = fieldSelect.options[0].value;
+                    }
+                    fieldSelect.value = activeGroupId;
                 }
             } else {
                 activeGroupId = "";
@@ -634,11 +669,15 @@
                 });
             };
 
-            populateList(fieldEducatorSelect, activeEducator);
-            populateList(welcomeEducatorSelect, activeEducator);
+            if (fieldEducatorSelect) {
+                populateList(fieldEducatorSelect, activeEducator);
+            }
+            if (welcomeEducatorSelect) {
+                populateList(welcomeEducatorSelect, activeEducator);
+            }
         }
 
-        // POPUNJAVANJE DROPDOWNA ZA ZAMENSKOG VASPITAČA (Samo ostali licencirani radnici)
+        // POPUNJAVANJE DROPDOWNA ZA ZAMENSKOG VASPITAČA
         function populateSubstituteSelect(activeGroup) {
             const subSelect = document.getElementById('field-substitute-select');
             if (!subSelect) return;
@@ -651,9 +690,9 @@
             defaultOpt.innerText = "Bez zamene (Vi vodite čas)";
             subSelect.appendChild(defaultOpt);
 
-            // Popuni ostale registrovane vaspitače koji nisu vlasnici ove grupe
+            // Prijavljeni vaspitač (activeEducator) više ne može izabrati sam sebe kao zamenu!
             appState.educators.forEach(ed => {
-                if (activeGroup.educator && ed !== activeGroup.educator) {
+                if (ed !== activeEducator) {
                     const opt = document.createElement('option');
                     opt.value = ed;
                     opt.innerText = ed;
@@ -665,7 +704,7 @@
             const key = getRecordKey();
             const record = appState.dailyRecords[key];
             if (record) {
-                if (record.writer && record.writer !== record.educator) {
+                if (record.writer && record.writer !== activeEducator) {
                     subSelect.value = record.writer;
                 } else {
                     subSelect.value = "none";
@@ -673,6 +712,7 @@
             }
         }
 
+        // FUNKCIJA ZA PRIJAVU VASPITAČA
         function loginAsEducator() {
             const select = document.getElementById('welcome-educator-select');
             if (select) {
@@ -682,17 +722,48 @@
                 const fieldSelect = document.getElementById('field-educator-select');
                 if (fieldSelect) fieldSelect.value = activeEducator;
 
-                const fieldTabBtn = document.getElementById('btn-tab-field');
-                if (fieldTabBtn) fieldTabBtn.classList.remove('hidden');
-
                 const logoutBtn = document.getElementById('btn-logout');
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
+
+                // PRONAĐI PRVU SOPSTVENU GRUPU vaspitača i veži je odmah na prijavu!
+                const myGroups = appState.groups.filter(g => g.educator === activeEducator);
+                if (myGroups.length > 0) {
+                    activeGroupId = myGroups[0].id;
+                } else if (appState.groups.length > 0) {
+                    activeGroupId = appState.groups[0].id;
+                } else {
+                    activeGroupId = "";
+                }
+
+                isSubstituteAlertDismissed = false;
 
                 populateGroupSelects();
                 loadOrCreateDailyRecord();
                 switchTab('field');
                 showToast(`Prijavljeni ste kao: ${activeEducator}`);
             }
+        }
+
+        // FUNKCIJA ZA POTPUNI RESET SESIJE (LOGOUT)
+        function logout() {
+            activeEducator = "";
+            activeGroupId = "";
+            isSubstituteAlertDismissed = false;
+            localStorage.removeItem('umg_active_educator');
+            
+            const logoutBtn = document.getElementById('btn-logout');
+            if (logoutBtn) logoutBtn.classList.add('hidden');
+            
+            // Očisti listu dece na ekranu
+            const container = document.getElementById('children-field-list');
+            if (container) {
+                container.innerHTML = '';
+            }
+
+            populateEducatorSelects();
+            populateGroupSelects();
+            switchTab('welcome');
+            showToast("Odjavljeni ste sa sistema. Sesija je resetovana.");
         }
 
         function changeActiveEducator() {
@@ -703,6 +774,8 @@
                 
                 const searchInput = document.getElementById('global-child-search');
                 if (searchInput) searchInput.value = '';
+
+                activeGroupId = "";
 
                 populateGroupSelects();
                 loadOrCreateDailyRecord();
@@ -726,25 +799,42 @@
             if (appState.dailyRecords[key]) {
                 const val = subSelect.value;
                 if (val === "none") {
-                    appState.dailyRecords[key].writer = appState.dailyRecords[key].educator;
+                    appState.dailyRecords[key].writer = activeEducator;
                 } else {
                     appState.dailyRecords[key].writer = val;
                 }
                 saveDailyRecord(false); 
                 
-                const alertBar = document.getElementById('substitute-alert-bar');
-                const alertText = document.getElementById('substitute-alert-text');
-                const record = appState.dailyRecords[key];
+                isSubstituteAlertDismissed = false;
                 
-                if (record && record.writer && record.writer !== record.educator) {
-                    if (alertBar && alertText) {
-                        alertText.innerHTML = `Zabeleženo kao <strong>ZAMENA na času</strong>. Glavni vaspitač grupe je <strong>${record.educator}</strong>, a zamenski vaspitač <strong>${record.writer}</strong> unosi podatke. Svi unosi biće potpisani imenom zamenskog vaspitača.`;
-                        alertBar.classList.remove('hidden');
-                    }
-                } else {
-                    if (alertBar) alertBar.classList.add('hidden');
-                }
+                triggerSubstituteNotification(appState.dailyRecords[key]);
                 updateSummaryBar();
+            }
+        }
+
+        // ZATVARANJE ALERT BAR-A (Korisnik kliknuo 'X')
+        function dismissSubstituteAlert() {
+            isSubstituteAlertDismissed = true;
+            const alertBar = document.getElementById('substitute-alert-bar');
+            if (alertBar) {
+                alertBar.classList.add('hidden');
+            }
+        }
+
+        // LOGIKA OKIDANJA SIGNALA ZA ZAMENU
+        function triggerSubstituteNotification(record) {
+            const alertBar = document.getElementById('substitute-alert-bar');
+            const alertText = document.getElementById('substitute-alert-text');
+            if (!alertBar || !alertText) return;
+
+            // Obaveštenje se prikazuje isključivo ako postoji stvarna odabrana zamena (writer != activeEducator i nije "none")
+            if (record && record.writer && record.writer !== activeEducator) {
+                if (!isSubstituteAlertDismissed) {
+                    alertText.innerHTML = `Zabeleženo kao <strong>ZAMENA na času</strong>. Glavni vaspitač grupe je <strong>${record.educator}</strong>, a zamenski vaspitač <strong>${record.writer}</strong> unosi podatke. Svi unosi biće potpisani imenom zamenskog vaspitača.`;
+                    alertBar.classList.remove('hidden');
+                }
+            } else {
+                alertBar.classList.add('hidden');
             }
         }
 
@@ -761,11 +851,20 @@
                         </div>
                     `;
                 }
-                document.getElementById('header-stat-present').innerText = "0";
-                document.getElementById('header-stat-absent').innerText = "0";
+                const hPresent = document.getElementById('header-stat-present');
+                if (hPresent) hPresent.innerText = "0";
+                const hAbsent = document.getElementById('header-stat-absent');
+                if (hAbsent) hAbsent.innerText = "0";
+                
                 const alertBar = document.getElementById('substitute-alert-bar');
                 if (alertBar) alertBar.classList.add('hidden');
                 return;
+            }
+
+            // Reset stanja ugašenog obaveštenja ako smo promenili aktivnu grupu
+            if (lastAlertGroupId !== activeGroupId) {
+                isSubstituteAlertDismissed = false;
+                lastAlertGroupId = activeGroupId;
             }
 
             const key = getRecordKey();
@@ -780,6 +879,7 @@
 
             if (!appState.dailyRecords[key]) {
                 const childTracking = {};
+                if (!activeGroup.children) activeGroup.children = [];
                 activeGroup.children.forEach(child => {
                     childTracking[child.id] = {
                         present: true,          
@@ -789,7 +889,7 @@
                     };
                 });
 
-                const initialWriter = (activeGroup.educator && activeGroup.educator !== activeEducator) ? activeEducator : (activeGroup.educator || activeEducator);
+                const initialWriter = activeEducator;
 
                 appState.dailyRecords[key] = {
                     date: document.getElementById('field-class-date').value,
@@ -808,21 +908,19 @@
             }
 
             const record = appState.dailyRecords[key];
-            document.getElementById('field-class-theme').value = record.theme || "";
-            document.getElementById('group-general-note').value = record.generalNote || "";
+            
+            const themeInput = document.getElementById('field-class-theme');
+            if (themeInput) {
+                themeInput.value = record.theme || "";
+            }
+            
+            const generalNoteInput = document.getElementById('group-general-note');
+            if (generalNoteInput) {
+                generalNoteInput.value = record.generalNote || "";
+            }
 
             populateSubstituteSelect(activeGroup);
-
-            const alertBar = document.getElementById('substitute-alert-bar');
-            const alertText = document.getElementById('substitute-alert-text');
-            if (record && record.writer && record.writer !== record.educator) {
-                if (alertBar && alertText) {
-                    alertText.innerHTML = `Zabeleženo kao <strong>ZAMENA na času</strong>. Glavni vaspitač grupe je <strong>${record.educator}</strong>, a zamenski vaspitač <strong>${record.writer}</strong> unosi podatke. Svi unosi biće potpisani imenom zamenskog vaspitača.`;
-                    alertBar.classList.remove('hidden');
-                }
-            } else {
-                if (alertBar) alertBar.classList.add('hidden');
-            }
+            triggerSubstituteNotification(record);
 
             updateSummaryBar();
             renderChildrenTrackingList();
@@ -842,6 +940,8 @@
             let presentCount = 0;
             let absentCount = 0;
 
+            if (!activeGroup.children) activeGroup.children = [];
+
             activeGroup.children.forEach(child => {
                 const tr = record.children[child.id] || { present: true, score: null, highlightAreas: [], note: "" };
                 
@@ -859,7 +959,7 @@
                         groupedAreas[area.category].push(area);
                     });
 
-                    // Kreiranje oblasti (w-12 h-12)
+                    // Kreiranje oblasti
                     let categoriesHTML = '<div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-2.5">';
                     
                     Object.keys(groupedAreas).forEach(catKey => {
@@ -938,7 +1038,7 @@
                             </div>
                         </div>
 
-                        <!-- SKLOPIVI DETALJNI PANEL ZA RAD (Otvara se na klik) -->
+                        <!-- SKLOPIVI DETALJNI PANEL ZA RAD -->
                         <div id="details-child-${child.id}" class="${isExpanded ? '' : 'hidden'} border-t border-slate-100 p-4 bg-slate-50/30 space-y-4">
                             <!-- Slikovne ocene -->
                             <div>
@@ -992,7 +1092,7 @@
             if (hAbsent) hAbsent.innerText = absentCount;
         }
 
-        // TOGGLE COLLAPSE FUNKCIJA (Pamti stanje u expandedChildIds)
+        // TOGGLE COLLAPSE FUNKCIJA
         function toggleChildCollapse(childId, event) {
             if (event.target.closest('button:not([id^="chevron-child"])') || event.target.closest('input') || event.target.closest('.rounded-full')) {
                 return;
@@ -1052,6 +1152,7 @@
             }
         }
 
+        // Postavljanje brze ocene časa
         function setQuickScore(childId, score) {
             const key = getRecordKey();
             if (appState.dailyRecords[key] && appState.dailyRecords[key].children[childId]) {
@@ -1143,7 +1244,7 @@
             let writerName = activeEducator;
             if (record) {
                 writerName = record.writer || record.educator || activeEducator;
-                if (record.writer && record.writer !== record.educator) {
+                if (record.writer && record.writer !== activeEducator) {
                     writerName += " (Zamena)";
                 }
             }
@@ -1273,9 +1374,6 @@
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
 
             if (tabId === 'welcome') {
-                const fieldTabBtn = document.getElementById('btn-tab-field');
-                if (fieldTabBtn) fieldTabBtn.classList.add('hidden');
-                
                 const logoutBtn = document.getElementById('btn-logout');
                 if (logoutBtn) logoutBtn.classList.add('hidden');
                 
