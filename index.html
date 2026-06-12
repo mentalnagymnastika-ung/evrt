@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>UMG - Terenski rad vaspitača</title>
     
-    <!-- Meta tagovi za mobilnu aplikaciju (PWA & iOS podrška) -->
+    <!-- Meta tagovi za mobilnu aplikaciju (Moderna PWA & iOS podrška) -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="UMG Asistent">
@@ -146,7 +147,7 @@
         <!-- ======================================================= -->
         <section id="tab-field" class="space-y-4 lg:h-full lg:overflow-y-auto custom-scrollbar pb-8 hidden">
             
-            <!-- PAMETNA KOMPAKTNA TRAKA SA SAŽETKOM ČASA, INLINE PRETRAGOM I STATISTIKOM (Dramatično štedi prostor) -->
+            <!-- PAMETNA KOMPAKTNA TRAKA SA SAŽETKOM ČASA I INLINE BRZOM PRETRAGOM -->
             <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
                 <!-- Sažetak časa (Sakriva se kada je pretraga aktivna) -->
                 <div class="flex items-center space-x-2 text-xs font-bold text-slate-700 flex-grow" id="summary-left-container">
@@ -158,7 +159,7 @@
                     <span class="truncate text-slate-600 flex items-center gap-1" id="summary-info">Učitavanje...</span>
                     <span class="text-slate-300">|</span>
                     
-                    <!-- NOVE KOMPAKTNE KAPSULE STATISTIKE UNUTAR GORNJE TRAKE (Item 3) -->
+                    <!-- KAPSULE STATISTIKE UNUTAR GORNJE TRAKE -->
                     <div class="flex items-center space-x-1.5 text-[10px] shrink-0">
                         <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-xl flex items-center gap-1" title="Prisutno dece">
                             P: <span id="header-stat-present" class="font-black">0</span>
@@ -169,7 +170,7 @@
                     </div>
                 </div>
 
-                <!-- Integrisani inline pretraživač (Prikazuje se umesto sažetka kada se klikne lupica) -->
+                <!-- Integrisani inline pretraživač -->
                 <div class="hidden flex-grow items-center relative" id="inline-search-container">
                     <input type="text" id="global-child-search" oninput="handleGlobalSearch()" placeholder="Pretraži dete po imenu..." class="w-full bg-slate-50 text-slate-800 placeholder-slate-400 rounded-xl pl-9 pr-8 py-2 text-xs outline-none border border-slate-200 focus:border-emerald-500 transition-all shadow-sm">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
@@ -235,7 +236,7 @@
                 <span id="substitute-alert-text">Učitavanje režima zamene...</span>
             </div>
 
-            <!-- DINAMIČKA LISTA DECE U GRUPI (Item 4: Sklopivi harmonika meni) -->
+            <!-- DINAMIČKA LISTA DECE U GRUPI (Sklopivi harmonika meni) -->
             <div class="space-y-3" id="children-field-list">
                 <!-- Generiše se kroz JS -->
             </div>
@@ -278,6 +279,57 @@
             clientName: "Predškolska Ustanova klijenta",
             supportContact: "podrska@mentalgimnastika.rs"
         };
+
+        // =================================================================
+        // === 2. GLOBALNE DEFINICIJE I STRUKTURA RAZVOJNIH OBLASTI      ===
+        // =================================================================
+        const areas = [
+            { id: 1, name: "Memorija (Radna, Dugotrajna, Kratkotrajna)", short: "Memorija i prisećanje", desc: "Sposobnost skladištenja i pronalaženja informacija.", default: 75, icon: "fa-brain", category: "cognitive" },
+            { id: 2, name: "Grafo-motorika i koordinacija oko-ruka", short: "Grafo-motorika", desc: "Preciznost pokreta ruke, držanje olovke i vizuelno-motorna kontrola.", default: 75, icon: "fa-pen-clip", category: "motor" },
+            { id: 3, name: "Pažnja i Koncentracija", short: "Fokus i pažnja", desc: "Dužina zadržavanja fokusa na zadatku bez ometanja.", default: 75, icon: "fa-eye", category: "motor" },
+            { id: 4, name: "Apstraktno razmišljanje i brzina pronalaženja rešenja", short: "Apstraktna logika", desc: "Sposobnost rešavanja mentalnih zagonetki bez fizičkih objekata.", default: 75, icon: "fa-lightbulb", category: "cognitive" },
+            { id: 5, name: "Uočavanje odnosa (asocijativnost i zaključivanje)", short: "Asocijativnost", desc: "Povezivanje uzroka i posledica, pronalaženje sličnosti.", default: 75, icon: "fa-diagram-project", category: "cognitive" },
+            { id: 6, name: "Razumevanje složenih pojmova i verbalna komunikacija", short: "Verbalni pojmovi", desc: "Vokabular i verbalno izražavanje kompleksnih ideja.", default: 75, icon: "fa-comments", category: "social" },
+            { id: 7, name: "Socijalno i emotivno sazrevanje", short: "Socijalno i emotivno", desc: "Nošenje sa uspehom/neuspehom, empatija prema drugarima.", default: 75, icon: "fa-heart", category: "social" },
+            { id: 8, name: "Propriocepcija (usklađenost pokreta tela)", short: "Propriocepcija", desc: "Orijentacija u prostoru, motorička kontrola i kretanje na poligonu.", default: 75, icon: "fa-child-reaching", category: "motor" },
+            { id: 9, name: "Logika (verbalna, matematička...)", short: "Matematička logika", desc: "Struktuirano, logičko zaključivanje i razumevanje odnosa.", default: 75, icon: "fa-calculator", category: "cognitive" },
+            { id: 10, name: "Serijacija i Klasifikacija", short: "Serijacija i klasifikacija", desc: "Grupisanje po osobinama (boja, oblik) i ređanje po veličini.", default: 75, icon: "fa-arrow-down-short-wide", category: "cognitive" },
+            { id: 11, name: "Kreativnost i originalnost rešenja", short: "Kreativnost", desc: "Inovativan pristup igrama i sloboda u stvaranju rešenja.", default: 75, icon: "fa-palette", category: "social" }
+        ];
+
+        // Definicija 3 kategorije (Svijetli dizajn)
+        const categories = {
+            cognitive: { 
+                name: "Kognitivni razvoj i Logika", 
+                colorClass: "bg-blue-50/70 border-blue-100", 
+                activeBtnClass: "bg-blue-600 text-white border-transparent", 
+                inactiveBtnClass: "bg-white text-blue-600 border-blue-200/50 hover:bg-blue-50/50", 
+                textClass: "text-blue-700"
+            },
+            motor: { 
+                name: "Fokus, Pažnja i Motorika", 
+                colorClass: "bg-emerald-50/70 border-emerald-100", 
+                activeBtnClass: "bg-emerald-600 text-white border-transparent", 
+                inactiveBtnClass: "bg-white text-emerald-600 border-emerald-200/50 hover:bg-emerald-50/50", 
+                textClass: "text-emerald-700"
+            },
+            social: { 
+                name: "Socijalni, Govorni i Kreativni", 
+                colorClass: "bg-purple-50/70 border-purple-100", 
+                activeBtnClass: "bg-purple-600 text-white border-transparent", 
+                inactiveBtnClass: "bg-white text-purple-600 border-purple-200/50 hover:bg-purple-50/50", 
+                textClass: "text-purple-700"
+            }
+        };
+
+        // Podrazumevani nivoi procene za vaspitače (Veliki mobilni slikovni dugmići - Svetli tonovi)
+        const ratingLevels = [
+            { val: 120, label: "Iznad oček.", title: "120 - Iznad očekivanog (darovitost)", color: "from-purple-600 via-indigo-600 to-cyan-500", text: "text-purple-700", border: "border-purple-200", bg: "bg-purple-50" },
+            { val: 100, label: "Odlično", title: "100 - Odlično postignuće", color: "from-indigo-500 to-purple-600", text: "text-indigo-700", border: "border-indigo-200", bg: "bg-indigo-50" },
+            { val: 90, label: "Uobičajeno", title: "90 - Uobičajeni nivo", color: "from-emerald-500 to-teal-500", text: "text-emerald-700", border: "border-emerald-200", bg: "bg-emerald-50" },
+            { val: 75, label: "Dobro", title: "75 - Dobro u skladu sa uzrastom", color: "from-blue-500 to-cyan-500", text: "text-blue-700", border: "border-blue-200", bg: "bg-blue-50" },
+            { val: 50, label: "Podrška", title: "50 - Potrebna dodatna podrška", color: "from-rose-500 to-red-500", text: "text-rose-700", border: "border-rose-200", bg: "bg-rose-50" }
+        ];
 
         // Stanje aplikacije
         let appState = {
@@ -686,7 +738,7 @@
             renderChildrenTrackingList();
         }
 
-        // RENDER KARTICA DECE (Item 4: Sklopivi harmonika meni sa očuvanjem proširenog stanja)
+        // RENDER KARTICA DECE (Sklopivi harmonika meni sa očuvanjem proširenog stanja)
         function renderChildrenTrackingList() {
             const key = getRecordKey();
             const record = appState.dailyRecords[key];
@@ -766,7 +818,7 @@
                                         }" title="${level.title}">
                                     ${level.val}
                                 </button>
-                                <span class="text-[9px] font-bold mt-1 text-slate-500 uppercase tracking-tight">${level.label}</span>
+                                <span class="text-[9px] font-bold mt-1 text-slate-505 uppercase tracking-tight">${level.label}</span>
                             </div>
                         `;
                     });
@@ -806,7 +858,7 @@
 
                             <!-- Kategorisane slikovne oblasti -->
                             <div>
-                                <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Izražene snage danas:</span>
+                                <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-505 mb-1.5">Izražene snage danas:</span>
                                 ${categoriesHTML}
                             </div>
 
@@ -1008,7 +1060,7 @@
                 summaryLeft.classList.remove('hidden');
                 inlineSearch.classList.add('hidden');
                 inlineSearch.classList.remove('flex');
-                searchBtn.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                searchBtn.className = "bg-slate-100 hover:bg-slate-200 text-slate-700 w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 cursor-pointer";
                 if (searchInput) {
                     searchInput.value = '';
                     handleGlobalSearch(); 
@@ -1089,6 +1141,18 @@
             };
 
             recognition.start();
+        }
+
+        // DEPRECOR REPLACEMENT ZA PWA LICENCU
+        function saveDailyRecord(showNotification = false) {
+            const key = getRecordKey();
+            if (appState.dailyRecords[key]) {
+                localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
+                updateCloudDailyRecord(key, appState.dailyRecords[key]);
+                if (showNotification) {
+                    showToast("Čas uspešno ažuriran i sačuvan!");
+                }
+            }
         }
 
         function resetMicIcons() {
