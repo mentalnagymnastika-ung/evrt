@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>UMG - za vaspitača</title>
+    <title>UMG - Terenski rad vaspitača</title>
     
     <!-- Meta tagovi za mobilnu aplikaciju (Moderna PWA & iOS podrška) -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -75,7 +75,7 @@
                 </div>
                 <div>
                     <h1 class="font-black text-base tracking-wide leading-tight text-slate-900">Mentalna Gimnastika</h1>
-                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Vaspitački Modul 1.0</p>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Terenski Modul</p>
                 </div>
             </div>
             
@@ -199,7 +199,7 @@
 
             <!-- SKLOPIVI PANEL SA SELEKTORIMA (Sadrži samo potrebna polja i spojenu belešku) -->
             <div id="settings-collapsible-panel" class="hidden bg-white border border-slate-200 rounded-3xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 shadow-inner transition-all duration-350">
-                <!-- Korak 1: Zamenski vaspitač (Glavni vaspitač grupe je uklonjen iz vizuelnog menija) -->
+                <!-- Korak 1: Zamenski vaspitač -->
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
                         <i class="fa-solid fa-user-friends text-emerald-500 mr-1.5"></i> 1. Zamenski vaspitač
@@ -208,7 +208,7 @@
                         <!-- Dinamički se popunjava -->
                     </select>
                 </div>
-                <!-- Korak 2: Izbor grupe (Podeljen na Moje grupe i Zamene) -->
+                <!-- Korak 2: Izbor grupe -->
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
                         <i class="fa-solid fa-folder-tree text-emerald-500 mr-1.5"></i> 2. Aktivna grupa / Vrtić
@@ -218,13 +218,13 @@
                     </select>
                 </div>
 
-                <!-- Korak 3: Zapažanja o času i tema (Zajednička beleška - Spojeno i olakšano polje sa snimačem glasa) -->
+                <!-- Korak 3: Zapažanja o času i tema (Zajednička beleška - Spojeno i olakšano polje) -->
                 <div class="sm:col-span-2 border-t border-slate-100 pt-3 mt-1 space-y-2">
                     <div class="flex justify-between items-center">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center">
                             <i class="fa-solid fa-message-captions text-emerald-500 mr-1.5"></i> 3. Zapažanja o času i tema (Zajednička beleška)
                         </label>
-                        <button onclick="startVoiceInput('group-general-note')" class="bg-slate-50 hover:bg-emerald-600 text-slate-505 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow border border-slate-200">
+                        <button onclick="startVoiceInput('group-general-note')" class="bg-slate-50 hover:bg-emerald-600 text-slate-550 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow border border-slate-200">
                             <i class="fa-solid fa-microphone text-[10px]" id="mic-group-general-note"></i>
                         </button>
                     </div>
@@ -265,7 +265,7 @@
         };
 
         // =================================================================
-        // === 2. GLOBALNE DEFINICIJE I STRUKTURA RAZVOJNIH OBLASTI      ===
+        // === 2. GLOBALNE DEFINICIJE - STRUKTURA RAZVOJNIH OBLASTI       ===
         // =================================================================
         const areas = [
             { id: 1, name: "Memorija (Radna, Dugotrajna, Kratkotrajna)", short: "Memorija i prisećanje", desc: "Sposobnost skladištenja i pronalaženja informacija.", default: 75, icon: "fa-brain", category: "cognitive" },
@@ -345,6 +345,40 @@
             return `${date}_${activeGroupId}`;
         }
 
+        // PROVERA ISTEKA VREMENSKE LICENCE
+        function checkLicenseExpired() {
+            const today = new Date();
+            const expirationLimit = new Date(LICENSE_CONFIG.expirationDate);
+            return today > expirationLimit;
+        }
+
+        // EKRAN BLOKADE LICENCE (Svijetla tema ujednačena sa dizajnom)
+        function showLicenseExpiredScreen() {
+            document.body.className = "bg-slate-50 text-slate-800 flex items-center justify-center min-h-screen p-4 select-none";
+            document.body.innerHTML = `
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 max-w-md w-full text-center shadow-xl space-y-6">
+                    <div class="w-20 h-20 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto text-3xl border border-rose-100">
+                        <i class="fa-solid fa-hourglass-end animate-pulse"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="text-xl font-black text-slate-900">Licenca za korišćenje je istekla</h2>
+                        <p class="text-xs text-slate-505 leading-relaxed">Pristup aplikaciji UMG Asistent za ustanovu <strong class="text-slate-850">${LICENSE_CONFIG.clientName}</strong> je onemogućen jer je ugovorni ili probni period završen.</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl text-left border border-slate-200 text-[11px] text-slate-500 leading-relaxed font-sans">
+                        Za produženje ugovora, tehničku podršku i reizdavanje licenci, molimo kontaktirajte nas direktno putem e-mail adrese.
+                    </div>
+                    <a href="mailto:${LICENSE_CONFIG.supportContact}" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md flex items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-envelope mr-2"></i> Kontaktiraj tehničku podršku
+                    </a>
+                </div>
+            `;
+        }
+
+        // Pomocna funkcija za selektovanog edukatora
+        function savedSelectedEducator() {
+            return localStorage.getItem('umg_active_educator');
+        }
+
         // INICIJALIZACIJA pri pokretanju
         window.addEventListener('DOMContentLoaded', () => {
             // PROVERI LICENCU ODMAH
@@ -370,9 +404,9 @@
             const savedRecords = localStorage.getItem('umg_field_records');
             if (savedRecords) appState.dailyRecords = JSON.parse(savedRecords);
 
-            const savedSelectedEducator = localStorage.getItem('umg_active_educator');
-            if (savedSelectedEducator && appState.educators.includes(savedSelectedEducator)) {
-                activeEducator = savedSelectedEducator;
+            const lastSelectedEducator = savedSelectedEducator();
+            if (lastSelectedEducator && appState.educators.includes(lastSelectedEducator)) {
+                activeEducator = lastSelectedEducator;
             } else if (appState.educators.length > 0) {
                 activeEducator = appState.educators[0];
             }
@@ -384,35 +418,6 @@
             initFirebaseCloudSync();
             setupPWAAndServiceWorker();
         });
-
-        // PROVERA ISTEKA VREMENSKE LICENCE
-        function checkLicenseExpired() {
-            const today = new Date();
-            const expirationLimit = new Date(LICENSE_CONFIG.expirationDate);
-            return today > expirationLimit;
-        }
-
-        // EKRAN BLOKADE LICENCE (Svijetla tema ujednačena sa dizajnom)
-        function showLicenseExpiredScreen() {
-            document.body.className = "bg-slate-50 text-slate-800 flex items-center justify-center min-h-screen p-4 select-none";
-            document.body.innerHTML = `
-                <div class="bg-white p-8 rounded-3xl border border-slate-200 max-w-md w-full text-center shadow-xl space-y-6">
-                    <div class="w-20 h-20 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto text-3xl border border-rose-100">
-                        <i class="fa-solid fa-hourglass-end animate-pulse"></i>
-                    </div>
-                    <div class="space-y-2">
-                        <h2 class="text-xl font-black text-slate-900">Licenca za korišćenje je istekla</h2>
-                        <p class="text-xs text-slate-500 leading-relaxed">Pristup aplikaciji UMG Asistent za ustanovu <strong class="text-slate-800">${LICENSE_CONFIG.clientName}</strong> je onemogućen jer je ugovorni ili probni period završen.</p>
-                    </div>
-                    <div class="p-4 bg-slate-50 rounded-xl text-left border border-slate-200 text-[11px] text-slate-500 leading-relaxed font-sans">
-                        Za produženje ugovora, tehničku podršku i reizdavanje licenci, molimo kontaktirajte nas direktno putem e-mail adrese.
-                    </div>
-                    <a href="mailto:${LICENSE_CONFIG.supportContact}" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md flex items-center justify-center cursor-pointer">
-                        <i class="fa-solid fa-envelope mr-2"></i> Kontaktiraj tehničku podršku
-                    </a>
-                </div>
-            `;
-        }
 
         // DINAMIČKI PWA GENERATOR
         function setupPWAAndServiceWorker() {
@@ -563,13 +568,6 @@
             }, (err) => console.error(err));
         }
 
-        function updateCloudDailyRecord(key, record) {
-            if (useCloud && db && auth.currentUser) {
-                db.collection(`artifacts/${appId}/public/data/dailyRecords`).doc(key).set(record)
-                  .catch(err => console.error("Greška pri upisu dnevnika na server:", err));
-            }
-        }
-
         // POPUNJAVANJE kaskadnih grupa (Moje grupe vs Zamene)
         function populateGroupSelects() {
             const fieldSelect = document.getElementById('field-group-select');
@@ -673,81 +671,6 @@
             }
         }
 
-        function loginAsEducator() {
-            const select = document.getElementById('welcome-educator-select');
-            if (select) {
-                activeEducator = select.value;
-                localStorage.setItem('umg_active_educator', activeEducator);
-                
-                const fieldSelect = document.getElementById('field-educator-select');
-                if (fieldSelect) fieldSelect.value = activeEducator;
-
-                const fieldTabBtn = document.getElementById('btn-tab-field');
-                if (fieldTabBtn) fieldTabBtn.classList.remove('hidden');
-
-                const logoutBtn = document.getElementById('btn-logout');
-                if (logoutBtn) logoutBtn.classList.remove('hidden');
-
-                populateGroupSelects();
-                loadOrCreateDailyRecord();
-                switchTab('field');
-                showToast(`Prijavljeni ste kao: ${activeEducator}`);
-            }
-        }
-
-        function changeActiveEducator() {
-            const select = document.getElementById('field-educator-select');
-            if (select) {
-                activeEducator = select.value;
-                localStorage.setItem('umg_active_educator', activeEducator);
-                
-                const searchInput = document.getElementById('global-child-search');
-                if (searchInput) searchInput.value = '';
-
-                populateGroupSelects();
-                loadOrCreateDailyRecord();
-            }
-        }
-
-        function changeActiveGroup() {
-            const select = document.getElementById('field-group-select');
-            if (select) {
-                activeGroupId = select.value;
-                loadOrCreateDailyRecord();
-            }
-        }
-
-        // AKCIJA PROMENE ZAMENSKOG VASPITAČA
-        function changeSubstituteEducator() {
-            const subSelect = document.getElementById('field-substitute-select');
-            if (!subSelect) return;
-
-            const key = getRecordKey();
-            if (appState.dailyRecords[key]) {
-                const val = subSelect.value;
-                if (val === "none") {
-                    appState.dailyRecords[key].writer = appState.dailyRecords[key].educator;
-                } else {
-                    appState.dailyRecords[key].writer = val;
-                }
-                saveDailyRecord(false); 
-                
-                const alertBar = document.getElementById('substitute-alert-bar');
-                const alertText = document.getElementById('substitute-alert-text');
-                const record = appState.dailyRecords[key];
-                
-                if (record && record.writer && record.writer !== record.educator) {
-                    if (alertBar && alertText) {
-                        alertText.innerHTML = `Zabeleženo kao <strong>ZAMENA na času</strong>. Glavni vaspitač grupe je <strong>${record.educator}</strong>, a zamenski vaspitač <strong>${record.writer}</strong> unosi podatke. Svi unosi biće potpisani imenom zamenskog vaspitača.`;
-                        alertBar.classList.remove('hidden');
-                    }
-                } else {
-                    if (alertBar) alertBar.classList.add('hidden');
-                }
-                updateSummaryBar();
-            }
-        }
-
         // UČITAVANJE ILI KREIRANJE ZAPISA SA PODRŠKOM ZA ZAMENE
         function loadOrCreateDailyRecord() {
             if (!activeGroupId) {
@@ -808,7 +731,6 @@
             }
 
             const record = appState.dailyRecords[key];
-            document.getElementById('field-class-theme').value = record.theme || "";
             document.getElementById('group-general-note').value = record.generalNote || "";
 
             populateSubstituteSelect(activeGroup);
@@ -859,7 +781,6 @@
                         groupedAreas[area.category].push(area);
                     });
 
-                    // Kreiranje oblasti (w-12 h-12)
                     let categoriesHTML = '<div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-2.5">';
                     
                     Object.keys(groupedAreas).forEach(catKey => {
@@ -894,7 +815,6 @@
 
                     categoriesHTML += '</div>';
 
-                    // Kreiranje tastera za ocene (w-12 h-12)
                     let ratingButtonsHTML = '<div class="flex flex-wrap gap-3 py-1">';
                     ratingLevels.forEach(level => {
                         const isActive = (tr.score === level.val);
@@ -908,7 +828,7 @@
                                         }" title="${level.title}">
                                     ${level.val}
                                 </button>
-                                <span class="text-[9px] font-bold mt-1 text-slate-505 uppercase tracking-tight">${level.label}</span>
+                                <span class="text-[9px] font-bold mt-1 text-slate-555 uppercase tracking-tight">${level.label}</span>
                             </div>
                         `;
                     });
@@ -929,7 +849,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Kontrole i Chevron sa desne strane -->
                             <div class="flex items-center space-x-2">
                                 <span class="bg-emerald-100 text-emerald-800 text-[9px] font-black px-2.5 py-1 rounded-full uppercase">Prisutan</span>
                                 <button class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-transform duration-300" id="chevron-child-${child.id}" style="transform: ${isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'}">
@@ -938,7 +857,7 @@
                             </div>
                         </div>
 
-                        <!-- SKLOPIVI DETALJNI PANEL ZA RAD (Otvara se na klik) -->
+                        <!-- SKLOPIVI DETALJNI PANEL ZA RAD -->
                         <div id="details-child-${child.id}" class="${isExpanded ? '' : 'hidden'} border-t border-slate-100 p-4 bg-slate-50/30 space-y-4">
                             <!-- Slikovne ocene -->
                             <div>
@@ -948,7 +867,7 @@
 
                             <!-- Kategorisane slikovne oblasti -->
                             <div>
-                                <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-550 mb-1.5">Izražene snage danas:</span>
+                                <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-505 mb-1.5">Izražene snage danas:</span>
                                 ${categoriesHTML}
                             </div>
 
@@ -1295,7 +1214,7 @@
             if (type === 'success') {
                 icon.className = "fa-solid fa-circle-check text-emerald-400 text-sm";
             } else if (type === 'warning') {
-                icon.className = "fa-solid fa-circle-exclamation text-rose-500 text-sm";
+                icon.className = "fa-solid fa-circle-exclamation text-rose-505 text-sm";
             } else {
                 icon.className = "fa-solid fa-circle-notch text-purple-400 text-sm animate-spin";
             }
