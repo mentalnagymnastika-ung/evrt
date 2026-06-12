@@ -622,13 +622,19 @@
             }
 
             if (fieldSelect.options.length > 0) {
-                const prevSelected = activeGroupId;
-                const exists = Array.from(fieldSelect.options).some(opt => opt.value === prevSelected);
-                if (exists && prevSelected) {
-                    fieldSelect.value = prevSelected;
+                // POPRAVKA BUG-A 2: Ako trenutno odabrana grupa ne pripada prijavljenom vaspitaču,
+                // a on ima svoje lične grupe, odmah mu selektujemo njegovu prvu grupu!
+                const isCurrentlyMyGroup = myGroups.some(g => g.id === activeGroupId);
+                if (!isCurrentlyMyGroup && myGroups.length > 0) {
+                    activeGroupId = myGroups[0].id;
+                }
+
+                const exists = Array.from(fieldSelect.options).some(opt => opt.value === activeGroupId);
+                if (exists && activeGroupId) {
+                    fieldSelect.value = activeGroupId;
                 } else {
                     activeGroupId = fieldSelect.options[0].value;
-                    fieldSelect.selectedIndex = 0;
+                    fieldSelect.value = activeGroupId;
                 }
             } else {
                 activeGroupId = "";
@@ -660,7 +666,7 @@
             }
         }
 
-        // POPUNJAVANJE DROPDOWNA ZA ZAMENSKOG VASPITAČA (Samo ostali licencirani radnici)
+        // POPUNJAVANJE DROPDOWNA ZA ZAMENSKOG VASPITAČA
         function populateSubstituteSelect(activeGroup) {
             const subSelect = document.getElementById('field-substitute-select');
             if (!subSelect) return;
@@ -673,9 +679,10 @@
             defaultOpt.innerText = "Bez zamene (Vi vodite čas)";
             subSelect.appendChild(defaultOpt);
 
-            // Popuni ostale registrovane vaspitače koji nisu vlasnici ove grupe
+            // POPRAVKA BUG-A 1: Prijavljeni vaspitač (activeEducator) više ne može izabrati sam sebe kao zamenu!
+            // Popunjavamo ostale registrovane vaspitače koji nisu trenutno aktivni prijavljeni korisnik
             appState.educators.forEach(ed => {
-                if (activeGroup.educator && ed !== activeGroup.educator) {
+                if (ed !== activeEducator) {
                     const opt = document.createElement('option');
                     opt.value = ed;
                     opt.innerText = ed;
@@ -687,7 +694,8 @@
             const key = getRecordKey();
             const record = appState.dailyRecords[key];
             if (record) {
-                if (record.writer && record.writer !== record.educator) {
+                // Ako stvarna zamena postoji (writer se razlikuje od vlasnika i od aktivnog koji je prijavljen)
+                if (record.writer && record.writer !== activeEducator) {
                     subSelect.value = record.writer;
                 } else {
                     subSelect.value = "none";
@@ -710,6 +718,9 @@
                 const logoutBtn = document.getElementById('btn-logout');
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
 
+                // Resetujemo trenutnu aktivnu grupu pre popunjavanja selektora
+                activeGroupId = "";
+
                 populateGroupSelects();
                 loadOrCreateDailyRecord();
                 switchTab('field');
@@ -725,6 +736,9 @@
                 
                 const searchInput = document.getElementById('global-child-search');
                 if (searchInput) searchInput.value = '';
+
+                // Resetujemo trenutnu aktivnu grupu pri promeni profila
+                activeGroupId = "";
 
                 populateGroupSelects();
                 loadOrCreateDailyRecord();
@@ -748,7 +762,8 @@
             if (appState.dailyRecords[key]) {
                 const val = subSelect.value;
                 if (val === "none") {
-                    appState.dailyRecords[key].writer = appState.dailyRecords[key].educator;
+                    // Ako nema zamene, pisac je prijavljeni vaspitač
+                    appState.dailyRecords[key].writer = activeEducator;
                 } else {
                     appState.dailyRecords[key].writer = val;
                 }
@@ -777,11 +792,10 @@
             const alertText = document.getElementById('substitute-alert-text');
             if (!alertBar || !alertText) return;
 
-            // Prikazujemo samo ako je prijavljeni vaspitač (writer) različit od vlasnika grupe (educator)
-            // I ako korisnik nije eksplicitno ugasio obaveštenje za ovu grupu
-            if (record && record.writer && record.writer !== record.educator) {
+            // POPRAVKA BUG-A 1: Obaveštenje se prikazuje isključivo ako postoji stvarna odabrana zamena (writer != activeEducator i nije "none")
+            if (record && record.writer && record.writer !== activeEducator) {
                 if (!isSubstituteAlertDismissed) {
-                    alertText.innerHTML = `Zabeleženo kao <strong>ZAMENA na času</strong>. Glavni vaspitač grupe je <strong>${record.educator}</strong>, a vi (<strong>${record.writer}</strong>) unosite podatke. Svi unosi biće potpisani Vašim imenom.`;
+                    alertText.innerHTML = `Zabeleženo kao <strong>ZAMENA na času</strong>. Glavni vaspitač grupe je <strong>${record.educator}</strong>, a zamenski vaspitač <strong>${record.writer}</strong> unosi podatke. Svi unosi biće potpisani imenom zamenskog vaspitača.`;
                     alertBar.classList.remove('hidden');
                 }
             } else {
@@ -839,8 +853,8 @@
                     };
                 });
 
-                // Zamenski pisac se postavlja ako se prijavljeni i glavni vaspitač razlikuju
-                const initialWriter = (activeGroup.educator && activeGroup.educator !== activeEducator) ? activeEducator : (activeGroup.educator || activeEducator);
+                // Zamenski pisac se postavlja samo ako je odabrana zamena, inače je onaj ko je prijavljen
+                const initialWriter = activeEducator;
 
                 appState.dailyRecords[key] = {
                     date: document.getElementById('field-class-date').value,
@@ -1194,7 +1208,7 @@
             let writerName = activeEducator;
             if (record) {
                 writerName = record.writer || record.educator || activeEducator;
-                if (record.writer && record.writer !== record.educator) {
+                if (record.writer && record.writer !== activeEducator) {
                     writerName += " (Zamena)";
                 }
             }
