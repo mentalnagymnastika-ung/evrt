@@ -146,15 +146,27 @@
         <!-- ======================================================= -->
         <section id="tab-field" class="space-y-4 lg:h-full lg:overflow-y-auto custom-scrollbar pb-8 hidden">
             
-            <!-- PAMETNA KOMPAKTNA TRAKA SA SAŽETKOM ČASA I INLINE BRZOM PRETRAGOM -->
+            <!-- PAMETNA KOMPAKTNA TRAKA SA SAŽETKOM ČASA, INLINE PRETRAGOM I STATISTIKOM (Dramatično štedi prostor) -->
             <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
                 <!-- Sažetak časa (Sakriva se kada je pretraga aktivna) -->
                 <div class="flex items-center space-x-2 text-xs font-bold text-slate-700 flex-grow" id="summary-left-container">
-                    <span class="bg-emerald-50 text-emerald-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-emerald-100/60" id="summary-date">
-                        Danas
+                    <!-- Dinamički formatiran današnji datum npr. 12.06. -->
+                    <span class="bg-emerald-50 text-emerald-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-emerald-100/60 font-black" id="summary-date">
+                        12.06.
                     </span>
                     <span class="text-slate-300">|</span>
-                    <span class="truncate text-slate-600" id="summary-info">Učitavanje...</span>
+                    <span class="truncate text-slate-600 flex items-center gap-1" id="summary-info">Učitavanje...</span>
+                    <span class="text-slate-300">|</span>
+                    
+                    <!-- NOVE KOMPAKTNE KAPSULE STATISTIKE UNUTAR GORNJE TRAKE (Item 3) -->
+                    <div class="flex items-center space-x-1.5 text-[10px] shrink-0">
+                        <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-xl flex items-center gap-1" title="Prisutno dece">
+                            P: <span id="header-stat-present" class="font-black">0</span>
+                        </span>
+                        <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-xl flex items-center gap-1" title="Odsutno dece">
+                            O: <span id="header-stat-absent" class="font-black">0</span>
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Integrisani inline pretraživač (Prikazuje se umesto sažetka kada se klikne lupica) -->
@@ -223,20 +235,8 @@
                 <span id="substitute-alert-text">Učitavanje režima zamene...</span>
             </div>
 
-            <!-- Brza statistika prisutnosti -->
-            <div class="flex justify-between items-center bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
-                <div class="flex items-center space-x-3 text-xs font-bold text-slate-600">
-                    <span>Prisutno dece: <span id="stat-present" class="text-sm font-black text-emerald-600">0</span></span>
-                    <span class="text-slate-200">|</span>
-                    <span class="text-slate-400">Odsutno: <span id="stat-absent" class="text-sm font-black text-rose-500">0</span></span>
-                </div>
-                <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                    <i class="fa-solid fa-circle-info text-emerald-500 mr-1 text-[10px]"></i> Klikni na ime deteta da označiš odsustvo
-                </div>
-            </div>
-
-            <!-- DINAMIČKA LISTA DECE U GRUPI SPREMNA ZA BRZI UNOS -->
-            <div class="space-y-4" id="children-field-list">
+            <!-- DINAMIČKA LISTA DECE U GRUPI (Item 4: Sklopivi harmonika meni) -->
+            <div class="space-y-3" id="children-field-list">
                 <!-- Generiše se kroz JS -->
             </div>
 
@@ -247,7 +247,7 @@
                         <i class="fa-solid fa-message-captions text-emerald-500 mr-1.5"></i>
                         Zajednička beleška za celu grupu (opcionalno)
                     </h4>
-                    <button onclick="startVoiceInput('group-general-note')" class="bg-slate-50 hover:bg-emerald-600 text-slate-500 hover:text-white w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer shadow border border-slate-200">
+                    <button onclick="startVoiceInput('group-general-note')" class="bg-slate-50 hover:bg-emerald-600 text-slate-505 hover:text-white w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer shadow border border-slate-200">
                         <i class="fa-solid fa-microphone text-xs" id="mic-group-general-note"></i>
                     </button>
                 </div>
@@ -279,55 +279,6 @@
             supportContact: "podrska@mentalgimnastika.rs"
         };
 
-        // Definicija 11 oblasti sa kategorizacijom
-        const areas = [
-            { id: 1, name: "Memorija (Radna, Dugotrajna, Kratkotrajna)", short: "Memorija i prisećanje", desc: "Sposobnost skladištenja i pronalaženja informacija.", default: 75, icon: "fa-brain", category: "cognitive" },
-            { id: 2, name: "Grafo-motorika i koordinacija oko-ruka", short: "Grafo-motorika", desc: "Preciznost pokreta ruke, držanje olovke i vizuelno-motorna kontrola.", default: 75, icon: "fa-pen-clip", category: "motor" },
-            { id: 3, name: "Pažnja i Koncentracija", short: "Fokus i pažnja", desc: "Dužina zadržavanja fokusa na zadatku bez ometanja.", default: 75, icon: "fa-eye", category: "motor" },
-            { id: 4, name: "Apstraktno razmišljanje i brzina pronalaženja rešenja", short: "Apstraktna logika", desc: "Sposobnost rešavanja mentalnih zagonetki bez fizičkih objekata.", default: 75, icon: "fa-lightbulb", category: "cognitive" },
-            { id: 5, name: "Uočavanje odnosa (asocijativnost i zaključivanje)", short: "Asocijativnost", desc: "Povezivanje uzroka i posledica, pronalaženje sličnosti.", default: 75, icon: "fa-diagram-project", category: "cognitive" },
-            { id: 6, name: "Razumevanje složenih pojmova i verbalna komunikacija", short: "Verbalni pojmovi", desc: "Vokabular i verbalno izražavanje kompleksnih ideja.", default: 75, icon: "fa-comments", category: "social" },
-            { id: 7, name: "Socijalno i emotivno sazrevanje", short: "Socijalno i emotivno", desc: "Nošenje sa uspehom/neuspehom, empatija prema drugarima.", default: 75, icon: "fa-heart", category: "social" },
-            { id: 8, name: "Propriocepcija (usklađenost pokreta tela)", short: "Propriocepcija", desc: "Orijentacija u prostoru, motorička kontrola i kretanje na poligonu.", default: 75, icon: "fa-child-reaching", category: "motor" },
-            { id: 9, name: "Logika (verbalna, matematička...)", short: "Matematička logika", desc: "Struktuirano, logičko zaključivanje i razumevanje odnosa.", default: 75, icon: "fa-calculator", category: "cognitive" },
-            { id: 10, name: "Serijacija i Klasifikacija", short: "Serijacija i klasifikacija", desc: "Grupisanje po osobinama (boja, oblik) i ređanje po veličini.", default: 75, icon: "fa-arrow-down-short-wide", category: "cognitive" },
-            { id: 11, name: "Kreativnost i originalnost rešenja", short: "Kreativnost", desc: "Inovativan pristup igrama i sloboda u stvaranju rešenja.", default: 75, icon: "fa-palette", category: "social" }
-        ];
-
-        // Definicija 3 kategorije (Svijetli dizajn)
-        const categories = {
-            cognitive: { 
-                name: "Kognitivni razvoj i Logika", 
-                colorClass: "bg-blue-50/70 border-blue-100", 
-                activeBtnClass: "bg-blue-600 text-white border-transparent", 
-                inactiveBtnClass: "bg-white text-blue-600 border-blue-200/50 hover:bg-blue-50/50", 
-                textClass: "text-blue-700"
-            },
-            motor: { 
-                name: "Fokus, Pažnja i Motorika", 
-                colorClass: "bg-emerald-50/70 border-emerald-100", 
-                activeBtnClass: "bg-emerald-600 text-white border-transparent", 
-                inactiveBtnClass: "bg-white text-emerald-600 border-emerald-200/50 hover:bg-emerald-50/50", 
-                textClass: "text-emerald-700"
-            },
-            social: { 
-                name: "Socijalni, Govorni i Kreativni", 
-                colorClass: "bg-purple-50/70 border-purple-100", 
-                activeBtnClass: "bg-purple-600 text-white border-transparent", 
-                inactiveBtnClass: "bg-white text-purple-600 border-purple-200/50 hover:bg-purple-50/50", 
-                textClass: "text-purple-700"
-            }
-        };
-
-        // Podrazumevani nivoi procene za vaspitače (Veliki mobilni slikovni dugmići - Svetli tonovi)
-        const ratingLevels = [
-            { val: 120, label: "Iznad oček.", title: "120 - Iznad očekivanog (darovitost)", color: "from-purple-600 via-indigo-600 to-cyan-500", text: "text-purple-700", border: "border-purple-200", bg: "bg-purple-50" },
-            { val: 100, label: "Odlično", title: "100 - Odlično postignuće", color: "from-indigo-500 to-purple-600", text: "text-indigo-700", border: "border-indigo-200", bg: "bg-indigo-50" },
-            { val: 90, label: "Uobičajeno", title: "90 - Uobičajeni nivo", color: "from-emerald-500 to-teal-500", text: "text-emerald-700", border: "border-emerald-200", bg: "bg-emerald-50" },
-            { val: 75, label: "Dobro", title: "75 - Dobro u skladu sa uzrastom", color: "from-blue-500 to-cyan-500", text: "text-blue-700", border: "border-blue-200", bg: "bg-blue-50" },
-            { val: 50, label: "Podrška", title: "50 - Potrebna dodatna podrška", color: "from-rose-500 to-red-500", text: "text-rose-700", border: "border-rose-200", bg: "bg-rose-50" }
-        ];
-
         // Stanje aplikacije
         let appState = {
             groups: [],
@@ -339,6 +290,9 @@
         let activeEducator = "";
         let activeRecognition = null;
         let originalTextMap = {};
+        
+        // Pamti koje su dječije kartice trenutno proširene (da se ne zatvore pri sync-u)
+        let expandedChildIds = new Set();
         
         // Firebase Cloud Storage sistemske promenljive
         let db = null;
@@ -654,7 +608,7 @@
             }
         }
 
-        // DOBIJANJE KLJUČA zapisa (datum_grupaId) - ISPRAVLJENO!
+        // DOBIJANJE KLJUČA zapisa (datum_grupaId)
         function getRecordKey() {
             const dateInput = document.getElementById('field-class-date');
             const date = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
@@ -674,9 +628,8 @@
                         </div>
                     `;
                 }
-                document.getElementById('stat-present').innerText = "0";
-                document.getElementById('stat-absent').innerText = "0";
-                // Sakrij traku za zamenu
+                document.getElementById('header-stat-present').innerText = "0";
+                document.getElementById('header-stat-absent').innerText = "0";
                 const alertBar = document.getElementById('substitute-alert-bar');
                 if (alertBar) alertBar.classList.add('hidden');
                 return;
@@ -715,14 +668,13 @@
                     date: document.getElementById('field-class-date').value,
                     groupId: activeGroupId,
                     groupName: activeGroup.name,
-                    educator: activeGroup.educator || activeEducator, // Glavni vaspitač grupe
-                    writer: activeEducator, // Ko je zapravo uneo podatke tog dana!
+                    educator: activeGroup.educator || activeEducator, 
+                    writer: activeEducator, 
                     theme: "",
                     generalNote: "",
                     children: childTracking
                 };
             } else {
-                // Ako zapis već postoji, osiguraj da zapamtimo ko je poslednji vršio izmjene
                 appState.dailyRecords[key].writer = activeEducator;
             }
 
@@ -730,13 +682,11 @@
             document.getElementById('field-class-theme').value = record.theme || "";
             document.getElementById('group-general-note').value = record.generalNote || "";
 
-            // Ažuriraj tekstualni sažetak časa u traci
             updateSummaryBar();
-
             renderChildrenTrackingList();
         }
 
-        // RENDER KARTICA DECE
+        // RENDER KARTICA DECE (Item 4: Sklopivi harmonika meni sa očuvanjem proširenog stanja)
         function renderChildrenTrackingList() {
             const key = getRecordKey();
             const record = appState.dailyRecords[key];
@@ -759,14 +709,15 @@
                 card.id = `child-card-${child.id}`;
                 
                 if (tr.present) {
-                    card.className = "bg-white rounded-3xl p-4 md:p-5 shadow-sm border border-slate-200/80 transition-all duration-300 relative";
+                    const isExpanded = expandedChildIds.has(child.id);
+                    card.className = "bg-white rounded-3xl border border-slate-200/80 shadow-sm transition-all duration-300 overflow-hidden";
                     
                     const groupedAreas = { cognitive: [], motor: [], social: [] };
                     areas.forEach(area => {
                         groupedAreas[area.category].push(area);
                     });
 
-                    // Kreiranje POVEĆANIH slikovnih oblasti (w-12 h-12)
+                    // Kreiranje oblasti (w-12 h-12)
                     let categoriesHTML = '<div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-2.5">';
                     
                     Object.keys(groupedAreas).forEach(catKey => {
@@ -801,7 +752,7 @@
 
                     categoriesHTML += '</div>';
 
-                    // Kreiranje POVEĆANIH slikovnih dugmića za ocene (w-12 h-12)
+                    // Kreiranje tastera za ocene (w-12 h-12)
                     let ratingButtonsHTML = '<div class="flex flex-wrap gap-3 py-1">';
                     ratingLevels.forEach(level => {
                         const isActive = (tr.score === level.val);
@@ -822,51 +773,61 @@
                     ratingButtonsHTML += '</div>';
 
                     card.innerHTML = `
-                        <!-- Zaglavlje -->
-                        <div class="flex justify-between items-center border-b border-slate-100 pb-3.5 mb-3.5">
-                            <div class="flex items-center space-x-3 cursor-pointer" onclick="togglePresence('${child.id}')">
-                                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold flex items-center justify-center text-sm shadow-inner">
+                        <!-- UVIJEK VIDLJIVO ZAGLAVLJE KARTICE DETETA -->
+                        <div class="flex items-center justify-between p-3.5 cursor-pointer hover:bg-slate-50/50" onclick="toggleChildCollapse('${child.id}', event)">
+                            <div class="flex items-center space-x-3">
+                                <div onclick="togglePresence('${child.id}', event)" class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-250 font-bold flex items-center justify-center text-sm shadow-inner transition-colors duration-200">
                                     ${child.name.charAt(0)}
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-sm text-slate-800 flex items-center">
                                         ${child.name}
-                                        <span class="ml-2 bg-emerald-100 text-emerald-800 border border-emerald-200 text-[8px] font-bold px-2 py-0.5 rounded-full uppercase">Prisutan</span>
                                     </h4>
-                                    <p class="text-[9px] text-slate-400 font-semibold">Klikni da označiš odsustvo</p>
+                                    <p class="text-[9px] text-slate-400 font-semibold">Dodirni krug za prisustvo | Klikni za detalje</p>
                                 </div>
+                            </div>
+                            
+                            <!-- Kontrole i Chevron sa desne strane -->
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-emerald-100 text-emerald-800 text-[9px] font-black px-2.5 py-1 rounded-full uppercase">Prisutan</span>
+                                <button class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-transform duration-300" id="chevron-child-${child.id}" style="transform: ${isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'}">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Slikovne ocene -->
-                        <div class="mb-4">
-                            <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-2">UMG Procena Časa:</span>
-                            ${ratingButtonsHTML}
-                        </div>
+                        <!-- SKLOPIVI DETALJNI PANEL ZA RAD (Otvara se na klik) -->
+                        <div id="details-child-${child.id}" class="${isExpanded ? '' : 'hidden'} border-t border-slate-100 p-4 bg-slate-50/30 space-y-4">
+                            <!-- Slikovne ocene -->
+                            <div>
+                                <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-2">UMG Procena Časa:</span>
+                                ${ratingButtonsHTML}
+                            </div>
 
-                        <!-- Kategorisane slikovne oblasti -->
-                        <div class="mb-4">
-                            <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-505 mb-1.5">Izražene snage danas:</span>
-                            ${categoriesHTML}
-                        </div>
+                            <!-- Kategorisane slikovne oblasti -->
+                            <div>
+                                <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Izražene snage danas:</span>
+                                ${categoriesHTML}
+                            </div>
 
-                        <!-- Glasovni unos zabeleške -->
-                        <div class="relative flex items-center bg-slate-50 rounded-xl border border-slate-200 p-2">
-                            <input type="text" id="note-child-${child.id}" value="${tr.note || ''}" 
-                                   oninput="updateChildNote('${child.id}', this.value)" 
-                                   placeholder="Diktirajte ili upišite opasku za ${child.name.split(' ')[0]}..." 
-                                   class="w-full pr-12 pl-3 py-1.5 text-xs bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 font-medium">
-                            <button onclick="startVoiceInput('note-child-${child.id}', '${child.id}')" 
-                                    class="absolute right-2 bg-white hover:bg-emerald-600 hover:text-white text-slate-505 w-9 h-9 rounded-full flex items-center justify-center shadow border border-slate-200 transition-all cursor-pointer">
-                                <i class="fa-solid fa-microphone text-xs" id="mic-note-child-${child.id}"></i>
-                            </button>
+                            <!-- Glasovni unos zabeleške -->
+                            <div class="relative flex items-center bg-slate-100/50 rounded-xl border border-slate-200 p-2">
+                                <input type="text" id="note-child-${child.id}" value="${tr.note || ''}" 
+                                       oninput="updateChildNote('${child.id}', this.value)" 
+                                       placeholder="Diktirajte ili upišite opasku za ${child.name.split(' ')[0]}..." 
+                                       class="w-full pr-12 pl-3 py-1.5 text-xs bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 font-medium">
+                                <button onclick="startVoiceInput('note-child-${child.id}', '${child.id}')" 
+                                        class="absolute right-2 bg-white hover:bg-emerald-600 hover:text-white text-slate-500 w-9 h-9 rounded-full flex items-center justify-center shadow border border-slate-200 transition-all cursor-pointer">
+                                    <i class="fa-solid fa-microphone text-xs" id="mic-note-child-${child.id}"></i>
+                                </button>
+                            </div>
                         </div>
                     `;
                 } else {
                     card.className = "bg-slate-100 rounded-2xl p-3 shadow-sm border border-slate-200/60 opacity-60 transition-all duration-300";
                     card.innerHTML = `
                         <div class="flex justify-between items-center">
-                            <div class="flex items-center space-x-3 cursor-pointer" onclick="togglePresence('${child.id}')">
+                            <div class="flex items-center space-x-3 cursor-pointer" onclick="togglePresence('${child.id}', event)">
                                 <div class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-[10px]">
                                     ${child.name.charAt(0)}
                                 </div>
@@ -883,8 +844,35 @@
                 container.appendChild(card);
             });
 
-            document.getElementById('stat-present').innerText = presentCount;
-            document.getElementById('stat-absent').innerText = absentCount;
+            // Ažuriraj statistiku u header kapsulama
+            const hPresent = document.getElementById('header-stat-present');
+            const hAbsent = document.getElementById('header-stat-absent');
+            if (hPresent) hPresent.innerText = presentCount;
+            if (hAbsent) hAbsent.innerText = absentCount;
+        }
+
+        // TOGGLE COLLAPSE FUNKCIJA (Pamti stanje u expandedChildIds)
+        function toggleChildCollapse(childId, event) {
+            // Nemoj sklopiti ako se klikne na kružić za prisustvo ili unos unutar kartice
+            if (event.target.closest('button:not([id^="chevron-child"])') || event.target.closest('input') || event.target.closest('.rounded-full')) {
+                return;
+            }
+            
+            const details = document.getElementById(`details-child-${childId}`);
+            const chevron = document.getElementById(`chevron-child-${childId}`);
+            
+            if (details && chevron) {
+                const isHidden = details.classList.contains('hidden');
+                if (isHidden) {
+                    details.classList.remove('hidden');
+                    chevron.style.transform = 'rotate(180deg)';
+                    expandedChildIds.add(childId);
+                } else {
+                    details.classList.add('hidden');
+                    chevron.style.transform = 'rotate(0deg)';
+                    expandedChildIds.delete(childId);
+                }
+            }
         }
 
         // GLOBALNA PRETRAGA DECE
@@ -905,7 +893,9 @@
             });
         }
 
-        function togglePresence(childId) {
+        function togglePresence(childId, event) {
+            if (event) event.stopPropagation(); // Sprečava otvaranje/zatvaranje kartice na klik za prisustvo!
+            
             const key = getRecordKey();
             if (appState.dailyRecords[key] && appState.dailyRecords[key].children[childId]) {
                 const current = appState.dailyRecords[key].children[childId].present;
@@ -915,6 +905,7 @@
                     appState.dailyRecords[key].children[childId].score = null;
                     appState.dailyRecords[key].children[childId].highlightAreas = [];
                     appState.dailyRecords[key].children[childId].note = "";
+                    expandedChildIds.delete(childId); // Ukloni iz otvorenih ako postane odsutan
                 }
                 saveDailyRecord(false);
                 renderChildrenTrackingList();
@@ -972,7 +963,14 @@
             const groupSelect = document.getElementById('field-group-select');
             const themeInput = document.getElementById('field-class-theme');
 
-            const dateVal = dateInput ? dateInput.value.split('-').reverse().join('.') : '';
+            let dateVal = '';
+            if (dateInput && dateInput.value) {
+                const parts = dateInput.value.split('-');
+                if (parts.length === 3) {
+                    dateVal = `${parts[2]}.${parts[1]}.`;
+                }
+            }
+            
             const educatorVal = educatorSelect ? educatorSelect.value : '';
             
             let groupVal = '';
@@ -985,9 +983,9 @@
             const summaryDate = document.getElementById('summary-date');
             const summaryInfo = document.getElementById('summary-info');
 
-            if (summaryDate) summaryDate.innerHTML = `<i class="fa-solid fa-calendar-day mr-1"></i> ${dateVal || 'Danas'}`;
+            if (summaryDate) summaryDate.innerHTML = `<i class="fa-solid fa-calendar-day mr-1"></i> ${dateVal || '12.06.'}`;
             if (summaryInfo) {
-                summaryInfo.innerHTML = `👤 <span class="font-bold text-slate-800">${educatorVal || 'Vaspitač'}</span> | 🏫 <span class="font-bold text-slate-800">${groupVal || 'Nema grupe'}</span> ${themeVal ? ' | 📝 ' + themeVal : ''}`;
+                summaryInfo.innerHTML = `👤 <span class="font-bold text-slate-800">${educatorVal || 'Vaspitač'}</span> | <i class="fa-solid fa-house text-emerald-600 mr-1.5 ml-1"></i> <span class="font-bold text-slate-800">${groupVal || 'Nema grupe'}</span> ${themeVal ? ' | 📝 ' + themeVal : ''}`;
             }
         }
 
@@ -1013,7 +1011,7 @@
                 searchBtn.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
                 if (searchInput) {
                     searchInput.value = '';
-                    handleGlobalSearch(); // Resetuje filter i prikazuje svu decu
+                    handleGlobalSearch(); 
                 }
             }
         }
