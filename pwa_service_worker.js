@@ -1,4 +1,4 @@
-const CACHE_NAME = 'umg-cache-v2.30';
+const CACHE_NAME = 'umg-cache-v2.35';
 const ASSETS_TO_CACHE = [
   'index.html',
   'p_izvestaj.html',
