@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>UMG - za vaspitača</title>
+    <title>UMG - Terenski rad vaspitača</title>
     
     <!-- Meta tagovi za mobilnu aplikaciju (Moderna PWA & iOS podrška) -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -218,7 +218,7 @@
                     </select>
                 </div>
 
-                <!-- Korak 3: Tema časa (Polje koje je falilo, a potrebno je kodu) -->
+                <!-- Korak 3: Tema časa -->
                 <div class="sm:col-span-2 border-t border-slate-100 pt-3 space-y-1">
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center">
                         <i class="fa-solid fa-book-open text-emerald-500 mr-1.5"></i> 3. Tema časa / Naziv aktivnosti
@@ -240,10 +240,15 @@
                 </div>
             </div>
 
-            <!-- SIGNALNA ZONA ZA DETEKCIJU ZAMENE -->
-            <div id="substitute-alert-bar" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-medium leading-relaxed flex items-center space-x-2.5">
-                <i class="fa-solid fa-circle-exclamation text-base shrink-0 text-amber-600 animate-bounce"></i>
-                <span id="substitute-alert-text">Učitavanje režima zamene...</span>
+            <!-- SIGNALNA ZONA ZA DETEKCIJU ZAMENE (Sa ugrađenim dugmetom za zatvaranje) -->
+            <div id="substitute-alert-bar" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-medium leading-relaxed flex items-center justify-between gap-3 shadow-sm transition-all">
+                <div class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-circle-exclamation text-base shrink-0 text-amber-600 animate-bounce"></i>
+                    <span id="substitute-alert-text">Učitavanje režima zamene...</span>
+                </div>
+                <button onclick="dismissSubstituteAlert()" class="text-amber-500 hover:text-amber-800 p-1 rounded-lg hover:bg-amber-100/60 transition-all cursor-pointer shrink-0" title="Zatvori obaveštenje">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
             </div>
 
             <!-- DINAMIČKA LISTA DECE U GRUPI (Sklopivi harmonika meni) -->
@@ -338,6 +343,10 @@
         // Pamti koje su dječije kartice trenutno proširene (da se ne zatvore pri sync-u)
         let expandedChildIds = new Set();
         
+        // Stanje zatvorenosti alert prozora za zamenu (kako ne bi dosađivao na svaki klik)
+        let isSubstituteAlertDismissed = false;
+        let lastAlertGroupId = "";
+
         // Firebase Cloud Storage sistemske promenljive
         let db = null;
         let auth = null;
@@ -410,7 +419,7 @@
                     </div>
                     <div class="space-y-2">
                         <h2 class="text-xl font-black text-slate-900">Licenca za korišćenje je istekla</h2>
-                        <p class="text-xs text-slate-500 leading-relaxed">Pristup aplikaciji UMG Asistent za ustanovu <strong class="text-slate-800">${LICENSE_CONFIG.clientName}</strong> je onemogućen jer je ugovorni ili probni period završen.</p>
+                        <p class="text-xs text-slate-505 leading-relaxed">Pristup aplikaciji UMG Asistent za ustanovu <strong class="text-slate-800">${LICENSE_CONFIG.clientName}</strong> je onemogućen jer je ugovorni ili probni period završen.</p>
                     </div>
                     <div class="p-4 bg-slate-50 rounded-xl text-left border border-slate-200 text-[11px] text-slate-500 leading-relaxed font-sans">
                         Za produženje ugovora, tehničku podršku i reizdavanje licenci, molimo kontaktirajte nas direktno putem e-mail adrese.
@@ -425,7 +434,7 @@
         // DINAMIČKI PWA GENERATOR
         function setupPWAAndServiceWorker() {
             try {
-                const manifest = {
+                const mapObj = {
                     "name": "UMG Terenski Asistent",
                     "short_name": "UMG Asistent",
                     "start_url": "index.html",
@@ -441,7 +450,7 @@
                         }
                     ]
                 };
-                const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+                const blob = new Blob([JSON.stringify(mapObj)], {type: 'application/json'});
                 const manifestURL = URL.createObjectURL(blob);
                 const link = document.createElement('link');
                 link.rel = 'manifest';
@@ -462,7 +471,7 @@
             }
         }
 
-        // INICIJALIZACIJA FIREBASE SA OFFLINE PERSISTENCIJOM (Spremi za rad bez interneta)
+        // INICIJALIZACIJA FIREBASE SA OFFLINE PERSISTENCIJOM
         function initFirebaseCloudSync() {
             try {
                 if (typeof __app_id !== 'undefined') {
@@ -745,19 +754,38 @@
                 }
                 saveDailyRecord(false); 
                 
-                const alertBar = document.getElementById('substitute-alert-bar');
-                const alertText = document.getElementById('substitute-alert-text');
-                const record = appState.dailyRecords[key];
+                // Resetujemo zatvaranje jer je vaspitač namerno promenio mod zamene
+                isSubstituteAlertDismissed = false;
                 
-                if (record && record.writer && record.writer !== record.educator) {
-                    if (alertBar && alertText) {
-                        alertText.innerHTML = `Zabeleženo kao <strong>ZAMENA na času</strong>. Glavni vaspitač grupe je <strong>${record.educator}</strong>, a zamenski vaspitač <strong>${record.writer}</strong> unosi podatke. Svi unosi biće potpisani imenom zamenskog vaspitača.`;
-                        alertBar.classList.remove('hidden');
-                    }
-                } else {
-                    if (alertBar) alertBar.classList.add('hidden');
-                }
+                triggerSubstituteNotification(appState.dailyRecords[key]);
                 updateSummaryBar();
+            }
+        }
+
+        // ZATVARANJE ALERT BAR-A (Korisnik kliknuo 'X')
+        function dismissSubstituteAlert() {
+            isSubstituteAlertDismissed = true;
+            const alertBar = document.getElementById('substitute-alert-bar');
+            if (alertBar) {
+                alertBar.classList.add('hidden');
+            }
+        }
+
+        // LOGIKA OKIDANJA SIGNALA ZA ZAMENU
+        function triggerSubstituteNotification(record) {
+            const alertBar = document.getElementById('substitute-alert-bar');
+            const alertText = document.getElementById('substitute-alert-text');
+            if (!alertBar || !alertText) return;
+
+            // Prikazujemo samo ako je prijavljeni vaspitač (writer) različit od vlasnika grupe (educator)
+            // I ako korisnik nije eksplicitno ugasio obaveštenje za ovu grupu
+            if (record && record.writer && record.writer !== record.educator) {
+                if (!isSubstituteAlertDismissed) {
+                    alertText.innerHTML = `Zabeleženo kao <strong>ZAMENA na času</strong>. Glavni vaspitač grupe je <strong>${record.educator}</strong>, a vi (<strong>${record.writer}</strong>) unosite podatke. Svi unosi biće potpisani Vašim imenom.`;
+                    alertBar.classList.remove('hidden');
+                }
+            } else {
+                alertBar.classList.add('hidden');
             }
         }
 
@@ -784,6 +812,12 @@
                 return;
             }
 
+            // Reset stanja ugašenog obaveštenja ako smo promenili aktivnu grupu
+            if (lastAlertGroupId !== activeGroupId) {
+                isSubstituteAlertDismissed = false;
+                lastAlertGroupId = activeGroupId;
+            }
+
             const key = getRecordKey();
             const activeGroup = appState.groups.find(g => g.id === activeGroupId);
             
@@ -805,6 +839,7 @@
                     };
                 });
 
+                // Zamenski pisac se postavlja ako se prijavljeni i glavni vaspitač razlikuju
                 const initialWriter = (activeGroup.educator && activeGroup.educator !== activeEducator) ? activeEducator : (activeGroup.educator || activeEducator);
 
                 appState.dailyRecords[key] = {
@@ -825,7 +860,7 @@
 
             const record = appState.dailyRecords[key];
             
-            // SIGURNE DODELE VREDNOSTI (Bezbedno od null greške ako elementi nisu u HTML-u)
+            // SIGURNE DODELE VREDNOSTI (Bezbedno od null greške)
             const themeInput = document.getElementById('field-class-theme');
             if (themeInput) {
                 themeInput.value = record.theme || "";
@@ -837,17 +872,7 @@
             }
 
             populateSubstituteSelect(activeGroup);
-
-            const alertBar = document.getElementById('substitute-alert-bar');
-            const alertText = document.getElementById('substitute-alert-text');
-            if (record && record.writer && record.writer !== record.educator) {
-                if (alertBar && alertText) {
-                    alertText.innerHTML = `Zabeleženo kao <strong>ZAMENA na času</strong>. Glavni vaspitač grupe je <strong>${record.educator}</strong>, a zamenski vaspitač <strong>${record.writer}</strong> unosi podatke. Svi unosi biće potpisani imenom zamenskog vaspitača.`;
-                    alertBar.classList.remove('hidden');
-                }
-            } else {
-                if (alertBar) alertBar.classList.add('hidden');
-            }
+            triggerSubstituteNotification(record);
 
             updateSummaryBar();
             renderChildrenTrackingList();
@@ -884,7 +909,7 @@
                         groupedAreas[area.category].push(area);
                     });
 
-                    // Kreiranje oblasti (w-12 h-12)
+                    // Kreiranje oblasti
                     let categoriesHTML = '<div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-2.5">';
                     
                     Object.keys(groupedAreas).forEach(catKey => {
@@ -963,7 +988,7 @@
                             </div>
                         </div>
 
-                        <!-- SKLOPIVI DETALJNI PANEL ZA RAD (Otvara se na klik) -->
+                        <!-- SKLOPIVI DETALJNI PANEL ZA RAD -->
                         <div id="details-child-${child.id}" class="${isExpanded ? '' : 'hidden'} border-t border-slate-100 p-4 bg-slate-50/30 space-y-4">
                             <!-- Slikovne ocene -->
                             <div>
@@ -1017,7 +1042,7 @@
             if (hAbsent) hAbsent.innerText = absentCount;
         }
 
-        // TOGGLE COLLAPSE FUNKCIJA (Pamti stanje u expandedChildIds)
+        // TOGGLE COLLAPSE FUNKCIJA
         function toggleChildCollapse(childId, event) {
             if (event.target.closest('button:not([id^="chevron-child"])') || event.target.closest('input') || event.target.closest('.rounded-full')) {
                 return;
