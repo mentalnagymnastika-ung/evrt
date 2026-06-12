@@ -102,96 +102,126 @@
     <!-- OSNOVNI RADNI PROSTOR (Podijeljen na dva nezavisna skrolujuća panela za lakši rad) -->
     <main class="max-w-7xl w-full mx-auto p-4 flex-grow flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:overflow-hidden">
 
-        <!-- LEVA KOLONA: GRUPE, DECA I GDPR PODACI (Skroluje nezavisno) -->
-        <section class="lg:col-span-7 space-y-6 lg:h-full lg:overflow-y-auto custom-scrollbar pr-0 lg:pr-4 pb-8">
+////////////////////////////////////////////////////////////<!-- LEVA KOLONA: GRUPE, DECA I GDPR PODACI (Skroluje nezavisno) -->
+<section class="lg:col-span-7 space-y-6 lg:h-full lg:overflow-y-auto custom-scrollbar pr-0 lg:pr-4 pb-8">
             
-            <!-- Urednik grupa i članova -->
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 space-y-5">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 space-y-4">
                 <h3 class="text-sm font-bold text-slate-900 flex items-center">
-                    <i class="fa-solid fa-users text-emerald-600 mr-2"></i> Upravljanje grupama i decom u vrtićima
+                    <span class="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-black mr-2">1</span>
+                    <i class="fa-solid fa-hotel text-emerald-600 mr-2"></i> Ustanove / Vrtići
                 </h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-slate-100 pb-4">
-                    <!-- Kreiranje nove grupe sa dodelom vaspitača i uzrasne grupe -->
-                    <div class="space-y-2">
-                        <label class="block text-xs font-semibold text-slate-500">Dodaj novu grupu / Vrtić</label>
-                        <div class="flex flex-col gap-2">
-                            <input type="text" id="new-group-name" placeholder="Npr. PU Liliput Milana starija grupa" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 shadow-inner">
-                            
-                            <select id="new-group-age" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-inner">
-                                <option value="3-4 godine">Mlađa grupa (3 - 4 godine)</option>
-                                <option value="4-5 godina">Srednja grupa (4 - 5 godina)</option>
-                                <option value="5-6 godina">Starija grupa (5 - 6 godina)</option>
-                                <option value="6-7 godina">Predškolci (6 - 7 godina)</option>
-                                <option value="7-8 godina">Mlađi osnovci (7 - 8 godina)</option>
-                            </select>
-
-                            <div class="flex gap-2">
-                                <select id="new-group-educator" class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-inner">
-                                    <!-- Popunjava se dinamički iz edukatora -->
-                                </select>
-                                <button onclick="createNewGroup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all cursor-pointer whitespace-nowrap shadow-sm">
-                                    Kreiraj grupu
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Uređivanje postojecih grupa (Promena vaspitača i uzrasta) -->
-                    <div class="space-y-2">
-                        <label class="block text-xs font-semibold text-slate-500">Uredi selektovanu grupu</label>
-                        <div class="flex flex-col gap-2">
-                            <select id="edit-group-select" onchange="renderGroupEditor()" class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-inner">
-                                <!-- Popunjeno dinamički -->
-                            </select>
-
-                            <select id="edit-group-age-assign" onchange="assignAgeToGroup()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-inner">
-                                <option value="3-4 godine">Mlađa grupa (3 - 4 godine)</option>
-                                <option value="4-5 godina">Srednja grupa (4 - 5 godina)</option>
-                                <option value="5-6 godina">Starija grupa (5 - 6 godina)</option>
-                                <option value="6-7 godina">Predškolci (6 - 7 godina)</option>
-                                <option value="7-8 godina">Mlađi osnovci (7 - 8 godina)</option>
-                            </select>
-
-                            <div class="flex gap-2">
-                                <select id="edit-group-educator-assign" onchange="assignEducatorToGroup()" class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-inner">
-                                    <!-- Popunjava se dinamički -->
-                                </select>
-                                <button onclick="deleteActiveGroup()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-2 rounded-xl text-xs transition-all cursor-pointer whitespace-nowrap border border-rose-100">
-                                    Obriši grupu
-                                </button>
-                            </div>
-                        </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3 shadow-inner">
+                    <label class="block text-xs font-semibold text-slate-500">Dodaj novi vrtić u sistem</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="new-kindergarten-name" placeholder="Npr. PU Liliput" class="flex-grow bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 shadow-sm">
+                        <button onclick="createNewKindergarten()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all cursor-pointer whitespace-nowrap shadow-sm">
+                            Dodaj vrtić
+                        </button>
                     </div>
                 </div>
-
-                <!-- Registracija dece u selektovanoj grupi sa roditeljskim GDPR podacima -->
-                <div class="space-y-4">
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3 shadow-inner">
-                        <span class="text-xs font-black text-slate-800 uppercase tracking-wide block border-b border-slate-200 pb-2">Registruj novo dete i podatke roditelja</span>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <input type="text" id="new-child-name" placeholder="Ime i prezime deteta..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 shadow-sm">
-                            <input type="text" id="new-child-parent" placeholder="Ime roditelja/staratelja..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 shadow-sm">
-                            <input type="text" id="new-child-phone" placeholder="Telefon roditelja (npr. +381 64...)..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 shadow-sm">
-                            <input type="email" id="new-child-email" placeholder="Email roditelja..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 shadow-sm">
-                        </div>
-                        <div class="flex justify-end">
-                            <button onclick="addChildToGroup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs transition-all cursor-pointer flex items-center shadow-md">
-                                <i class="fa-solid fa-user-plus mr-1.5"></i> Registruj i sačuvaj dete
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Članovi selektovane grupe (sa kontaktima):</h4>
-                        <div class="space-y-2 max-h-56 overflow-y-auto custom-scrollbar pr-1" id="editor-children-list">
-                            <!-- Popunjava se dinamički kroz JS -->
-                        </div>
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-slate-500">Izaberi aktivni vrtić za rad:</label>
+                    <div class="flex gap-2">
+                        <select id="active-kindergarten-select" onchange="onKindergartenChange()" class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-inner">
+                            </select>
+                        <button onclick="deleteActiveKindergarten()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-2 rounded-xl text-xs transition-all cursor-pointer border border-rose-100">
+                            Obriši vrtić
+                        </button>
                     </div>
                 </div>
             </div>
 
-        </section>
+            <div id="step-groups-card" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 space-y-4 opacity-40 pointer-events-none transition-all duration-300">
+                <h3 class="text-sm font-bold text-slate-900 flex items-center">
+                    <span class="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-black mr-2">2</span>
+                    <i class="fa-solid fa-users text-emerald-600 mr-2"></i> Grupe u izabranom vrtiću
+                </h3>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3 shadow-inner">
+                    <span class="text-xs font-black text-slate-800 uppercase tracking-wide block border-b border-slate-200 pb-2">Kreiraj novu grupu za ovaj vrtić</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="block text-[10px] font-semibold text-slate-500">Naziv grupe</label>
+                            <input type="text" id="new-group-name" placeholder="Npr. Starija grupa" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 shadow-sm">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-[10px] font-semibold text-slate-500">Uzrasna grupa</label>
+                            <select id="new-group-age" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-sm">
+                                <option value="3-4 godine">Mlađa grupa (3 - 4 godine)</option>
+                                <option value="4-5 godina">Srednja grupa (4 - 5 godina)</option>
+                                <option value="5-6 godina">Starija grupa (5 - 6 godina)</option>
+                                <option value="6-7 godina">Predškolci (6 - 7 godina)</option>
+                                <option value="7-8 godina">Mlađi osnovci (7 - 8 godina)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-semibold text-slate-500">Inicijalni vaspitač / instruktor</label>
+                        <div class="flex gap-2">
+                            <select id="new-group-educator" class="flex-grow bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-sm">
+                                </select>
+                            <button onclick="createNewGroup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs transition-all cursor-pointer shadow-sm animate-pulse">
+                                Kreiraj grupu
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-slate-500">Izaberi aktivnu grupu za rad:</label>
+                    <div class="flex gap-2">
+                        <select id="edit-group-select" onchange="renderGroupEditor()" class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-inner">
+                            </select>
+                        <button onclick="deleteActiveGroup()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-2 rounded-xl text-xs transition-all cursor-pointer border border-rose-100">
+                            Obriši grupu
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step-children-card" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 space-y-5 opacity-40 pointer-events-none transition-all duration-300">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center">
+                        <span class="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-black mr-2">3</span>
+                        <i class="fa-solid fa-address-card text-emerald-600 mr-2"></i> Vaspitač i Registracija dece
+                    </h3>
+                    
+                    <div class="flex flex-wrap gap-2">
+                        <select id="edit-group-age-assign" onchange="assignAgeToGroup()" class="bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 text-[11px] font-bold outline-none text-slate-700 shadow-sm" title="Promeni uzrast grupe">
+                            <option value="3-4 godine">Uzrast: 3-4 god</option>
+                            <option value="4-5 godina">Uzrast: 4-5 god</option>
+                            <option value="5-6 godina">Uzrast: 5-6 god</option>
+                            <option value="6-7 godina">Uzrast: Predškolci</option>
+                            <option value="7-8 godina">Uzrast: Osnovci</option>
+                        </select>
+                        <select id="edit-group-educator-assign" onchange="assignEducatorToGroup()" class="bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 text-[11px] font-bold outline-none text-slate-700 shadow-sm" title="Promeni vaspitača">
+                            </select>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3 shadow-inner">
+                    <span class="text-xs font-black text-slate-800 uppercase tracking-wide block border-b border-slate-200 pb-1.5">Upiši novo dete i roditeljske GDPR podatke</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input type="text" id="new-child-name" placeholder="Ime i prezime deteta..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 shadow-sm">
+                        <input type="text" id="new-child-parent" placeholder="Ime roditelja/staratelja..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 shadow-sm">
+                        <input type="text" id="new-child-phone" placeholder="Telefon roditelja..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 shadow-sm">
+                        <input type="email" id="new-child-email" placeholder="Email roditelja..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 shadow-sm">
+                    </div>
+                    <div class="flex justify-end">
+                        <button onclick="addChildToGroup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs transition-all cursor-pointer flex items-center shadow-md">
+                            <i class="fa-solid fa-user-plus mr-1.5"></i> Registruj i sačuvaj dete
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Upisani članovi ove grupe (sa kontaktima):</h4>
+                    <div class="space-y-2 max-h-56 overflow-y-auto custom-scrollbar pr-1" id="editor-children-list">
+                        </div>
+                </div>
+            </div>
+
+        </section>
+///////////////////////////////////////////////////////////////////////////
         <!-- DESNA KOLONA: PROMOCIJA, VASPITAČI I ARHIVIRANJE BAZA (Skroluje nezavisno) -->
         <section class="lg:col-span-5 space-y-6 lg:h-full lg:overflow-y-auto custom-scrollbar pb-8">
             
@@ -341,896 +371,762 @@
         <i class="fa-solid fa-circle-check text-emerald-400 text-sm" id="toast-icon"></i>
         <span id="toast-text" class="text-xs font-bold tracking-wide">Učitavanje...</span>
     </div>
+<script>
+// ==========================================
+// STANJE APLIKACIJE (APPLICATION STATE)
+// ==========================================
+let appState = {
+    kindergartens: [], 
+    groups: [],
+    dailyRecords: {}, 
+    educators: [],
+    pedagogPin: "UMG123",
+    adminPin: "UMG123admin",
+    savedReports: {}
+};
 
-    <!-- JAVASCRIPT LOGIKA PORTALA I ADMINISTRACIJE -->
-    <script>
-        // Stanje aplikacije
-        let appState = {
-            groups: [],
-            dailyRecords: {}, 
-            educators: [],
-            pedagogPin: "UMG123",
-            adminPin: "UMG123admin", // Nova podrazumevana lozinka za Administraciju
-            savedReports: {}
-        };
+let isAuthorized = false;
+let db = null;
+let auth = null;
+let useCloud = false;
+let appId = 'default-app-id';
 
-        let isAuthorized = false;
+let selectedKindergartenId = null;
+let selectedGroupId = null;
+
+// ==========================================
+// INICIJALIZACIJA I UCITAVANJE PODATAKA
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    // 1. Učitavanje podataka iz localStorage
+    const stored = {
+        kindergartens: localStorage.getItem('umg_field_kindergartens'),
+        groups: localStorage.getItem('umg_field_groups'),
+        educators: localStorage.getItem('umg_field_educators'),
+        records: localStorage.getItem('umg_field_records'),
+        reports: localStorage.getItem('umg_field_reports_archive'),
+        adminAuth: localStorage.getItem('umg_admin_authenticated'),
+        pinPed: localStorage.getItem('umg_pedagog_pin'),
+        pinAdm: localStorage.getItem('umg_admin_pin')
+    };
+
+    if (stored.kindergartens) appState.kindergartens = JSON.parse(stored.kindergartens);
+    if (stored.groups) appState.groups = JSON.parse(stored.groups);
+    if (stored.educators) appState.educators = JSON.parse(stored.educators);
+    if (stored.records) appState.dailyRecords = JSON.parse(stored.records);
+    if (stored.reports) appState.savedReports = JSON.parse(stored.reports);
+
+    // Postavke bezbednosnih lozinki
+    if (stored.pinPed) appState.pedagogPin = stored.pinPed;
+    if (stored.pinAdm) appState.adminPin = stored.pinAdm;
+    
+    // Provera sesije autorizacije
+    if (stored.adminAuth === 'true') {
+        isAuthorized = true;
+        const ps = document.getElementById('password-screen');
+        if (ps) ps.classList.add('hidden');
+    }
+
+    // Popunjavanje svih dropdown kontrola na osnovu ucitanog stanja
+    populateKindergartenSelects(); 
+    populateEducatorSelects();
+    renderSettingsEducatorList();
+    populatePromotionGroupSelects();
+    
+    // Pokretanje sinhronizacije u pozadini
+    initFirebaseCloudSync();
+});
+
+// ==========================================
+// BEZBEDNOSNE FUNKCIJE I PIN KODOVI
+// ==========================================
+function verifySecureAccess() {
+    const enteredEl = document.getElementById('pedagog-password-input');
+    const entered = enteredEl ? enteredEl.value.trim() : '';
+    const error = document.getElementById('password-error-msg');
+
+    if (entered === appState.adminPin) {
+        isAuthorized = true;
+        localStorage.setItem('umg_admin_authenticated', 'true');
+        const passwordScreen = document.getElementById('password-screen');
+        if (passwordScreen) passwordScreen.classList.add('hidden');
+        showToast("Pristup odobren!");
+    } else {
+        if (error) error.classList.remove('hidden');
+        if (enteredEl) {
+            enteredEl.value = '';
+            enteredEl.focus();
+        }
+    }
+}
+
+function lockSecureTab() {
+    isAuthorized = false;
+    localStorage.setItem('umg_admin_authenticated', 'false');
+    const passwordScreen = document.getElementById('password-screen');
+    if (passwordScreen) passwordScreen.classList.remove('hidden');
+    const pinInput = document.getElementById('pedagog-password-input');
+    if (pinInput) pinInput.value = '';
+    showToast("Administracija zaključana.", "warning");
+}
+
+function goToHomePortal() {
+    window.location.href = "index.html";
+}
+
+function savePedagogPin() {
+    const input = document.getElementById('settings-pedagog-pin');
+    if (!input || !input.value.trim()) return showToast("Unesite validnu lozinku!", "warning");
+    appState.pedagogPin = input.value.trim();
+    localStorage.setItem('umg_pedagog_pin', appState.pedagogPin);
+    input.value = '';
+    showToast("P-PIN uspešno ažuriran!");
+}
+
+function saveAdminPin() {
+    const input = document.getElementById('settings-admin-pin');
+    if (!input || !input.value.trim()) return showToast("Unesite validnu lozinku!", "warning");
+    appState.adminPin = input.value.trim();
+    localStorage.setItem('umg_admin_pin', appState.adminPin);
+    input.value = '';
+    showToast("A-PIN uspešno ažuriran!");
+}
+
+// ==========================================
+// OPERACIJE SA USTANOVAMA / VRTIĆIMA (KORAK 1)
+// ==========================================
+function createNewKindergarten() {
+    const input = document.getElementById('new-kindergarten-name');
+    const name = input ? input.value.trim() : '';
+    if (!name) return showToast("Unesite naziv ustanove!", "warning");
+
+    const newK = { id: `k-${Date.now()}`, name: name };
+    appState.kindergartens.push(newK);
+    localStorage.setItem('umg_field_kindergartens', JSON.stringify(appState.kindergartens));
+    
+    input.value = '';
+    populateKindergartenSelects();
+    showToast(`Vrtić "${name}" je dodat u sistem!`);
+}
+
+function populateKindergartenSelects() {
+    const select = document.getElementById('active-kindergarten-select');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">-- Izaberite aktivni vrtić sa spiska --</option>';
+    appState.kindergartens.forEach(k => {
+        const opt = document.createElement('option');
+        opt.value = k.id;
+        opt.textContent = k.name;
+        if (selectedKindergartenId === k.id) opt.selected = true;
+        select.appendChild(opt);
+    });
+    onKindergartenChange();
+}
+
+function onKindergartenChange() {
+    const select = document.getElementById('active-kindergarten-select');
+    selectedKindergartenId = select ? select.value : '';
+    
+    const stepGroupsCard = document.getElementById('step-groups-card');
+    const stepChildrenCard = document.getElementById('step-children-card');
+
+    if (selectedKindergartenId) {
+        stepGroupsCard.classList.remove('opacity-40', 'pointer-events-none');
+        populateGroupSelects();
+    } else {
+        stepGroupsCard.classList.add('opacity-40', 'pointer-events-none');
+        stepChildrenCard.classList.add('opacity-40', 'pointer-events-none');
+        if (document.getElementById('edit-group-select')) {
+            document.getElementById('edit-group-select').innerHTML = '';
+        }
+    }
+}
+
+function deleteActiveKindergarten() {
+    if (!selectedKindergartenId) return showToast("Nijedan vrtić nije izabran!", "warning");
+    const kName = appState.kindergartens.find(k => k.id === selectedKindergartenId)?.name;
+    
+    if (confirm(`Da li ste sigurni da želite obrisati vrtić "${kName}"? Sve grupe i deca unutar njega ostaće trajno obrisani.`)) {
+        appState.kindergartens = appState.kindergartens.filter(k => k.id !== selectedKindergartenId);
+        appState.groups = appState.groups.filter(g => g.kindergartenId !== selectedKindergartenId);
         
-        // Firebase Cloud Storage sistemske promenljive
-        let db = null;
-        let auth = null;
-        let useCloud = false;
-        let appId = 'default-app-id';
+        localStorage.setItem('umg_field_kindergartens', JSON.stringify(appState.kindergartens));
+        localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+        
+        selectedKindergartenId = null;
+        selectedGroupId = null;
+        
+        populateKindergartenSelects();
+        populatePromotionGroupSelects();
+        showToast("Vrtić uspešno uklonjen.", "warning");
+    }
+}
 
-        // INICIJALIZACIJA pri pokretanju
-        window.addEventListener('DOMContentLoaded', () => {
-            // Provjera bezbjednosnog stanja iz localStorage (Gleda se umg_admin_authenticated)
-            const authState = localStorage.getItem('umg_admin_authenticated');
-            if (authState === 'true') {
-                isAuthorized = true;
-                const passwordScreen = document.getElementById('password-screen');
-                if (passwordScreen) passwordScreen.classList.add('hidden');
-            }
+// ==========================================
+// OPERACIJE SA GRUPAMA U VRTIĆU (KORAK 2)
+// ==========================================
+function createNewGroup() {
+    const nameEl = document.getElementById('new-group-name');
+    const ageEl = document.getElementById('new-group-age');
+    const eduEl = document.getElementById('new-group-educator');
 
-            // Učitavanje iz localStorage
-            const savedGroups = localStorage.getItem('umg_field_groups');
-            if (savedGroups) appState.groups = JSON.parse(savedGroups);
+    const name = nameEl ? nameEl.value.trim() : '';
+    const age = ageEl ? ageEl.value : '';
+    const educator = eduEl ? eduEl.value : '';
 
-            const savedEducators = localStorage.getItem('umg_field_educators');
-            if (savedEducators) appState.educators = JSON.parse(savedEducators);
+    if (!name) return showToast("Unesite naziv grupe!", "warning");
+    if (!selectedKindergartenId) return showToast("Greška: Vrtić nije selektovan!", "warning");
 
-            const savedPin = localStorage.getItem('umg_pedagog_pin');
-            if (savedPin) {
-                appState.pedagogPin = savedPin;
-                document.getElementById('settings-pedagog-pin').value = appState.pedagogPin;
-            }
+    const newGroup = {
+        id: `g-${Date.now()}`,
+        kindergartenId: selectedKindergartenId,
+        name: name,
+        ageGroup: age,
+        educator: educator,
+        children: []
+    };
 
-            const savedAdminPin = localStorage.getItem('umg_admin_pin');
-            if (savedAdminPin) {
-                appState.adminPin = savedAdminPin;
-                document.getElementById('settings-admin-pin').value = appState.adminPin;
-            } else {
-                document.getElementById('settings-admin-pin').value = appState.adminPin;
-            }
+    appState.groups.push(newGroup);
+    localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+    updateCloudGroup(newGroup);
 
-            const savedRecords = localStorage.getItem('umg_field_records');
-            if (savedRecords) appState.dailyRecords = JSON.parse(savedRecords);
+    if (nameEl) nameEl.value = '';
+    populateGroupSelects();
+    populatePromotionGroupSelects();
+    showToast(`Grupa "${name}" uspešno formirana!`);
+}
 
-            const savedReports = localStorage.getItem('umg_field_reports_archive');
-            if (savedReports) appState.savedReports = JSON.parse(savedReports);
+function populateGroupSelects() {
+    const select = document.getElementById('edit-group-select');
+    if (!select) return;
 
-            populateGroupSelects();
-            populateEducatorSelects();
-            renderSettingsEducatorList();
-            populatePromotionGroupSelects();
+    select.innerHTML = '<option value="">-- Izaberite aktivnu grupu za rad --</option>';
+    const filtered = appState.groups.filter(g => g.kindergartenId === selectedKindergartenId);
 
-            // Inicijalizacija Firebase automatske sinhronizacije
-            initFirebaseCloudSync();
+    filtered.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.id;
+        opt.textContent = `${g.name} (${g.ageGroup || 'Uzrast nepoznat'})`;
+        if (selectedGroupId === g.id) opt.selected = true;
+        select.appendChild(opt);
+    });
+    renderGroupEditor();
+}
+
+function renderGroupEditor() {
+    const select = document.getElementById('edit-group-select');
+    selectedGroupId = select ? select.value : '';
+    
+    const stepChildrenCard = document.getElementById('step-children-card');
+    if (!selectedGroupId) {
+        if (stepChildrenCard) stepChildrenCard.classList.add('opacity-40', 'pointer-events-none');
+        return;
+    }
+
+    if (stepChildrenCard) stepChildrenCard.classList.remove('opacity-40', 'pointer-events-none');
+    
+    const group = appState.groups.find(g => g.id === selectedGroupId);
+    if (!group) return;
+
+    // Sinhronizacija pomoćnih dodela na vrhu tab-a 3
+    const ageAssign = document.getElementById('edit-group-age-assign');
+    const eduAssign = document.getElementById('edit-group-educator-assign');
+    
+    if (ageAssign) ageAssign.value = group.ageGroup || '3-4 godine';
+    if (eduAssign) eduAssign.value = group.educator || '';
+
+    renderChildrenList(group);
+}
+
+function assignAgeToGroup() {
+    if (!selectedGroupId) return;
+    const group = appState.groups.find(g => g.id === selectedGroupId);
+    const ageAssign = document.getElementById('edit-group-age-assign');
+    if (group && ageAssign) {
+        group.ageGroup = ageAssign.value;
+        localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+        updateCloudGroup(group);
+        showToast("Uzrasna grupa uspešno ažurirana!");
+    }
+}
+
+function assignEducatorToGroup() {
+    if (!selectedGroupId) return;
+    const group = appState.groups.find(g => g.id === selectedGroupId);
+    const eduAssign = document.getElementById('edit-group-educator-assign');
+    if (group && eduAssign) {
+        group.educator = eduAssign.value;
+        localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+        updateCloudGroup(group);
+        showToast("Odgovorni vaspitač uspešno dodeljen grupi!");
+    }
+}
+
+function deleteActiveGroup() {
+    if (!selectedGroupId) return showToast("Nijedna grupa nije selektovana!", "warning");
+    if (confirm("Da li ste sigurni da želite da obrišete ovu grupu i sve njene članove? Podaci se ne mogu povratiti.")) {
+        appState.groups = appState.groups.filter(g => g.id !== selectedGroupId);
+        localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+        deleteCloudGroup(selectedGroupId);
+
+        selectedGroupId = null;
+        populateGroupSelects();
+        populatePromotionGroupSelects();
+        showToast("Grupa trajno uklonjena iz baze.", "warning");
+    }
+}
+
+// ==========================================
+// REGISTRACIJA DECE I GDPR PODACI (KORAK 3)
+// ==========================================
+function addChildToGroup() {
+    if (!selectedGroupId) return showToast("Prvo izaberite aktivnu grupu!", "warning");
+    const group = appState.groups.find(g => g.id === selectedGroupId);
+    if (!group) return;
+
+    const nameIn = document.getElementById('new-child-name');
+    const parentIn = document.getElementById('new-child-parent');
+    const phoneIn = document.getElementById('new-child-phone');
+    const emailIn = document.getElementById('new-child-email');
+
+    const name = nameIn ? nameIn.value.trim() : '';
+    if (!name) return showToast("Ime deteta je obavezno polje!", "warning");
+
+    if (!group.children) group.children = [];
+    
+    const newChild = {
+        id: `c-${Date.now()}`,
+        name: name,
+        parent: parentIn ? parentIn.value.trim() : '',
+        phone: phoneIn ? phoneIn.value.trim() : '',
+        email: emailIn ? emailIn.value.trim() : ''
+    };
+
+    group.children.push(newChild);
+    localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+    updateCloudGroup(group);
+
+    // Reset polja za unos
+    if (nameIn) nameIn.value = '';
+    if (parentIn) parentIn.value = '';
+    if (phoneIn) phoneIn.value = '';
+    if (emailIn) emailIn.value = '';
+
+    renderChildrenList(group);
+    showToast(`Dete ${name} upisano u grupu.`);
+}
+
+function renderChildrenList(group) {
+    const listEl = document.getElementById('editor-children-list');
+    if (!listEl) return;
+
+    if (!group.children || group.children.length === 0) {
+        listEl.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-4">Nema upisane dece u ovoj grupi.</p>';
+        return;
+    }
+
+    listEl.innerHTML = group.children.map(c => `
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+            <div class="space-y-0.5">
+                <div class="font-bold text-slate-900 text-sm">${c.name}</div>
+                <div class="text-slate-500 font-medium">Roditelj: ${c.parent || '/'} • Tel: ${c.phone || '/'}</div>
+                <div class="text-[10px] text-slate-400 font-mono">${c.email || '/'}</div>
+            </div>
+            <button onclick="removeChildFromGroup('${c.id}')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 px-2.5 py-1.5 rounded-lg border border-rose-100 flex items-center gap-1 font-bold shrink-0 text-[10px] ml-auto transition-all">
+                <i class="fa-solid fa-user-minus"></i> Ispiši
+            </button>
+        </div>
+    `).join('');
+}
+
+function removeChildFromGroup(childId) {
+    if (!selectedGroupId) return;
+    const group = appState.groups.find(g => g.id === selectedGroupId);
+    if (!group || !group.children) return;
+
+    const child = group.children.find(c => c.id === childId);
+    if (confirm(`Da li ste sigurni da želite da ispišete dete "${child ? child.name : ''}" iz grupe?`)) {
+        group.children = group.children.filter(c => c.id !== childId);
+        localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+        updateCloudGroup(group);
+        renderChildrenList(group);
+        showToast("Dete ispisano iz grupe.", "warning");
+    }
+}
+
+// ==========================================
+// DESNA KOLONA: GODIŠNJA PROMOCIJA DECE
+// ==========================================
+function populatePromotionGroupSelects() {
+    const srcSelect = document.getElementById('promote-source-group');
+    const tgtSelect = document.getElementById('promote-target-group');
+    if (!srcSelect || !tgtSelect) return;
+
+    let html = '<option value="">-- Izaberite izvornu grupu --</option>';
+    appState.groups.forEach(g => {
+        const kName = appState.kindergartens.find(k => k.id === g.kindergartenId)?.name || 'Eksterni';
+        html += `<option value="${g.id}">${g.name} [${kName}] (Vaspitač: ${g.educator || 'Nedodeljen'})</option>`;
+    });
+
+    srcSelect.innerHTML = html;
+    tgtSelect.innerHTML = html.replace('-- Izaberite izvornu grupu --', '-- Izaberite ciljnu grupu --');
+    renderPromotionChildrenList();
+}
+
+function renderPromotionChildrenList() {
+    const srcSelect = document.getElementById('promote-source-group');
+    const container = document.getElementById('promote-children-container');
+    if (!srcSelect || !container) return;
+
+    const srcId = srcSelect.value;
+    if (!srcId) {
+        container.innerHTML = '<p class="text-[11px] text-slate-400 italic text-center py-2">Prvo odaberite izvornu grupu.</p>';
+        return;
+    }
+
+    const group = appState.groups.find(g => g.id === srcId);
+    if (!group || !group.children || group.children.length === 0) {
+        container.innerHTML = '<p class="text-[11px] text-slate-400 italic text-center py-2">Grupa nema aktivnih članova za prebacivanje.</p>';
+        return;
+    }
+
+    container.innerHTML = group.children.map(c => `
+        <label class="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-100 rounded-lg cursor-pointer transition-all">
+            <input type="checkbox" name="promo-child-cb" value="${c.id}" checked class="rounded border-slate-300 text-purple-600 focus:ring-purple-500 w-4 h-4">
+            <span class="text-xs font-bold text-slate-800">${c.name}</span>
+        </label>
+    `).join('');
+}
+
+function executeGroupPromotion() {
+    const srcSelect = document.getElementById('promote-source-group');
+    const tgtSelect = document.getElementById('promote-target-group');
+    
+    if (!srcSelect || !tgtSelect) return;
+    const srcId = srcSelect.value;
+    const tgtId = tgtSelect.value;
+
+    if (!srcId || !tgtId) return showToast("Morate izabrati i izvornu i ciljnu grupu!", "warning");
+    if (srcId === tgtId) return showToast("Izvorna i ciljna grupa ne mogu biti iste!", "warning");
+
+    const srcGroup = appState.groups.find(g => g.id === srcId);
+    const targetGroup = appState.groups.find(g => g.id === tgtId);
+
+    if (!srcGroup || !targetGroup) return showToast("Greška u strukturama grupa!", "warning");
+
+    const checkboxes = document.querySelectorAll('input[name="promo-child-cb"]:checked');
+    if (checkboxes.length === 0) return showToast("Niste označili nijedno dete za promociju!", "warning");
+
+    const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+
+    // Filtriranje dece i migracija
+    if (!targetGroup.children) targetGroup.children = [];
+    
+    const childrenToMove = srcGroup.children.filter(c => selectedIds.includes(c.id));
+    srcGroup.children = srcGroup.children.filter(c => !selectedIds.includes(c.id));
+
+    targetGroup.children.push(...childrenToMove);
+
+    // Čuvanje novog stanja
+    localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+    
+    // Sinhronizacija oba entiteta na Cloud-u
+    updateCloudGroup(srcGroup);
+    updateCloudGroup(targetGroup);
+
+    // Osvežavanje prikaza
+    renderPromotionChildrenList();
+    if (selectedGroupId === srcId || selectedGroupId === tgtId) {
+        renderGroupEditor();
+    }
+    showToast(`Uspešno promovisano ${childrenToMove.length} dece u grupu "${targetGroup.name}"!`);
+}
+
+// ==========================================
+// REGISTRACIJA VASPITAČA I OSOBLJA
+// ==========================================
+function addNewEducator() {
+    const input = document.getElementById('new-educator-name');
+    const name = input ? input.value.trim() : '';
+    if (!name) return showToast("Unesite ime i prezime vaspitača!", "warning");
+
+    if (appState.educators.includes(name)) return showToast("Vaspitač već postoji u bazi!", "warning");
+
+    appState.educators.push(name);
+    localStorage.setItem('umg_field_educators', JSON.stringify(appState.educators));
+
+    input.value = '';
+    populateEducatorSelects();
+    renderSettingsEducatorList();
+    showToast(`Vaspitač ${name} uspešno unet.`);
+}
+
+function populateEducatorSelects() {
+    const newSelect = document.getElementById('new-group-educator');
+    const assignSelect = document.getElementById('edit-group-educator-assign');
+    
+    const optionsHtml = appState.educators.map(edu => `<option value="${edu}">${edu}</option>`).join('');
+    
+    if (newSelect) newSelect.innerHTML = '<option value="">-- Izaberite vaspitača --</option>' + optionsHtml;
+    if (assignSelect) assignSelect.innerHTML = '<option value="">Dodele vaspitača: Nedodeljen</option>' + optionsHtml;
+}
+
+function renderSettingsEducatorList() {
+    const listEl = document.getElementById('settings-educator-list');
+    if (!listEl) return;
+
+    if (!appState.educators || appState.educators.length === 0) {
+        listEl.innerHTML = '<p class="text-xs text-slate-400 italic">Nema registrovanih vaspitača u sistemu.</p>';
+        return;
+    }
+
+    listEl.innerHTML = appState.educators.map(edu => `
+        <div class="flex items-center justify-between bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+            <span class="text-xs font-bold text-slate-700">${edu}</span>
+            <button onclick="deleteEducator('${edu}')" class="text-rose-500 hover:text-rose-700 text-xs p-1 transition-all">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+function deleteEducator(name) {
+    if (confirm(`Da li ste sigurni da želite da uklonite vaspitača "${name}"?`)) {
+        appState.educators = appState.educators.filter(e => e !== name);
+        localStorage.setItem('umg_field_educators', JSON.stringify(appState.educators));
+        populateEducatorSelects();
+        renderSettingsEducatorList();
+        showToast("Vaspitač uklonjen.", "warning");
+    }
+}
+
+// ==========================================
+// REZERVNE KOPIJE I EKSPERTIZA (JSON / VIBER KOD)
+// ==========================================
+function exportDatabaseFile() {
+    try {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `UMG_BAZA_ADMIN_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        showToast("JSON fajl generisan i preuzet!");
+    } catch (e) {
+        console.error(e);
+        showToast("Greška kod generisanja fajla!", "warning");
+    }
+}
+
+function copyDatabaseAsTextCode() {
+    try {
+        // Safe UTF-8 Base64 encoding for text transmission via Viber (protects Č, Ć, Ž etc.)
+        const plainJson = JSON.stringify(appState);
+        const encodedCode = btoa(unescape(encodeURIComponent(plainJson)));
+        
+        navigator.clipboard.writeText(encodedCode).then(() => {
+            showToast("Viber kod kopiran u clipboard!");
+        }).catch(() => {
+            alert("Kopiranje neuspešno. Kod za Viber:\n\n" + encodedCode);
         });
+    } catch(e) {
+        console.error(e);
+        showToast("Greška prilikom enkodiranja!", "warning");
+    }
+}
 
-        // BEZBEDNOSNE FUNKCIJE (Proverava isključivo adminPin za ulaz na ovu stranu)
-        function verifySecureAccess() {
-            const enteredEl = document.getElementById('pedagog-password-input');
-            const entered = enteredEl ? enteredEl.value.trim() : '';
-            const error = document.getElementById('password-error-msg');
+function openMergePasteArea() {
+    const el = document.getElementById('viber-paste-area');
+    if (el) el.classList.remove('hidden');
+}
 
-            if (entered === appState.adminPin) {
-                isAuthorized = true;
-                localStorage.setItem('umg_admin_authenticated', 'true');
-                const passwordScreen = document.getElementById('password-screen');
-                if (passwordScreen) passwordScreen.classList.add('hidden');
-                showToast("Pristup odobren!");
+function closeMergePasteArea() {
+    const el = document.getElementById('viber-paste-area');
+    if (el) el.classList.add('hidden');
+    const txt = document.getElementById('viber-code-textarea');
+    if (txt) txt.value = '';
+}
+
+function mergeDatabaseFromTextCode() {
+    const textarea = document.getElementById('viber-code-textarea');
+    const code = textarea ? textarea.value.trim() : '';
+    if (!code) return showToast("Nalepite kod pre pokretanja!", "warning");
+
+    try {
+        const decodedJson = decodeURIComponent(escape(atob(code)));
+        const parsedData = JSON.parse(decodedJson);
+        executeDatabaseMerge(parsedData);
+        closeMergePasteArea();
+    } catch (e) {
+        console.error(e);
+        showToast("Nevažeći kod! Proverite da li ste kopirali ceo tekst.", "warning");
+    }
+}
+
+function importDatabaseFromFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const parsedData = JSON.parse(e.target.result);
+            executeDatabaseMerge(parsedData);
+        } catch (err) {
+            showToast("Neispravan JSON fajl!", "warning");
+        }
+    };
+    reader.readAsText(file);
+}
+
+function executeDatabaseMerge(incoming) {
+    if (!incoming) return;
+
+    // 1. Spajanje vrtića (sprečavanje duplikata po ID-ju)
+    if (incoming.kindergartens && Array.isArray(incoming.kindergartens)) {
+        incoming.kindergartens.forEach(ik => {
+            if (!appState.kindergartens.some(k => k.id === ik.id)) {
+                appState.kindergartens.push(ik);
+            }
+        });
+    }
+
+    // 2. Spajanje grupa i njihove dece
+    if (incoming.groups && Array.isArray(incoming.groups)) {
+        incoming.groups.forEach(ig => {
+            const index = appState.groups.findIndex(g => g.id === ig.id);
+            if (index === -1) {
+                appState.groups.push(ig);
             } else {
-                if (error) error.classList.remove('hidden');
-                if (enteredEl) {
-                    enteredEl.value = '';
-                    enteredEl.focus();
-                }
-            }
-        }
-
-        function lockSecureTab() {
-            isAuthorized = false;
-            localStorage.setItem('umg_admin_authenticated', 'false');
-            const passwordScreen = document.getElementById('password-screen');
-            if (passwordScreen) passwordScreen.classList.remove('hidden');
-            document.getElementById('pedagog-password-input').value = '';
-            showToast("Administracija zaključana.", "warning");
-        }
-
-        function goToHomePortal() {
-            window.location.href = "index.html";
-        }
-
-        // CLOUD STORAGE SINHRONIZACIJA
-        function initFirebaseCloudSync() {
-            try {
-                if (typeof __app_id !== 'undefined') {
-                    appId = __app_id;
-                }
-                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                    const firebaseConfig = JSON.parse(__firebase_config);
-                    
-                    firebase.initializeApp(firebaseConfig);
-                    auth = firebase.auth();
-                    db = firebase.firestore();
-                    useCloud = true;
-                    
-                    initAuthCloud().then(() => {
-                        auth.onAuthStateChanged((user) => {
-                            if (user) {
-                                updateSyncStatusUI(true);
-                                setupFirestoreRealtimeSync();
-                            } else {
-                                updateSyncStatusUI(false);
-                            }
-                        });
-                    });
-                } else {
-                    updateSyncStatusUI(false);
-                }
-            } catch (e) {
-                console.error("UMG Cloud Sync Error:", e);
-                updateSyncStatusUI(false);
-            }
-        }
-
-        async function initAuthCloud() {
-            if (!useCloud) return;
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await auth.signInWithCustomToken(__initial_auth_token);
-                } else {
-                    await auth.signInAnonymously();
-                }
-            } catch (e) {
-                console.error("UMG Cloud Sync: Greška prilikom autentifikacije:", e);
-            }
-        }
-
-        function updateSyncStatusUI(isOnline) {
-            const el = document.getElementById('sync-status');
-            if (!el) return;
-
-            if (isOnline) {
-                el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-emerald-600 animate-pulse"></i> Sinhronizovano`;
-                el.className = "text-[9px] font-black px-2.5 py-2 rounded-xl flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-sm animate-pulse";
-            } else {
-                el.innerHTML = `<i class="fa-solid fa-cloud-slash text-slate-400"></i> Lokalni režim`;
-                el.className = "text-[9px] font-bold px-2.5 py-2 rounded-xl flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-500";
-            }
-        }
-
-        function setupFirestoreRealtimeSync() {
-            if (!useCloud || !db) return;
-
-            // Slušaj konfiguraciju sistema
-            db.doc(`artifacts/${appId}/public/data/system/config`).onSnapshot((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (data.pedagogPin) {
-                        appState.pedagogPin = data.pedagogPin;
-                        const pinInput = document.getElementById('settings-pedagog-pin');
-                        if (pinInput) pinInput.value = data.pedagogPin;
-                    }
-                    if (data.adminPin) {
-                        appState.adminPin = data.adminPin;
-                        const adminPinInput = document.getElementById('settings-admin-pin');
-                        if (adminPinInput) adminPinInput.value = data.adminPin;
-                    }
-                    if (data.educators) {
-                        appState.educators = data.educators;
-                        populateEducatorSelects();
-                        renderSettingsEducatorList();
-                    }
-                }
-            }, (err) => console.error(err));
-
-            // Slušaj grupe
-            db.collection(`artifacts/${appId}/public/data/groups`).onSnapshot((snapshot) => {
-                let tempGroups = [];
-                snapshot.forEach(doc => {
-                    tempGroups.push(doc.data());
-                });
-                if (tempGroups.length > 0) {
-                    appState.groups = tempGroups;
-                    localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-                    populateGroupSelects();
-                    populatePromotionGroupSelects();
-                }
-            }, (err) => console.error(err));
-
-            // Slušaj dnevne records časova
-            db.collection(`artifacts/${appId}/public/data/dailyRecords`).onSnapshot((snapshot) => {
-                let tempRecords = {};
-                snapshot.forEach(doc => {
-                    tempRecords[doc.id] = doc.data();
-                });
-                if (Object.keys(tempRecords).length > 0) {
-                    appState.dailyRecords = tempRecords;
-                    localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
-                }
-            }, (err) => console.error(err));
-
-            // Slušaj arhivu izveštaja
-            db.collection(`artifacts/${appId}/public/data/savedReports`).onSnapshot((snapshot) => {
-                let tempReports = {};
-                snapshot.forEach(doc => {
-                    tempReports[doc.id] = doc.data().reports || [];
-                });
-                if (Object.keys(tempReports).length > 0) {
-                    appState.savedReports = tempReports;
-                    localStorage.setItem('umg_field_reports_archive', JSON.stringify(appState.savedReports));
-                }
-            }, (err) => console.error(err));
-        }
-
-        // CLOUD UPDATE POMOĆNICI
-        function updateCloudGroup(group) {
-            if (useCloud && db && auth.currentUser) {
-                db.collection(`artifacts/${appId}/public/data/groups`).doc(group.id).set(group)
-                  .catch(err => console.error("Greška pri upisu grupe na server:", err));
-            }
-        }
-
-        function deleteCloudGroup(groupId) {
-            if (useCloud && db && auth.currentUser) {
-                db.collection(`artifacts/${appId}/public/data/groups`).doc(groupId).delete()
-                  .catch(err => console.error("Greška pri brisanju grupe sa servera:", err));
-            }
-        }
-
-        function updateCloudSystemConfig() {
-            if (useCloud && db && auth.currentUser) {
-                db.doc(`artifacts/${appId}/public/data/system/config`).set({
-                    educators: appState.educators,
-                    pedagogPin: appState.pedagogPin,
-                    adminPin: appState.adminPin
-                }).catch(err => console.error("Greška pri upisu sistemskih postavki na server:", err));
-            }
-        }
-
-        // POPUNJAVANJE SELEKTORA GRUPA
-        function populateGroupSelects() {
-            const editSelect = document.getElementById('edit-group-select');
-            if (!editSelect) return;
-
-            editSelect.innerHTML = '';
-            appState.groups.forEach(group => {
-                const opt = document.createElement('option');
-                opt.value = group.id;
-                opt.innerText = `${group.name} (Vaspitač: ${group.educator || 'Nedodeljen'})`;
-                editSelect.appendChild(opt);
-            });
-
-            renderGroupEditor();
-        }
-
-        // POPUNJAVANJE SELEKTORA VASPITAČA
-        function populateEducatorSelects() {
-            const newGroupEducator = document.getElementById('new-group-educator');
-            const editGroupEducator = document.getElementById('edit-group-educator-assign');
-
-            if (newGroupEducator) {
-                newGroupEducator.innerHTML = '<option value="">-- Izaberi vaspitača --</option>';
-                appState.educators.forEach(ed => {
-                    const opt = document.createElement('option');
-                    opt.value = ed;
-                    opt.innerText = ed;
-                    newGroupEducator.appendChild(opt);
-                });
-            }
-
-            if (editGroupEducator) {
-                editGroupEducator.innerHTML = '<option value="">-- Promeni vaspitača --</option>';
-                appState.educators.forEach(ed => {
-                    const opt = document.createElement('option');
-                    opt.value = ed;
-                    opt.innerText = ed;
-                    editGroupEducator.appendChild(opt);
-                });
-            }
-        }
-
-        // RENDER LISTE DECE U GRUPI SA GDPR KONTAKTIMA
-        function renderGroupEditor() {
-            const select = document.getElementById('edit-group-select');
-            if (!select) return;
-
-            const selectedGroupId = select.value;
-            const group = appState.groups.find(g => g.id === selectedGroupId);
-            const container = document.getElementById('editor-children-list');
-
-            if (!container) return;
-            container.innerHTML = '';
-
-            if (!group) {
-                container.innerHTML = `<div class="text-xs text-slate-400 py-3 text-center">Nema kreiranih grupa.</div>`;
-                return;
-            }
-
-            // Sinhronizuj selektore
-            const assignSelect = document.getElementById('edit-group-educator-assign');
-            if (assignSelect) assignSelect.value = group.educator || "";
-
-            const ageAssignSelect = document.getElementById('edit-group-age-assign');
-            if (ageAssignSelect) ageAssignSelect.value = group.ageGroup || "3-4 godine";
-
-            if (group.children.length === 0) {
-                container.innerHTML = `<div class="text-xs text-slate-400 py-3 text-center">Grupa nema prijavljenih članova.</div>`;
-                return;
-            }
-
-            group.children.forEach(child => {
-                const row = document.createElement('div');
-                row.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 transition-all flex flex-col space-y-2";
-                row.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-slate-700">${child.name}</span>
-                        <div class="flex items-center space-x-1.5">
-                            <button onclick="toggleParentCardDetails('${child.id}')" class="text-slate-400 hover:text-emerald-600 p-1 cursor-pointer transition-all" title="Prikaži kontakt roditelja">
-                                <i class="fa-solid fa-address-book text-xs"></i>
-                            </button>
-                            <button onclick="removeChildFromGroup('${group.id}', '${child.id}')" class="text-slate-400 hover:text-rose-600 p-1 cursor-pointer transition-all" title="Ukloni dete">
-                                <i class="fa-solid fa-user-minus text-xs"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- GDPR Sklopiva sekcija detalja o roditelju -->
-                    <div id="parent-detail-card-${child.id}" class="hidden p-2.5 bg-white border border-slate-150 rounded-lg text-[10px] text-slate-500 leading-relaxed font-sans space-y-1">
-                        <div><i class="fa-solid fa-user text-emerald-600 mr-1.5"></i><strong>Roditelj/Staratelj:</strong> ${child.parentName || 'Nije uneto'}</div>
-                        <div><i class="fa-solid fa-phone text-emerald-600 mr-1.5"></i><strong>Telefon:</strong> <span class="select-all font-mono font-bold">${child.parentPhone || 'Nije uneto'}</span></div>
-                        <div><i class="fa-solid fa-envelope text-emerald-600 mr-1.5"></i><strong>Email:</strong> <span class="select-all font-mono">${child.parentEmail || 'Nije uneto'}</span></div>
-                    </div>
-                `;
-                container.appendChild(row);
-            });
-        }
-
-        function toggleParentCardDetails(childId) {
-            const card = document.getElementById(`parent-detail-card-${childId}`);
-            if (card) card.classList.toggle('hidden');
-        }
-
-        // DODAVANJE NOVE GRUPE
-        function createNewGroup() {
-            const input = document.getElementById('new-group-name');
-            const educatorSelect = document.getElementById('new-group-educator');
-            const ageSelect = document.getElementById('new-group-age');
-
-            const name = input.value.trim();
-            const educator = educatorSelect.value;
-            const ageGroup = ageSelect.value;
-
-            if (!name) {
-                showToast("Upišite naziv grupe/vrtića.", "warning");
-                return;
-            }
-
-            if (!educator) {
-                showToast("Dodelite vaspitača novoj grupi.", "warning");
-                return;
-            }
-
-            const newId = `g-${Date.now()}`;
-            const newGroup = { id: newId, name: name, educator: educator, ageGroup: ageGroup, children: [] };
-
-            appState.groups.push(newGroup);
-            localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-            
-            // Automatsko slanje u cloud
-            updateCloudGroup(newGroup);
-
-            input.value = '';
-            educatorSelect.value = '';
-            activeGroupId = newId;
-
-            populateGroupSelects();
-            populatePromotionGroupSelects();
-            showToast("Nova grupa uspešno registrovana!");
-        }
-
-        // PROMENA VASPITAČA
-        function assignEducatorToGroup() {
-            const groupSelect = document.getElementById('edit-group-select');
-            const educatorSelect = document.getElementById('edit-group-educator-assign');
-
-            if (!groupSelect || !educatorSelect) return;
-
-            const groupId = groupSelect.value;
-            const educator = educatorSelect.value;
-
-            const group = appState.groups.find(g => g.id === groupId);
-            if (group && educator) {
-                group.educator = educator;
-                localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-                
-                updateCloudGroup(group);
-                populateGroupSelects();
-                showToast(`Grupa "${group.name}" uspešno dodeljena vaspitaču: ${educator}`);
-            }
-        }
-
-        // PROMENA UZRASTA
-        function assignAgeToGroup() {
-            const groupSelect = document.getElementById('edit-group-select');
-            const ageSelect = document.getElementById('edit-group-age-assign');
-
-            if (!groupSelect || !ageSelect) return;
-
-            const groupId = groupSelect.value;
-            const ageGroup = ageSelect.value;
-
-            const group = appState.groups.find(g => g.id === groupId);
-            if (group && ageGroup) {
-                group.ageGroup = ageGroup;
-                localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-                
-                updateCloudGroup(group);
-                populateGroupSelects();
-                showToast(`Grupi "${group.name}" uspešno dodeljen uzrast: ${ageGroup}`);
-            }
-        }
-
-        // REGISTRACIJA DETETA SA GDPR PODACIMA
-        function addChildToGroup() {
-            const select = document.getElementById('edit-group-select');
-            const inputName = document.getElementById('new-child-name');
-            const inputParent = document.getElementById('new-child-parent');
-            const inputPhone = document.getElementById('new-child-phone');
-            const inputEmail = document.getElementById('new-child-email');
-
-            if (!select || !inputName) return;
-
-            const childName = inputName.value.trim();
-            const parentName = inputParent ? inputParent.value.trim() : "";
-            const parentPhone = inputPhone ? inputPhone.value.trim() : "";
-            const parentEmail = inputEmail ? inputEmail.value.trim() : "";
-
-            if (!select.value) {
-                showToast("Prvo izaberite ili kreirajte grupu.", "warning");
-                return;
-            }
-
-            if (!childName) {
-                showToast("Unesite ime i prezime deteta.", "warning");
-                return;
-            }
-
-            const group = appState.groups.find(g => g.id === select.value);
-            if (group) {
-                const newChild = { 
-                    id: `c-${Date.now()}`, 
-                    name: childName,
-                    parentName: parentName,
-                    parentPhone: parentPhone,
-                    parentEmail: parentEmail
-                };
-                
-                group.children.push(newChild);
-                localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-                
-                updateCloudGroup(group);
-
-                // Očisti polja
-                inputName.value = '';
-                if (inputParent) inputParent.value = '';
-                if (inputPhone) inputPhone.value = '';
-                if (inputEmail) inputEmail.value = '';
-
-                renderGroupEditor();
-                populatePromotionGroupSelects();
-                showToast(`${childName} uspešno registrovano!`);
-            }
-        }
-
-        function removeChildFromGroup(groupId, childId) {
-            const group = appState.groups.find(g => g.id === groupId);
-            if (group) {
-                group.children = group.children.filter(c => c.id !== childId);
-                localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-                
-                updateCloudGroup(group);
-                renderGroupEditor();
-                populatePromotionGroupSelects();
-                showToast("Dete uklonjeno iz ove grupe.");
-            }
-        }
-
-        function deleteActiveGroup() {
-            const select = document.getElementById('edit-group-select');
-            const groupId = select ? select.value : '';
-
-            if (!groupId) return;
-
-            if (confirm("Da li ste sigurni da želite obrisati celu grupu i sve njene članove?")) {
-                appState.groups = appState.groups.filter(g => g.id !== groupId);
-                localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-
-                deleteCloudGroup(groupId);
-                populateGroupSelects();
-                populatePromotionGroupSelects();
-                showToast("Grupa uspešno obrisana.");
-            }
-        }
-
-        // =======================================================
-        //  UPRAVLJANJE PROMOCIJOM I PREBACIVANJEM DECE (DIPLOMIRANJE)
-        // =======================================================
-        function populatePromotionGroupSelects() {
-            const sourceSelect = document.getElementById('promote-source-group');
-            const targetSelect = document.getElementById('promote-target-group');
-            
-            if (!sourceSelect || !targetSelect) return;
-
-            sourceSelect.innerHTML = '<option value="">-- Izaberi izvornu grupu --</option>';
-            targetSelect.innerHTML = '<option value="">-- Izaberi ciljnu grupu --</option>';
-
-            appState.groups.forEach(group => {
-                const opt1 = document.createElement('option');
-                opt1.value = group.id;
-                opt1.innerText = `${group.name} (${group.ageGroup || 'Bez uzrasta'})`;
-                sourceSelect.appendChild(opt1);
-
-                const opt2 = document.createElement('option');
-                opt2.value = group.id;
-                opt2.innerText = `${group.name} (${group.ageGroup || 'Bez uzrasta'})`;
-                targetSelect.appendChild(opt2);
-            });
-
-            renderPromotionChildrenList();
-        }
-
-        function renderPromotionChildrenList() {
-            const sourceSelect = document.getElementById('promote-source-group');
-            const container = document.getElementById('promote-children-container');
-
-            if (!sourceSelect || !container) return;
-            container.innerHTML = '';
-
-            const groupId = sourceSelect.value;
-            const group = appState.groups.find(g => g.id === groupId);
-
-            if (!group || group.children.length === 0) {
-                container.innerHTML = `<div class="text-xs text-slate-400 py-3 text-center">Nema dece za prikaz. Selektujte ispravnu izvornu grupu.</div>`;
-                return;
-            }
-
-            group.children.forEach(child => {
-                const div = document.createElement('div');
-                div.className = "flex items-center space-x-2 bg-white p-2 rounded-lg border border-slate-100 hover:bg-purple-50/20 transition-all";
-                div.innerHTML = `
-                    <input type="checkbox" id="promote-check-${child.id}" value="${child.id}" checked class="w-4 h-4 text-purple-600 border-slate-300 rounded focus:ring-purple-500 cursor-pointer">
-                    <label for="promote-check-${child.id}" class="text-xs font-bold text-slate-700 cursor-pointer select-none">${child.name}</label>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function executeGroupPromotion() {
-            const sourceSelect = document.getElementById('promote-source-group');
-            const targetSelect = document.getElementById('promote-target-group');
-
-            if (!sourceSelect || !targetSelect) return;
-
-            const sourceId = sourceSelect.value;
-            const targetId = targetSelect.value;
-
-            if (!sourceId || !targetId) {
-                showToast("Morate izabrati i izvornu i ciljnu grupu za prebacivanje.", "warning");
-                return;
-            }
-
-            if (sourceId === targetId) {
-                showToast("Izvorna i ciljna grupa moraju biti različite.", "warning");
-                return;
-            }
-
-            const sourceGroup = appState.groups.find(g => g.id === sourceId);
-            const targetGroup = appState.groups.find(g => g.id === targetId);
-
-            if (!sourceGroup || !targetGroup) return;
-
-            const checkedChildIds = [];
-            sourceGroup.children.forEach(child => {
-                const checkEl = document.getElementById(`promote-check-${child.id}`);
-                if (checkEl && checkEl.checked) {
-                    checkedChildIds.push(child.id);
-                }
-            });
-
-            if (checkedChildIds.length === 0) {
-                showToast("Niste označili nijedno dete za prebacivanje.", "warning");
-                return;
-            }
-
-            if (confirm(`Da li ste sigurni da želite prebaciti ${checkedChildIds.length} dece iz grupe "${sourceGroup.name}" u grupu "${targetGroup.name}" bez gubljenja istorije?`)) {
-                
-                const promotedChildren = sourceGroup.children.filter(c => checkedChildIds.includes(c.id));
-                sourceGroup.children = sourceGroup.children.filter(c => !checkedChildIds.includes(c.id));
-
-                promotedChildren.forEach(promChild => {
-                    const exists = targetGroup.children.some(c => c.id === promChild.id);
-                    if (!exists) {
-                        targetGroup.children.push(promChild);
-                    }
-                });
-
-                // Sačuvaj i sinkuj
-                localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-                updateCloudGroup(sourceGroup);
-                updateCloudGroup(targetGroup);
-
-                populateGroupSelects();
-                populatePromotionGroupSelects();
-
-                showToast(`Uspešno prebačeno ${promotedChildren.length} dece u grupu "${targetGroup.name}"!`);
-            }
-        }
-
-        // =======================================================
-        //  UPRAVLJANJE EDUKATORIMA / VASPITAČIMA (TAB 3)
-        // =======================================================
-        function renderSettingsEducatorList() {
-            const container = document.getElementById('settings-educator-list');
-            if (!container) return;
-
-            container.innerHTML = '';
-            if (appState.educators.length === 0) {
-                container.innerHTML = `<div class="text-xs text-slate-400 text-center py-2">Nema registrovanih vaspitača.</div>`;
-                return;
-            }
-
-            appState.educators.forEach(ed => {
-                const row = document.createElement('div');
-                row.className = "flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100 hover:bg-slate-100 transition-all";
-                row.innerHTML = `
-                    <span class="text-xs font-bold text-slate-700">${ed}</span>
-                    <button onclick="removeEducator('${ed}')" class="text-slate-400 hover:text-rose-600 p-1 cursor-pointer transition-all">
-                        <i class="fa-solid fa-trash-can text-xs"></i>
-                    </button>
-                `;
-                container.appendChild(row);
-            });
-        }
-
-        function addNewEducator() {
-            const input = document.getElementById('new-educator-name');
-            const name = input ? input.value.trim() : '';
-
-            if (!name) {
-                showToast("Upišite ime i prezime vaspitača.", "warning");
-                return;
-            }
-
-            if (appState.educators.includes(name)) {
-                showToast("Ovaj vaspitač je već registrovan.", "warning");
-                return;
-            }
-
-            appState.educators.push(name);
-            localStorage.setItem('umg_field_educators', JSON.stringify(appState.educators));
-            
-            updateCloudSystemConfig();
-
-            if (input) input.value = '';
-            populateEducatorSelects();
-            renderSettingsEducatorList();
-            showToast(`Vaspitač ${name} uspešno dodat!`);
-        }
-
-        function removeEducator(name) {
-            if (confirm(`Da li ste sigurni da želite obrisati vaspitača "${name}"? Svi dodeljeni vrtići ostaće bez zaduženog instruktora.`)) {
-                appState.educators = appState.educators.filter(ed => ed !== name);
-                localStorage.setItem('umg_field_educators', JSON.stringify(appState.educators));
-
-                appState.groups.forEach(g => {
-                    if (g.educator === name) {
-                        g.educator = "";
-                        updateCloudGroup(g);
-                    }
-                });
-                localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-                updateCloudSystemConfig();
-
-                populateEducatorSelects();
-                populateGroupSelects();
-                renderSettingsEducatorList();
-                showToast("Vaspitač uklonjen iz sistema.");
-            }
-        }
-
-        function savePedagogPin() {
-            const input = document.getElementById('settings-pedagog-pin');
-            const pin = input ? input.value.trim() : '';
-
-            if (!pin) {
-                showToast("Lozinka ne može biti prazna.", "warning");
-                return;
-            }
-
-            appState.pedagogPin = pin;
-            localStorage.setItem('umg_pedagog_pin', pin);
-            
-            updateCloudSystemConfig();
-            showToast("Nova lozinka za P-izveštaje uspešno sačuvana!");
-        }
-
-        function saveAdminPin() {
-            const input = document.getElementById('settings-admin-pin');
-            const pin = input ? input.value.trim() : '';
-
-            if (!pin) {
-                showToast("Lozinka Administracije ne može biti prazna.", "warning");
-                return;
-            }
-
-            appState.adminPin = pin;
-            localStorage.setItem('umg_admin_pin', pin);
-            
-            updateCloudSystemConfig();
-            showToast("Nova lozinka Administracije uspešno sačuvana!");
-        }
-
-        // =======================================================
-        //  REZERVNE KOPIJE I UVOZ/IZVOZ PODATAKA
-        // =======================================================
-        function exportDatabaseFile() {
-            const dataStr = JSON.stringify(appState, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = `UMG_BazaPodataka_${new Date().toISOString().split('T')[0]}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-            showToast("Baza uspešno preuzeta!");
-        }
-
-        function copyDatabaseAsTextCode() {
-            try {
-                const rawString = JSON.stringify(appState);
-                const base64Code = btoa(unescape(encodeURIComponent(rawString)));
-                
-                const tempText = document.createElement("textarea");
-                tempText.value = `###UMG_BAZA###\n${base64Code}\n###KRAJ###`;
-                document.body.appendChild(tempText);
-                tempText.select();
-                document.execCommand('copy');
-                document.body.removeChild(tempText);
-                
-                showToast("Viber kod kopiran! Pošalji ga kolegi.");
-            } catch (e) {
-                console.error(e);
-                showToast("Greška kod generisanja koda.", "warning");
-            }
-        }
-
-        function openMergePasteArea() {
-            document.getElementById('viber-paste-area').classList.remove('hidden');
-        }
-
-        function closeMergePasteArea() {
-            document.getElementById('viber-paste-area').classList.add('hidden');
-            document.getElementById('viber-code-textarea').value = '';
-        }
-
-        function mergeDatabaseFromTextCode() {
-            const codeInput = document.getElementById('viber-code-textarea').value.trim();
-            if (!codeInput || !codeInput.includes('###UMG_BAZA###')) {
-                showToast("Nije pronađen ispravan Viber kod.", "warning");
-                return;
-            }
-
-            try {
-                const parts = codeInput.split('\n');
-                const cleanBase64 = parts[1].trim();
-                const rawString = decodeURIComponent(escape(atob(cleanBase64)));
-                const incomingState = JSON.parse(rawString);
-
-                executeDatabaseMerge(incomingState);
-                closeMergePasteArea();
-            } catch (e) {
-                console.error(e);
-                showToast("Nije uspelo dekodiranje Viber koda.", "warning");
-            }
-        }
-
-        function importDatabaseFromFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const incomingState = JSON.parse(e.target.result);
-                    executeDatabaseMerge(incomingState);
-                } catch (err) {
-                    showToast("Učitani fajl nije ispravna baza.", "warning");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function executeDatabaseMerge(incoming) {
-            if (!incoming.groups || !incoming.dailyRecords) {
-                showToast("Nepotpuna struktura učitane baze.", "warning");
-                return;
-            }
-
-            // A. Spajanje grupa i dece
-            incoming.groups.forEach(incGroup => {
-                let localGroup = appState.groups.find(g => g.name === incGroup.name || g.id === incGroup.id);
-                if (!localGroup) {
-                    appState.groups.push(incGroup);
-                    updateCloudGroup(incGroup);
-                } else {
-                    if (incGroup.educator && !localGroup.educator) {
-                        localGroup.educator = incGroup.educator;
-                    }
-                    if (incGroup.ageGroup && !localGroup.ageGroup) {
-                        localGroup.ageGroup = incGroup.ageGroup;
-                    }
-                    updateCloudGroup(localGroup);
-                    incGroup.children.forEach(incChild => {
-                        let localChild = localGroup.children.find(c => c.name === incChild.name);
-                        if (!localChild) {
-                            localGroup.children.push(incChild);
-                            updateCloudGroup(localGroup);
+                // Ako grupa već postoji, spoji njene članove (decu)
+                if (!appState.groups[index].children) appState.groups[index].children = [];
+                if (ig.children && Array.isArray(ig.children)) {
+                    ig.children.forEach(ic => {
+                        if (!appState.groups[index].children.some(c => c.id === ic.id)) {
+                            appState.groups[index].children.push(ic);
                         }
                     });
                 }
-            });
+            }
+        });
+    }
 
-            // B. Spajanje vaspitača
-            if (incoming.educators && Array.isArray(incoming.educators)) {
-                incoming.educators.forEach(ed => {
-                    if (!appState.educators.includes(ed)) {
-                        appState.educators.push(ed);
-                    }
-                });
-                updateCloudSystemConfig();
+    // 3. Spajanje vaspitača
+    if (incoming.educators && Array.isArray(incoming.educators)) {
+        incoming.educators.forEach(ie => {
+            if (!appState.educators.includes(ie)) appState.educators.push(ie);
+        });
+    }
+
+    // 4. Spajanje zapisa i arhiva
+    if (incoming.dailyRecords) {
+        appState.dailyRecords = { ...appState.dailyRecords, ...incoming.dailyRecords };
+    }
+    if (incoming.savedReports) {
+        appState.savedReports = { ...appState.savedReports, ...incoming.savedReports };
+    }
+
+    // Čuvanje spojenog stanja u lokalnu memoriju
+    localStorage.setItem('umg_field_kindergartens', JSON.stringify(appState.kindergartens));
+    localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+    localStorage.setItem('umg_field_educators', JSON.stringify(appState.educators));
+    localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
+    localStorage.setItem('umg_field_reports_archive', JSON.stringify(appState.savedReports));
+
+    // Osvežavanje kompletnog korisničkog interfejsa
+    populateKindergartenSelects();
+    populateEducatorSelects();
+    renderSettingsEducatorList();
+    populatePromotionGroupSelects();
+    
+    showToast("Baze su uspešno spojene i sinhronizovane!");
+}
+
+// ==========================================
+// CLOUD STORAGE SINHRONIZACIJA (FIREBASE)
+// ==========================================
+function initFirebaseCloudSync() {
+    try {
+        if (typeof __app_id !== 'undefined') appId = __app_id;
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+            const firebaseConfig = JSON.parse(__firebase_config);
+            
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            
+            db = firebase.firestore();
+            auth = firebase.auth();
+            useCloud = true;
+
+            const syncStatusEl = document.getElementById('sync-status');
+            if (syncStatusEl) {
+                syncStatusEl.innerHTML = `<i class="fa-solid fa-cloud text-emerald-600 animate-pulse"></i> Sinhronizovano`;
+                syncStatusEl.className = "text-[9px] font-black px-2.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 flex items-center gap-1.5 transition-all duration-300";
             }
 
-            localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-            localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
-            localStorage.setItem('umg_field_educators', JSON.stringify(appState.educators));
-            
-            populateGroupSelects();
-            populateEducatorSelects();
-            renderSettingsEducatorList();
-            populatePromotionGroupSelects();
-            showToast("Baze su uspešno spojene i sinhronizovane!");
-        }
-
-        function showToast(text, type = 'success') {
-            const toast = document.getElementById('toast');
-            const icon = document.getElementById('toast-icon');
-            const textEl = document.getElementById('toast-text');
-            
-            if (!toast || !icon || !textEl) return;
-
-            textEl.innerText = text;
-            
-            if (type === 'success') {
-                icon.className = "fa-solid fa-circle-check text-emerald-400 text-sm";
-            } else if (type === 'warning') {
-                icon.className = "fa-solid fa-circle-exclamation text-rose-500 text-sm";
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                auth.signInWithCustomToken(__initial_auth_token).catch(e => console.error("Cloud Auth Error:", e));
             } else {
-                icon.className = "fa-solid fa-circle-notch text-purple-400 text-sm animate-spin";
-            }
-            
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-            
-            if (type !== 'loading') {
-                setTimeout(() => {
-                    toast.classList.remove('translate-y-0', 'opacity-100');
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }, 3000);
+                auth.signInAnonymously().catch(e => console.error("Cloud Anonymous Auth Error:", e));
             }
         }
-    </script>
+    } catch (e) {
+        console.error("UMG Cloud Sync: Sistem radi u lokalnom režimu.", e);
+    }
+}
+
+function updateCloudGroup(group) {
+    if (!useCloud || !db) return;
+    try {
+        db.collection('apps').doc(appId).collection('groups').doc(group.id).set(group, { merge: true });
+    } catch (e) {
+        console.error("Greška pri slanju grupe na cloud:", e);
+    }
+}
+
+function deleteCloudGroup(groupId) {
+    if (!useCloud || !db) return;
+    try {
+        db.collection('apps').doc(appId).collection('groups').doc(groupId).delete();
+    } catch (e) {
+        console.error("Greška pri brisanju grupe sa clouda:", e);
+    }
+}
+
+// ==========================================
+// NOTIFIKACIJE (TOAST DIJALOG)
+// ==========================================
+function showToast(text, type = 'success') {
+    const toast = document.getElementById('toast');
+    const icon = document.getElementById('toast-icon');
+    const textEl = document.getElementById('toast-text');
+    
+    if (!toast || !icon || !textEl) return;
+
+    textEl.innerText = text;
+    
+    if (type === 'success') {
+        icon.className = "fa-solid fa-circle-check text-emerald-400 text-sm";
+    } else if (type === 'warning') {
+        icon.className = "fa-solid fa-circle-exclamation text-rose-500 text-sm";
+    } else {
+        icon.className = "fa-solid fa-circle-notch text-purple-400 text-sm animate-spin";
+    }
+    
+    toast.classList.remove('translate-y-20', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+    
+    if (type !== 'loading') {
+        setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-20', 'opacity-0');
+        }, 3000);
+    }
+}
+</script>
+
 </body>
 </html>
