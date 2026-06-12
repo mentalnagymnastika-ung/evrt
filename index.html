@@ -18,7 +18,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;950&display=swap" rel="stylesheet">
     
     <!-- Link ka manifestu za PWA instalaciju -->
     <link rel="manifest" href="manifest.json">
@@ -81,7 +81,7 @@
             <div class="flex items-center space-x-2">
                 <!-- Indikator statusa sinhronizacije na oblaku -->
                 <div class="text-[9px] font-black px-2.5 py-2 rounded-xl flex items-center gap-1.5 transition-all duration-300" id="sync-status">
-                    <i class="fa-solid fa-cloud-slash text-slate-450"></i> Lokalno
+                    <i class="fa-solid fa-cloud-slash text-slate-400"></i> Lokalno
                 </div>
                 <!-- Brzi povratak na Welcome stranu -->
                 <button onclick="switchTab('welcome')" id="btn-logout" class="text-xs font-black px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer border border-slate-200 hidden">
@@ -146,41 +146,59 @@
         <!-- ======================================================= -->
         <section id="tab-field" class="space-y-4 lg:h-full lg:overflow-y-auto custom-scrollbar pb-8 hidden">
             
-            <!-- Selektori za tekući čas -->
-            <div class="bg-white border border-slate-200/80 rounded-3xl p-4 grid grid-cols-1 sm:grid-cols-4 gap-3 shadow-md">
-                <!-- Korak 1: Prikaz aktivnog vaspitača -->
+            <!-- PAMETNA KOMPAKTNA TRAKA SA SAŽETKOM ČASA (Uvijek vidljiva, izuzetno štedi prostor) -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                <div class="flex items-center space-x-2 text-xs font-bold text-slate-700">
+                    <span class="bg-emerald-50 text-emerald-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-emerald-100/60" id="summary-date">
+                        Danas
+                    </span>
+                    <span class="text-slate-300">|</span>
+                    <span class="truncate text-slate-600" id="summary-info">Učitavanje...</span>
+                </div>
+                <button onclick="toggleSettingsPanel()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-slate-200">
+                    <i class="fa-solid fa-sliders text-emerald-600"></i>
+                    <span>Podesi čas</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300" id="settings-chevron"></i>
+                </button>
+            </div>
+
+            <!-- SKLOPIVI PANEL SA SELEKTORIMA (Sakriven po defaultu da oslobodi prostor) -->
+            <div id="settings-collapsible-panel" class="hidden bg-white border border-slate-200 rounded-3xl p-4 grid grid-cols-1 sm:grid-cols-4 gap-4 shadow-inner transition-all duration-300">
+                <!-- Korak 1: Datum časa (Premešten na prvo mesto i popunjava se direktno iz sistema) -->
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
-                        <i class="fa-solid fa-user-tie text-emerald-500 mr-1.5"></i> Aktivni vaspitač
+                        <i class="fa-solid fa-calendar-day text-emerald-500 mr-1.5"></i> 1. Datum časa
                     </label>
-                    <select id="field-educator-select" onchange="changeActiveEducator()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
+                    <input type="date" id="field-class-date" onchange="loadOrCreateDailyRecord(); updateSummaryBar();" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
+                </div>
+                <!-- Korak 2: Aktivni vaspitač -->
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
+                        <i class="fa-solid fa-user-tie text-emerald-500 mr-1.5"></i> 2. Aktivni vaspitač
+                    </label>
+                    <select id="field-educator-select" onchange="changeActiveEducator(); updateSummaryBar();" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
                         <!-- Popunjava se dinamički -->
                     </select>
                 </div>
-                <!-- Korak 2: Izbor pripadajuće grupe -->
+                <!-- Korak 3: Izbor pripadajuće grupe -->
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
-                        <i class="fa-solid fa-folder-tree text-emerald-500 mr-1.5"></i> Aktivna grupa / Vrtić
+                        <i class="fa-solid fa-folder-tree text-emerald-500 mr-1.5"></i> 3. Aktivna grupa / Vrtić
                     </label>
-                    <select id="field-group-select" onchange="changeActiveGroup()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
-                        <!-- Popunjava se dinamički i filtrira na osnovu izabranog vaspitača -->
+                    <select id="field-group-select" onchange="changeActiveGroup(); updateSummaryBar();" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
+                        <!-- Popunjava se dinamički -->
                     </select>
                 </div>
+                <!-- Korak 4: Tema časa -->
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
-                        <i class="fa-solid fa-calendar-day text-emerald-500 mr-1.5"></i> Datum časa
+                        <i class="fa-solid fa-book-open text-emerald-500 mr-1.5"></i> 4. Aktivnost / Tema
                     </label>
-                    <input type="date" id="field-class-date" onchange="loadOrCreateDailyRecord()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
-                        <i class="fa-solid fa-book-open text-emerald-500 mr-1.5"></i> Aktivnost / Tema
-                    </label>
-                    <input type="text" id="field-class-theme" placeholder="Npr. Apstraktna logika i poligon..." oninput="updateClassTheme(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
+                    <input type="text" id="field-class-theme" placeholder="Npr. Apstraktna logika i poligon..." oninput="updateClassTheme(this.value); updateSummaryBar();" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
                 </div>
             </div>
 
-            <!-- SIGNALNA ZONA ZA DETEKCIJU ZAMENE (SUBSTITUTE ALERT BAR) -->
+            <!-- SIGNALNA ZONA ZA DETEKCIJU ZAMENE -->
             <div id="substitute-alert-bar" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-medium leading-relaxed flex items-center space-x-2.5">
                 <i class="fa-solid fa-circle-exclamation text-base shrink-0 text-amber-600 animate-bounce"></i>
                 <span id="substitute-alert-text">Učitavanje režima zamene...</span>
@@ -256,7 +274,7 @@
             supportContact: "podrska@mentalgimnastika.rs"
         };
 
-        // Definicija 11 ključnih oblasti sa kategorizacijom
+        // Definicija 11 oblasti sa kategorizacijom
         const areas = [
             { id: 1, name: "Memorija (Radna, Dugotrajna, Kratkotrajna)", short: "Memorija i prisećanje", desc: "Sposobnost skladištenja i pronalaženja informacija.", default: 75, icon: "fa-brain", category: "cognitive" },
             { id: 2, name: "Grafo-motorika i koordinacija oko-ruka", short: "Grafo-motorika", desc: "Preciznost pokreta ruke, držanje olovke i vizuelno-motorna kontrola.", default: 75, icon: "fa-pen-clip", category: "motor" },
@@ -388,10 +406,9 @@
             `;
         }
 
-        // DINAMIČKI PWA GENERATOR (Omogućava Add to Home Screen bez posebnih fajlova!)
+        // DINAMIČKI PWA GENERATOR
         function setupPWAAndServiceWorker() {
             try {
-                // Generisanje Manifesta i dodavanje u head u hodu
                 const manifest = {
                     "name": "UMG Terenski Asistent",
                     "short_name": "UMG Asistent",
@@ -415,7 +432,6 @@
                 link.href = manifestURL;
                 document.head.appendChild(link);
 
-                // Registracija pozadinskog Service Workera
                 if ('serviceWorker' in navigator) {
                     const swCode = `
                         self.addEventListener('install', (e) => self.skipWaiting());
@@ -430,7 +446,7 @@
             }
         }
 
-        // INICIJALIZACIJA FIREBASE AUTOMATSKE SINHRONIZACIJE
+        // INICIJALIZACIJA FIREBASE
         function initFirebaseCloudSync() {
             try {
                 if (typeof __app_id !== 'undefined') {
@@ -709,6 +725,9 @@
             document.getElementById('field-class-theme').value = record.theme || "";
             document.getElementById('group-general-note').value = record.generalNote || "";
 
+            // Ažuriraj tekstualni sažetak časa u traci
+            updateSummaryBar();
+
             renderChildrenTrackingList();
         }
 
@@ -822,12 +841,12 @@
 
                         <!-- Kategorisane slikovne oblasti -->
                         <div class="mb-4">
-                            <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Izražene snage danas:</span>
+                            <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-505 mb-1.5">Izražene snage danas:</span>
                             ${categoriesHTML}
                         </div>
 
                         <!-- Glasovni unos zabeleške -->
-                        <div class="relative flex items-center bg-slate-50 rounded-xl border border-slate-200 p-2">
+                        <div class="relative flex items-center bg-slate-50 rounded-xl border border-slate-250 p-2">
                             <input type="text" id="note-child-${child.id}" value="${tr.note || ''}" 
                                    oninput="updateChildNote('${child.id}', this.value)" 
                                    placeholder="Diktirajte ili upišite opasku za ${child.name.split(' ')[0]}..." 
@@ -941,7 +960,47 @@
             }
         }
 
-        // GLASOVNI UNOS (Srb / BiH / Cro)
+        // KONTROLNI SAŽETAK ČASA (Popunjava gornju traku podacima)
+        function updateSummaryBar() {
+            const dateInput = document.getElementById('field-class-date');
+            const educatorSelect = document.getElementById('field-educator-select');
+            const groupSelect = document.getElementById('field-group-select');
+            const themeInput = document.getElementById('field-class-theme');
+
+            const dateVal = dateInput ? dateInput.value.split('-').reverse().join('.') : '';
+            const educatorVal = educatorSelect ? educatorSelect.value : '';
+            
+            let groupVal = '';
+            if (groupSelect && groupSelect.selectedIndex >= 0) {
+                groupVal = groupSelect.options[groupSelect.selectedIndex].text;
+            }
+            
+            const themeVal = themeInput ? themeInput.value.trim() : '';
+
+            const summaryDate = document.getElementById('summary-date');
+            const summaryInfo = document.getElementById('summary-info');
+
+            if (summaryDate) summaryDate.innerHTML = `<i class="fa-solid fa-calendar-day mr-1"></i> ${dateVal || 'Danas'}`;
+            if (summaryInfo) {
+                summaryInfo.innerHTML = `👤 <span class="font-bold text-slate-800">${educatorVal || 'Vaspitač'}</span> | 🏫 <span class="font-bold text-slate-800">${groupVal || 'Nema grupe'}</span> ${themeVal ? ' | 📝 ' + themeVal : ''}`;
+            }
+        }
+
+        // TOGGLING PODEŠAVANJA ČASA (Sklopiva animacija)
+        function toggleSettingsPanel() {
+            const panel = document.getElementById('settings-collapsible-panel');
+            const chevron = document.getElementById('settings-chevron');
+            if (panel && chevron) {
+                panel.classList.toggle('hidden');
+                if (panel.classList.contains('hidden')) {
+                    chevron.style.transform = 'rotate(0deg)';
+                } else {
+                    chevron.style.transform = 'rotate(180deg)';
+                }
+            }
+        }
+
+        // GLASOVNI UNOS
         function startVoiceInput(elementId, childId = null) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -1024,6 +1083,8 @@
                 
                 const logoutBtn = document.getElementById('btn-logout');
                 if (logoutBtn) logoutBtn.classList.add('hidden');
+                
+                document.body.className = "bg-slate-50 text-slate-800 flex flex-col min-h-screen lg:h-screen lg:overflow-hidden select-none";
             }
         }
 
