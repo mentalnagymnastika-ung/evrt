@@ -813,9 +813,9 @@ function handleExcelImport(event) {
     }
 }
 
-// ==================================================
-// NOVA FUNKCIJA ZA PRIKAZ ČLANOVA (UŠTEDA PROSTORA)
-// ==================================================
+// ==================================================================
+// NAPREDNA FUNKCIJA ZA PRIKAZ ČLANOVA (SA UŽIVO IZMENOM I RASKLAPANJEM)
+// ==================================================================
 function renderChildrenList(group) {
     const listEl = document.getElementById('editor-children-list');
     if (!listEl) return;
@@ -828,20 +828,24 @@ function renderChildrenList(group) {
 
     group.children.forEach((child) => {
         const card = document.createElement('div');
-        // Elegantna tanka kartica sa belom pozadinom
         card.className = "bg-white border border-slate-200/80 rounded-xl p-3 shadow-sm hover:shadow-md transition-all cursor-pointer select-none mb-2";
+        card.setAttribute('data-child-id', child.id);
 
-        // HTML struktura: samo Ime i Prezime i strelica za rasklapanje
         card.innerHTML = `
             <div class="flex justify-between items-center" onclick="toggleChildDetails('${child.id}')">
-                <div class="flex items-center space-x-2.5">
-                    <div class="w-7 h-7 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-xs">
+                <div class="flex items-center space-x-2.5 flex-1 min-w-0">
+                    <div class="w-7 h-7 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-xs shrink-0">
                         ${child.name ? child.name.charAt(0).toUpperCase() : 'D'}
                     </div>
-                    <span class="font-bold text-slate-700 text-xs tracking-tight">${child.name || 'Nepoznato ime'}</span>
+                    <div id="name-container-${child.id}" class="w-full truncate font-bold text-slate-700 text-xs tracking-tight">
+                        ${child.name || 'Nepoznato ime'}
+                    </div>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <i id="arrow-${child.id}" class="fa-solid fa-chevron-down text-slate-400 text-[10px] transition-transform duration-200"></i>
+                <div class="flex items-center space-x-1 ml-2 shrink-0">
+                    <button id="btn-edit-${child.id}" onclick="event.stopPropagation(); editChild('${group.id}', '${child.id}')" class="text-slate-300 hover:text-purple-600 p-1 transition-colors rounded-lg" title="Izmeni podatke">
+                        <i class="fa-solid fa-pen text-[11px]"></i>
+                    </button>
+                    <i id="arrow-${child.id}" class="fa-solid fa-chevron-down text-slate-400 text-[10px] transition-transform duration-200 px-1"></i>
                     <button onclick="event.stopPropagation(); deleteChild('${group.id}', '${child.id}')" class="text-slate-300 hover:text-rose-500 p-1 transition-colors rounded-lg" title="Ispiši dete">
                         <i class="fa-solid fa-trash-can text-xs"></i>
                     </button>
@@ -849,35 +853,168 @@ function renderChildrenList(group) {
             </div>
             
             <div id="details-${child.id}" class="hidden mt-3 pt-2.5 border-t border-slate-100 space-y-1.5 text-[11px] text-slate-600">
-                ${child.parent ? `
-                    <div class="flex items-center">
-                        <i class="fa-solid fa-user-shield text-slate-400 w-4"></i>
-                        <span class="font-medium text-slate-500 mr-1">Roditelj:</span>
-                        <span class="text-slate-700 font-semibold">${child.parent}</span>
-                    </div>` : ''}
-                
-                ${child.phone ? `
-                    <div class="flex items-center">
-                        <i class="fa-solid fa-phone text-slate-400 w-4"></i>
-                        <span class="font-medium text-slate-500 mr-1">Telefon:</span>
-                        <a href="tel:${child.phone}" onclick="event.stopPropagation()" class="text-purple-600 hover:underline font-semibold">${child.phone}</a>
-                    </div>` : ''}
-                
-                ${child.email ? `
-                    <div class="flex items-center">
-                        <i class="fa-solid fa-envelope text-slate-400 w-4"></i>
-                        <span class="font-medium text-slate-500 mr-1">Email:</span>
-                        <a href="mailto:${child.email}" onclick="event.stopPropagation()" class="text-blue-600 hover:underline font-medium break-all">${child.email}</a>
-                    </div>` : ''}
-                
-                ${!child.parent && !child.phone && !child.email ? `
-                    <div class="text-slate-400 italic text-[10px]">Nema dodatnih podataka o roditeljima.</div>
-                ` : ''}
+                <div id="fields-container-${child.id}" class="space-y-1.5">
+                    ${child.parent ? `
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-user-shield text-slate-400 w-4"></i>
+                            <span class="font-medium text-slate-500 mr-1">Roditelj:</span>
+                            <span class="text-slate-700 font-semibold">${child.parent}</span>
+                        </div>` : ''}
+                    
+                    ${child.phone ? `
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-phone text-slate-400 w-4"></i>
+                            <span class="font-medium text-slate-500 mr-1">Telefon:</span>
+                            <a href="tel:${child.phone}" onclick="event.stopPropagation()" class="text-purple-600 hover:underline font-semibold">${child.phone}</a>
+                        </div>` : ''}
+                    
+                    ${child.email ? `
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-envelope text-slate-400 w-4"></i>
+                            <span class="font-medium text-slate-500 mr-1">Email:</span>
+                            <a href="mailto:${child.email}" onclick="event.stopPropagation()" class="text-blue-600 hover:underline font-medium break-all">${child.email}</a>
+                        </div>` : ''}
+                    
+                    ${!child.parent && !child.phone && !child.email ? `
+                        <div class="text-slate-400 italic text-[10px]">Nema dodatnih podataka o roditeljima.</div>
+                    ` : ''}
+                </div>
             </div>
         `;
 
         listEl.appendChild(card);
     });
+}
+
+// FUNKCIJA KOJA PRETVARA TEKST U POLJA ZA IZMENU (INPUTE)
+function editChild(groupId, childId) {
+    const group = appState.groups.find(g => g.id === groupId);
+    if (!group) return;
+    const child = group.children.find(c => c.id === childId);
+    if (!child) return;
+
+    const detailsDiv = document.getElementById(`details-${childId}`);
+    const arrowIcon = document.getElementById(`arrow-${childId}`);
+    const editBtn = document.getElementById(`btn-edit-${childId}`);
+    
+    // Automatski rasklapamo karticu ako je bila zatvorena
+    if (detailsDiv && detailsDiv.classList.contains('hidden')) {
+        detailsDiv.classList.remove('hidden');
+        arrowIcon.classList.add('rotate-180');
+    }
+
+    // Promena ikonice olovke u ikonicu za čuvanje (Check)
+    if (editBtn) {
+        editBtn.innerHTML = `<i class="fa-solid fa-floppy-disk text-emerald-500 text-xs"></i>`;
+        editBtn.setAttribute('title', 'Sačuvaj izmene');
+        // Menjamo funkciju na klik da umesto "edit" sada "sačuva"
+        editBtn.onclick = function(e) { e.stopPropagation(); saveChildChanges(groupId, childId); };
+    }
+
+    // Zamena imena deteta input poljem
+    const nameCont = document.getElementById(`name-container-${childId}`);
+    if (nameCont) {
+        nameCont.innerHTML = `<input type="text" id="input-name-${childId}" value="${child.name || ''}" class="w-full bg-slate-50 border border-purple-200 rounded px-1.5 py-0.5 text-xs font-bold text-slate-800 focus:outline-purple-500" onclick="event.stopPropagation()">`;
+    }
+
+    // Zamena detalja input poljima
+    const fieldsCont = document.getElementById(`fields-container-${childId}`);
+    if (fieldsCont) {
+        fieldsCont.innerHTML = `
+            <div class="space-y-1">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-user-shield text-slate-400 w-4"></i>
+                    <input type="text" id="input-parent-${childId}" value="${child.parent || ''}" placeholder="Ime roditelja" class="w-full bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-[11px] focus:outline-purple-500" onclick="event.stopPropagation()">
+                </div>
+                <div class="flex items-center">
+                    <i class="fa-solid fa-phone text-slate-400 w-4"></i>
+                    <input type="text" id="input-phone-${childId}" value="${child.phone || ''}" placeholder="Telefon" class="w-full bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-[11px] focus:outline-purple-500" onclick="event.stopPropagation()">
+                </div>
+                <div class="flex items-center">
+                    <i class="fa-solid fa-envelope text-slate-400 w-4"></i>
+                    <input type="text" id="input-email-${childId}" value="${child.email || ''}" placeholder="Email" class="w-full bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-[11px] focus:outline-purple-500" onclick="event.stopPropagation()">
+                </div>
+            </div>
+        `;
+    }
+}
+
+// FUNKCIJA KOJA UPISUJE I ČUVA NOVE PODATKE U BAZU
+function saveChildChanges(groupId, childId) {
+    const group = appState.groups.find(g => g.id === groupId);
+    if (!group) return;
+    const child = group.children.find(c => c.id === childId);
+    if (!child) return;
+
+    // Uzimanje vrednosti iz input polja
+    const newName = document.getElementById(`input-name-${childId}`).value.trim();
+    const newParent = document.getElementById(`input-parent-${childId}`).value.trim();
+    const newPhone = document.getElementById(`input-phone-${childId}`).value.trim();
+    const newEmail = document.getElementById(`input-email-${childId}`).value.trim();
+
+    if (!newName) {
+        showToast("Ime deteta ne može biti prazno!", "warning");
+        return;
+    }
+
+    // Ažuriranje podataka u aplikaciji
+    child.name = newName;
+    child.parent = newParent;
+    child.phone = newPhone;
+    child.email = newEmail;
+
+    // Čuvanje u LocalStorage i Cloud sinhronizacija
+    localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+    if (typeof updateCloudGroup === 'function') {
+        updateCloudGroup(group);
+    }
+
+    // Ponovno rendersanje liste da se vrate obični tekstualni linkovi i kartica zatvori
+    renderChildrenList(group);
+    if (typeof renderGroupsGrid === 'function') {
+        renderGroupsGrid();
+    }
+    showToast("Podaci uspešno izmenjeni!");
+}
+
+// FUNKCIJA ZA RASKLAPANJE/SKLAPANJE KARTICE
+function toggleChildDetails(childId) {
+    // Sprečavamo rasklapanje ako smo u modu za izmenu (da ne skače ekran dok kucamo)
+    if (document.getElementById(`input-name-${childId}`)) return;
+
+    const detailsDiv = document.getElementById(`details-${childId}`);
+    const arrowIcon = document.getElementById(`arrow-${childId}`);
+    
+    if (detailsDiv && arrowIcon) {
+        if (detailsDiv.classList.contains('hidden')) {
+            detailsDiv.classList.remove('hidden');
+            arrowIcon.classList.add('rotate-180');
+        } else {
+            detailsDiv.classList.add('hidden');
+            arrowIcon.classList.remove('rotate-180');
+        }
+    }
+}
+
+// FUNKCIJA ZA BRISANJE (ISPISIVANJE) DETETA
+function deleteChild(groupId, childId) {
+    const group = appState.groups.find(g => g.id === groupId);
+    if (!group) return;
+    
+    if (confirm("Da li ste sigurni da želite da ispišete ovo dete iz grupe?")) {
+        group.children = group.children.filter(c => c.id !== childId);
+        
+        localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+        if (typeof updateCloudGroup === 'function') {
+            updateCloudGroup(group);
+        }
+        
+        renderChildrenList(group);
+        if (typeof renderGroupsGrid === 'function') {
+            renderGroupsGrid();
+        }
+        showToast("Član uspešno ispisan.", "warning");
+    }
 }
 
 // POMOĆNA FUNKCIJA ZA RASKLAPANJE/SKLAPANJE KARTICE
