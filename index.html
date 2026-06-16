@@ -19,7 +19,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;950&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;955&display=swap" rel="stylesheet">
     
     <!-- Link ka manifestu za PWA instalaciju -->
     <link rel="manifest" href="manifest.json">
@@ -117,7 +117,7 @@
             
             <!-- Brendirani logo i zaglavlje -->
             <div class="text-center max-w-xl space-y-4 my-auto">
-                <img src="logo.png" alt="eVrt Logo" class="w-24 h-24 rounded-[2rem] object-contain bg-white p-2 shadow-xl mx-auto border border-slate-100">
+                <img src="logo.png" alt="eVrt Logo" class="w-28 h-28 rounded-[2rem] object-contain bg-white p-2 shadow-xl mx-auto border border-slate-100">
                 <div class="space-y-1">
                     <h2 class="text-3xl font-black text-slate-900 tracking-tight leading-tight">Mentalna Gimnastika</h2>
                     <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Sistem za praćenje i analizu razvoja dece</p>
@@ -249,7 +249,7 @@
                         <i class="fa-solid fa-microphone text-xs" id="mic-group-general-note"></i>
                     </button>
                 </div>
-                <textarea id="group-general-note" rows="2" oninput="updateGroupGeneralNote(this.value)" placeholder="Unesite zapažanje koje se odnosi na celu grupu tokom današnjeg časa..." class="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 text-slate-800 placeholder-slate-400 shadow-inner"></textarea>
+                <textarea id="group-general-note" rows="2" onchange="updateGroupGeneralNote(this.value)" placeholder="Unesite zapažanje koje se odnosi na celu grupu tokom današnjeg časa..." class="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 text-slate-800 placeholder-slate-400 shadow-inner"></textarea>
             </div>
 
             <!-- Taster za čuvanje -->
@@ -436,7 +436,6 @@
             }
         }
 
-        // CLOUD SYNCHRONIZATION
         function initFirebaseCloudSync() {
             try {
                 const firebaseConfig = {
@@ -495,7 +494,6 @@
                             appState.dailyRecords = tempRecords;
                             localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
                             
-                            // PROVERA FOKUSA: Sprečava seckanje i zatvaranje tastature dok vaspitač kuca ili snima
                             const activeEl = document.activeElement;
                             const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
                             
@@ -787,19 +785,18 @@
                     card.innerHTML = `
                         <!-- UVIJEK VIDLJIVO ZAGLAVLJE KARTICE DETETA -->
                         <div class="flex items-center justify-between p-3.5 relative">
-                            <!-- OVO JE SLOJ ZA OTVARANJE KARTICE -->
                             <div class="absolute inset-0 z-0 cursor-pointer" onclick="toggleChildCollapse('${child.id}', event)"></div>
                             
                             <div class="flex items-center space-x-3 relative z-10">
-                                <!-- PRAVO DUGME ZA PRISUSTVO SA VISOKIM Z-INDEXOM -->
                                 <button type="button" onclick="togglePresence('${child.id}', event)" class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-700 border-2 border-emerald-300 font-bold flex items-center justify-center text-lg shadow-sm transition-all cursor-pointer hover:bg-emerald-100 focus:outline-none">
                                     ${child.name.charAt(0)}
                                 </button>
                                 <div class="pointer-events-none">
-                                    <h4 class="font-bold text-sm text-slate-800 flex items-center">
+                                    <!-- MAKSIMALNO KRUPNO IME DETETA -->
+                                    <h4 class="font-black text-xl sm:text-2xl text-slate-900 flex items-center tracking-tight leading-none">
                                         ${child.name}
                                     </h4>
-                                    <p class="text-[9px] text-slate-400 font-semibold">Dodirni krug za prisustvo | Klikni za detalje</p>
+                                    <p class="text-[9px] text-slate-400 font-semibold mt-1">Dodirni krug za prisustvo | Klikni za detalje</p>
                                 </div>
                             </div>
                             
@@ -825,7 +822,7 @@
 
                             <div class="relative flex items-center bg-slate-100/50 rounded-xl border border-slate-200 p-2">
                                 <input type="text" id="note-child-${child.id}" value="${tr.note || ''}" 
-                                       oninput="updateChildNote('${child.id}', this.value)" 
+                                       onchange="updateChildNote('${child.id}', this.value)" 
                                        placeholder="Diktirajte ili upišite opasku za ${child.name.split(' ')[0]}..." 
                                        class="w-full pr-12 pl-3 py-1.5 text-xs bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 font-medium">
                                 <button onclick="startVoiceInput('note-child-${child.id}', '${child.id}')" 
@@ -844,8 +841,9 @@
                                     ${child.name.charAt(0)}
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-sm text-slate-500 line-through">${child.name}</h4>
-                                    <p class="text-[10px] text-slate-400">Dete je odsutno (dodirni ovde da vratiš)</p>
+                                    <!-- KRUPNO IME ODSUTNOG DETETA -->
+                                    <h4 class="font-bold text-lg sm:text-xl text-slate-500 line-through leading-none">${child.name}</h4>
+                                    <p class="text-[10px] text-slate-400 mt-1">Dete je odsutno (dodirni ovde da vratiš)</p>
                                 </div>
                             </button>
                             <span class="bg-rose-100 text-rose-800 border border-rose-200 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase shrink-0 ml-2 relative z-10 pointer-events-none">Odsutan</span>
@@ -942,7 +940,7 @@
         }
 
         let typingTimer;
-        const doneTypingInterval = 1200; // Cekanje od 1.2 sekunde pre snimanja
+        const doneTypingInterval = 1200; 
 
         function updateChildNote(childId, val) {
             const key = getRecordKey();
@@ -1052,7 +1050,7 @@
         }
 
         function startVoiceInput(elementId, childId = null) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const SpeechRecognition = window.SpeechRecognition || window.webkitRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
                 showToast("Pregledač ne podržava glasovni unos.", "warning");
                 return;
@@ -1092,23 +1090,19 @@
                     }
                 }
                 if (transcript && inputField) {
-                    // Samo ispisuje u polje dok vaspitač priča, NE šalje u bazu
                     inputField.value = (originalVal ? originalVal.trim() + " " : "") + transcript.trim();
                 }
             };
 
             recognition.onerror = () => { resetMicIcons(); };
             
-            // onend se aktivira kada se mikrofon ugasi
             recognition.onend = () => {
                 if (inputField) {
-                    // SADA salje konačan tekst u bazu
                     if (childId) {
                         updateChildNote(childId, inputField.value);
                     } else {
                         updateGroupGeneralNote(inputField.value);
                     }
-                    // Forsira trenutno čuvanje bez čekanja tajmera
                     saveDailyRecord(false);
                 }
                 
