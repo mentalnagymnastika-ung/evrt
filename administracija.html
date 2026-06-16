@@ -1210,7 +1210,6 @@ function copyDatabaseAsTextCode() {
 // CLOUD SYNCHRONIZATION
 function initFirebaseCloudSync() {
     try {
-        // Konfiguracija tvog aktivnog Firebase projekta
         const firebaseConfig = {
             apiKey: "AIzaSyDMRU0F7cH4EPk6ZJd_pr4YfKQ7i4xqKuY",
             authDomain: "evrtumg.firebaseapp.com",
@@ -1220,7 +1219,6 @@ function initFirebaseCloudSync() {
             appId: "1:62747234765:web:e92a188dc2fd8390e43484"
         };
 
-        // Pokretanje Firebase-a ako već nije pokrenut
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -1229,15 +1227,15 @@ function initFirebaseCloudSync() {
         auth = firebase.auth(); 
         useCloud = true;
         
-        // Anonimna prijava za bezbedan upis na terenu bez kucanja lozinke
         auth.signInAnonymously().then(() => {
-            updateSyncStatusUI(true);
+            // Menjamo indikator u "Sinhronizovano"
+            const status = document.getElementById('sync-status');
+            if (status) {
+                status.innerHTML = `<i class="fa-solid fa-cloud text-emerald-600"></i> Sinhronizovano`;
+                status.className = "text-[9px] font-black px-2.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 flex items-center gap-1.5";
+            }
             
-            // =========================================================================
-            // DIREKTNA SINHRONIZACIJA SA PROJEKTOM (Umesto setupFirestoreRealtimeSync)
-            // =========================================================================
-
-            // 1. Slušaj pin kodove i spisak vaspitača iz 'system/config'
+            // 1. Slušaj pin kodove i vaspitače iz 'system/config'
             db.collection("system").doc("config").onSnapshot((doc) => {
                 if (doc.exists) {
                     const data = doc.data();
@@ -1249,9 +1247,9 @@ function initFirebaseCloudSync() {
                         if (typeof renderSettingsEducatorList === 'function') renderSettingsEducatorList();
                     }
                 }
-            }, (err) => console.error("Greška pri sinhronizaciji konfiguracije:", err));
+            }, (err) => console.error("Admin config sync error:", err));
 
-            // 2. Slušaj vrtiće, grupe i decu iz kolekcije 'groups'
+            // 2. Slušaj vrtiće/grupe i decu iz kolekcije 'groups'
             db.collection("groups").onSnapshot((snapshot) => {
                 let tempGroups = [];
                 snapshot.forEach(doc => {
@@ -1261,41 +1259,24 @@ function initFirebaseCloudSync() {
                     appState.groups = tempGroups;
                     localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
                     if (typeof populateGroupSelects === 'function') populateGroupSelects();
-                    if (typeof populatePedagogGroups === 'function') populatePedagogGroups();
                     if (typeof renderGroupsGrid === 'function') renderGroupsGrid();
                 }
-            }, (err) => console.error("Greška pri sinhronizaciji grupa:", err));
-
-            // 3. Slušaj ocene i unose sa časova iz kolekcije 'dailyRecords'
-            db.collection("dailyRecords").onSnapshot((snapshot) => {
-                let tempRecords = {};
-                snapshot.forEach(doc => {
-                    tempRecords[doc.id] = doc.data();
-                });
-                if (Object.keys(tempRecords).length > 0) {
-                    appState.dailyRecords = tempRecords;
-                    localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
-                    if (typeof loadOrCreateDailyRecord === 'function') loadOrCreateDailyRecord();
-                    if (typeof loadChildAnalysis === 'function') loadChildAnalysis();
-                }
-            }, (err) => console.error("Greška pri sinhronizaciji dnevnika:", err));
+            }, (err) => console.error("Admin groups sync error:", err));
 
         }).catch(err => {
-            console.error("Greška pri autentifikaciji na serveru:", err);
-            updateSyncStatusUI(false);
+            console.error("Greška pri autentifikaciji admina:", err);
         });
         
-    } catch (e) {
-        console.log("Sistem radi u lokalnom offline režimu.", e);
-        updateSyncStatusUI(false);
+    } catch (e) { 
+        console.log("Sistem radi u lokalnom režimu."); 
     }
 }
 
 function updateCloudGroup(group) {
-    if (useCloud && db) db.collection('apps').doc(appId).collection('groups').doc(group.id).set(group, { merge: true });
+    if (useCloud && db) db.collection('groups').doc(group.id).set(group, { merge: true });
 }
 function deleteCloudGroup(groupId) {
-    if (useCloud && db) db.collection('apps').doc(appId).collection('groups').doc(groupId).delete();
+    if (useCloud && db) db.collection('groups').doc(groupId).delete();
 }
 
 function showToast(text, type = 'success') {
