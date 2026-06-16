@@ -601,54 +601,89 @@
         }
 
         // CLOUD STORAGE SINHRONIZACIJA
+// CLOUD SYNCHRONIZATION
 function initFirebaseCloudSync() {
-            try {
-                // Konfiguracija tvog aktivnog Firebase projekta
-                const firebaseConfig = {
-                    apiKey: "AIzaSyDMRU0F7cH4EPk6ZJd_pr4YfKQ7i4xqKuY",
-                    authDomain: "evrtumg.firebaseapp.com",
-                    projectId: "evrtumg",
-                    storageBucket: "evrtumg.firebasestorage.app",
-                    messagingSenderId: "62747234765",
-                    appId: "1:62747234765:web:e92a188dc2fd8390e43484"
-                };
+    try {
+        // Konfiguracija tvog aktivnog Firebase projekta
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMRU0F7cH4EPk6ZJd_pr4YfKQ7i4xqKuY",
+            authDomain: "evrtumg.firebaseapp.com",
+            projectId: "evrtumg",
+            storageBucket: "evrtumg.firebasestorage.app",
+            messagingSenderId: "62747234765",
+            appId: "1:62747234765:web:e92a188dc2fd8390e43484"
+        };
 
-                // Pokretanje Firebase-a ako već nije pokrenut
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(firebaseConfig);
+        // Pokretanje Firebase-a ako već nije pokrenut
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        db = firebase.firestore(); 
+        auth = firebase.auth(); 
+        useCloud = true;
+        
+        // Anonimna prijava za bezbedan upis na terenu bez kucanja lozinke
+        auth.signInAnonymously().then(() => {
+            updateSyncStatusUI(true);
+            
+            // =========================================================================
+            // DIREKTNA SINHRONIZACIJA SA PROJEKTOM (Umesto setupFirestoreRealtimeSync)
+            // =========================================================================
+
+            // 1. Slušaj pin kodove i spisak vaspitača iz 'system/config'
+            db.collection("system").doc("config").onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.pedagogPin) appState.pedagogPin = data.pedagogPin;
+                    if (data.adminPin) appState.adminPin = data.adminPin;
+                    if (data.educators) {
+                        appState.educators = data.educators;
+                        if (typeof populateEducatorSelects === 'function') populateEducatorSelects();
+                        if (typeof renderSettingsEducatorList === 'function') renderSettingsEducatorList();
+                    }
                 }
-                
-                db = firebase.firestore(); 
-                auth = firebase.auth(); 
-                useCloud = true;
-                
-                // Anonimna prijava za bezbedan upis na terenu bez kucanja lozinke
-                auth.signInAnonymously().then(() => {
-                    updateSyncStatusUI(true);
-                    setupFirestoreRealtimeSync();
-                }).catch(err => {
-                    console.error("Greška pri autentifikaciji na serveru:", err);
-                    updateSyncStatusUI(false);
+            }, (err) => console.error("Greška pri sinhronizaciji konfiguracije:", err));
+
+            // 2. Slušaj vrtiće, grupe i decu iz kolekcije 'groups'
+            db.collection("groups").onSnapshot((snapshot) => {
+                let tempGroups = [];
+                snapshot.forEach(doc => {
+                    tempGroups.push(doc.data());
                 });
-                
-            } catch (e) {
-                console.log("Sistem radi u lokalnom offline režimu.", e);
-                updateSyncStatusUI(false);
-            }
-        }
-
-        async function initAuthCloud() {
-            if (!useCloud) return;
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await auth.signInWithCustomToken(__initial_auth_token);
-                } else {
-                    await auth.signInAnonymously();
+                if (tempGroups.length > 0) {
+                    appState.groups = tempGroups;
+                    localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+                    if (typeof populateGroupSelects === 'function') populateGroupSelects();
+                    if (typeof populatePedagogGroups === 'function') populatePedagogGroups();
+                    if (typeof renderGroupsGrid === 'function') renderGroupsGrid();
                 }
-            } catch (e) {
-                console.error("UMG Cloud Sync: Greška prilikom autentifikacije:", e);
-            }
-        }
+            }, (err) => console.error("Greška pri sinhronizaciji grupa:", err));
+
+            // 3. Slušaj ocene i unose sa časova iz kolekcije 'dailyRecords'
+            db.collection("dailyRecords").onSnapshot((snapshot) => {
+                let tempRecords = {};
+                snapshot.forEach(doc => {
+                    tempRecords[doc.id] = doc.data();
+                });
+                if (Object.keys(tempRecords).length > 0) {
+                    appState.dailyRecords = tempRecords;
+                    localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
+                    if (typeof loadOrCreateDailyRecord === 'function') loadOrCreateDailyRecord();
+                    if (typeof loadChildAnalysis === 'function') loadChildAnalysis();
+                }
+            }, (err) => console.error("Greška pri sinhronizaciji dnevnika:", err));
+
+        }).catch(err => {
+            console.error("Greška pri autentifikaciji na serveru:", err);
+            updateSyncStatusUI(false);
+        });
+        
+    } catch (e) {
+        console.log("Sistem radi u lokalnom offline režimu.", e);
+        updateSyncStatusUI(false);
+    }
+}
 
         function updateSyncStatusUI(isOnline) {
             const el = document.getElementById('sync-status');
