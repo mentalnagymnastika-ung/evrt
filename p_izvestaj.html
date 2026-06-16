@@ -114,6 +114,31 @@
                 margin: 12mm 10mm 12mm 10mm;
             }
         }
+
+/* Mobilna optimizacija za Terenski Asistent */
+        @media (max-width: 768px) {
+            /* Povećavanje specifičnih mikro klasa */
+            .text-\\[8px\\] { font-size: 11px !important; }
+            .text-\\[9px\\] { font-size: 13px !important; }
+            .text-\\[10px\\] { font-size: 14px !important; }
+            .text-\\[11px\\] { font-size: 15px !important; }
+            
+            /* Povećavanje standardnih Tailwind klasa */
+            .text-xs { font-size: 16px !important; line-height: 1.4 !important; }
+            .text-sm { font-size: 18px !important; line-height: 1.5 !important; }
+            .text-base { font-size: 20px !important; line-height: 1.5 !important; }
+            
+            /* Proširivanje interaktivnih polja za lakši dodir prstom */
+            button, select, input { min-height: 48px !important; }
+            
+            /* Povećavanje okruglih dugmića za ocene iz dnevnika */
+            .w-12.h-12 { width: 4rem !important; height: 4rem !important; }
+            
+            /* Razmak između redova u listama da ne budu previše zbijeni */
+            .space-y-1 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.5rem !important; }
+            .space-y-1\\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem !important; }
+        }
+
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen lg:h-screen lg:overflow-hidden">
@@ -576,34 +601,37 @@
         }
 
         // CLOUD STORAGE SINHRONIZACIJA
-        function initFirebaseCloudSync() {
+function initFirebaseCloudSync() {
             try {
-                if (typeof __app_id !== 'undefined') {
-                    appId = __app_id;
-                }
-                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                    const firebaseConfig = JSON.parse(__firebase_config);
-                    
+                // TVOJI FIREBASE PODACI (Unesi svoje prave ključeve ovde)
+                const firebaseConfig = {
+                    apiKey: "TVOJ_API_KEY",
+                    authDomain: "tvoj-projekat.firebaseapp.com",
+                    projectId: "tvoj-projekat",
+                    storageBucket: "tvoj-projekat.appspot.com",
+                    messagingSenderId: "123456789",
+                    appId: "1:123456789:web:abcdef"
+                };
+
+                if (!firebase.apps.length) {
                     firebase.initializeApp(firebaseConfig);
-                    auth = firebase.auth();
-                    db = firebase.firestore();
-                    useCloud = true;
-                    
-                    initAuthCloud().then(() => {
-                        auth.onAuthStateChanged((user) => {
-                            if (user) {
-                                updateSyncStatusUI(true);
-                                setupFirestoreRealtimeSync();
-                            } else {
-                                updateSyncStatusUI(false);
-                            }
-                        });
-                    });
-                } else {
-                    updateSyncStatusUI(false);
                 }
+                
+                db = firebase.firestore(); 
+                auth = firebase.auth(); 
+                useCloud = true;
+                
+                // Anonimna prijava omogućava sinhronizaciju baze bez pravljenja naloga
+                auth.signInAnonymously().then(() => {
+                    updateSyncStatusUI(true);
+                    setupFirestoreRealtimeSync();
+                }).catch(err => {
+                    console.error("Greška pri povezivanju na bazu:", err);
+                    updateSyncStatusUI(false);
+                });
+                
             } catch (e) {
-                console.error("UMG Cloud Sync Error:", e);
+                console.log("Sistem radi u lokalnom režimu.", e);
                 updateSyncStatusUI(false);
             }
         }
