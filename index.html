@@ -277,7 +277,7 @@
                         <i class="fa-solid fa-microphone text-xs" id="mic-group-general-note"></i>
                     </button>
                 </div>
-       <textarea id="group-general-note" rows="2" onchange="updateGroupGeneralNote(this.value)" placeholder="Unesite zapažanje koje se odnosi na celu grupu tokom današnjeg časa..." class="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 text-slate-800 placeholder-slate-400 shadow-inner"></textarea>        
+                <textarea id="group-general-note" rows="2" oninput="updateGroupGeneralNote(this.value)" placeholder="Unesite zapažanje koje se odnosi na celu grupu tokom današnjeg časa..." class="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 text-slate-800 placeholder-slate-400 shadow-inner"></textarea>
             </div>
 
             <!-- Taster za čuvanje -->
@@ -549,7 +549,7 @@ function initFirebaseCloudSync() {
                 }
             }, (err) => console.error("Greška pri sinhronizaciji grupa:", err));
 
-// 3. Slušaj ocene i unose sa časova iz kolekcije 'dailyRecords'
+            // 3. Slušaj ocene i unose sa časova iz kolekcije 'dailyRecords'
             db.collection("dailyRecords").onSnapshot((snapshot) => {
                 let tempRecords = {};
                 snapshot.forEach(doc => {
@@ -558,18 +558,13 @@ function initFirebaseCloudSync() {
                 if (Object.keys(tempRecords).length > 0) {
                     appState.dailyRecords = tempRecords;
                     localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
-                    
-                    // PROVERA FOKUSA: Proveravamo da li vaspitač trenutno kuca ili snima glas
-                    const activeEl = document.activeElement;
-                    const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
-                    
-                    // Osveži ekran SAMO ako vaspitač nije usred kucanja/snimanja
-                    if (!isTyping && !activeRecognition) {
-                        if (typeof loadOrCreateDailyRecord === 'function') loadOrCreateDailyRecord();
-                        if (typeof loadChildAnalysis === 'function') loadChildAnalysis();
-                    }
+                    if (typeof loadOrCreateDailyRecord === 'function') loadOrCreateDailyRecord();
+                    if (typeof loadChildAnalysis === 'function') loadChildAnalysis();
                 }
             }, (err) => console.error("Greška pri sinhronizaciji dnevnika:", err));
+
+        }).catch(err => {
+            console.error("Greška pri autentifikaciji na serveru:", err);
             updateSyncStatusUI(false);
         });
         
@@ -937,13 +932,13 @@ function updateCloudDailyRecord(key, record) {
                                 <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-505 mb-1.5">Izražene snage danas:</span>
                                 ${categoriesHTML}
                             </div>
-<input type="text" id="note-child-${child.id}" value="${tr.note || ''}" 
-       onchange="updateChildNote('${child.id}', this.value)" 
-       placeholder="Diktirajte ili upišite opasku za ${child.name.split(' ')[0]}..." 
-       class="w-full pr-12 pl-3 py-1.5 text-xs bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 font-medium">
+
                             <!-- Glasovni unos zabeleške -->
                             <div class="relative flex items-center bg-slate-100/50 rounded-xl border border-slate-200 p-2">
-
+                                <input type="text" id="note-child-${child.id}" value="${tr.note || ''}" 
+                                       oninput="updateChildNote('${child.id}', this.value)" 
+                                       placeholder="Diktirajte ili upišite opasku za ${child.name.split(' ')[0]}..." 
+                                       class="w-full pr-12 pl-3 py-1.5 text-xs bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 font-medium">
                                 <button onclick="startVoiceInput('note-child-${child.id}', '${child.id}')" 
                                         class="absolute right-2 bg-white hover:bg-emerald-600 hover:text-white text-slate-500 w-9 h-9 rounded-full flex items-center justify-center shadow border border-slate-200 transition-all cursor-pointer">
                                     <i class="fa-solid fa-microphone text-xs" id="mic-note-child-${child.id}"></i>
@@ -1191,7 +1186,8 @@ function updateCloudDailyRecord(key, record) {
                 }
                 showToast("Slušam glas... Klikni opet za kraj.", "loading");
             };
-recognition.onresult = (event) => {
+
+            recognition.onresult = (event) => {
                 let transcript = "";
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
@@ -1199,27 +1195,20 @@ recognition.onresult = (event) => {
                     }
                 }
                 if (transcript && inputField) {
-                    // Samo popunjava tekstualno polje dok pričaš (ne čuva u bazu)
                     inputField.value = (originalVal ? originalVal.trim() + " " : "") + transcript.trim();
-                }
-            };
-
-            recognition.onerror = () => { resetMicIcons(); };
-            
-            // onend se pali kada se mikrofon ugasi (ili kada klikneš ponovo na njega)
-            recognition.onend = () => {
-                // SADA uzima konačan tekst i šalje ga u bazu jednim potezom
-                if (inputField) {
                     if (childId) {
                         updateChildNote(childId, inputField.value);
                     } else {
                         updateGroupGeneralNote(inputField.value);
                     }
                 }
-                
+            };
+
+            recognition.onerror = () => { resetMicIcons(); };
+            recognition.onend = () => {
                 activeRecognition = null;
                 resetMicIcons();
-                showToast("Završen glasovni unos. Podatak sačuvan.");
+                showToast("Završen glasovni unos.");
             };
 
             recognition.start();
