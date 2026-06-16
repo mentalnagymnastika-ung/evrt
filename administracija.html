@@ -1210,16 +1210,17 @@ function copyDatabaseAsTextCode() {
 // CLOUD SYNCHRONIZATION
 function initFirebaseCloudSync() {
             try {
-                // TVOJI FIREBASE PODACI (Unesi svoje prave ključeve ovde)
+                // Konfiguracija tvog aktivnog Firebase projekta
                 const firebaseConfig = {
-                    apiKey: "TVOJ_API_KEY",
-                    authDomain: "tvoj-projekat.firebaseapp.com",
-                    projectId: "tvoj-projekat",
-                    storageBucket: "tvoj-projekat.appspot.com",
-                    messagingSenderId: "123456789",
-                    appId: "1:123456789:web:abcdef"
+                    apiKey: "AIzaSyDMRU0F7cH4EPk6ZJd_pr4YfKQ7i4xqKuY",
+                    authDomain: "evrtumg.firebaseapp.com",
+                    projectId: "evrtumg",
+                    storageBucket: "evrtumg.firebasestorage.app",
+                    messagingSenderId: "62747234765",
+                    appId: "1:62747234765:web:e92a188dc2fd8390e43484"
                 };
 
+                // Pokretanje Firebase-a ako već nije pokrenut
                 if (!firebase.apps.length) {
                     firebase.initializeApp(firebaseConfig);
                 }
@@ -1228,17 +1229,17 @@ function initFirebaseCloudSync() {
                 auth = firebase.auth(); 
                 useCloud = true;
                 
-                // Anonimna prijava omogućava sinhronizaciju baze bez pravljenja naloga
+                // Anonimna prijava za bezbedan upis na terenu bez kucanja lozinke
                 auth.signInAnonymously().then(() => {
                     updateSyncStatusUI(true);
                     setupFirestoreRealtimeSync();
                 }).catch(err => {
-                    console.error("Greška pri povezivanju na bazu:", err);
+                    console.error("Greška pri autentifikaciji na serveru:", err);
                     updateSyncStatusUI(false);
                 });
                 
             } catch (e) {
-                console.log("Sistem radi u lokalnom režimu.", e);
+                console.log("Sistem radi u lokalnom offline režimu.", e);
                 updateSyncStatusUI(false);
             }
         }
