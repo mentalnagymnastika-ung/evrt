@@ -602,6 +602,7 @@
 
         // CLOUD STORAGE SINHRONIZACIJA
 // CLOUD SYNCHRONIZATION
+// CLOUD SYNCHRONIZATION
 function initFirebaseCloudSync() {
     try {
         // Konfiguracija tvog aktivnog Firebase projekta
@@ -625,10 +626,11 @@ function initFirebaseCloudSync() {
         
         // Anonimna prijava za bezbedan upis na terenu bez kucanja lozinke
         auth.signInAnonymously().then(() => {
+            // Čim se anonimna prijava uspešno izvrši, prebacujemo UI u "Sinhronizovano"
             updateSyncStatusUI(true);
             
             // =========================================================================
-            // DIREKTNA SINHRONIZACIJA SA PROJEKTOM (Umesto setupFirestoreRealtimeSync)
+            // DIREKTNA SINHRONIZACIJA SA PROJEKTOM
             // =========================================================================
 
             // 1. Slušaj pin kodove i spisak vaspitača iz 'system/config'
@@ -684,74 +686,6 @@ function initFirebaseCloudSync() {
         updateSyncStatusUI(false);
     }
 }
-
-        function updateSyncStatusUI(isOnline) {
-            const el = document.getElementById('sync-status');
-            if (!el) return;
-
-            if (isOnline) {
-                el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-emerald-300 animate-pulse"></i> Sinhronizovano`;
-                el.className = "text-[10px] font-black px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 bg-emerald-800 border border-emerald-600 text-emerald-100 shadow-sm animate-pulse";
-            } else {
-                el.innerHTML = `<i class="fa-solid fa-cloud-slash text-slate-400"></i> Lokalni režim (Offline)`;
-                el.className = "text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 bg-slate-800 border border-slate-700 text-slate-300";
-            }
-        }
-
-        function setupFirestoreRealtimeSync() {
-            if (!useCloud || !db) return;
-
-            // Slušaj pin kod i konfiguraciju
-            db.doc(`artifacts/${appId}/public/data/system/config`).onSnapshot((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (data.pedagogPin) appState.pedagogPin = data.pedagogPin;
-                }
-            }, (err) => console.error(err));
-
-            // Slušaj grupe
-            db.collection(`artifacts/${appId}/public/data/groups`).onSnapshot((snapshot) => {
-                let tempGroups = [];
-                snapshot.forEach(doc => {
-                    tempGroups.push(doc.data());
-                });
-                if (tempGroups.length > 0) {
-                    appState.groups = tempGroups;
-                    localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-                    populatePedagogGroups();
-                }
-            }, (err) => console.error(err));
-
-            // Slušaj dnevne records časova
-            db.collection(`artifacts/${appId}/public/data/dailyRecords`).onSnapshot((snapshot) => {
-                let tempRecords = {};
-                snapshot.forEach(doc => {
-                    tempRecords[doc.id] = doc.data();
-                });
-                if (Object.keys(tempRecords).length > 0) {
-                    appState.dailyRecords = tempRecords;
-                    localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
-                    loadChildAnalysis();
-                }
-            }, (err) => console.error(err));
-
-            // Slušaj arhivu izveštaja
-            db.collection(`artifacts/${appId}/public/data/savedReports`).onSnapshot((snapshot) => {
-                let tempReports = {};
-                snapshot.forEach(doc => {
-                    tempReports[doc.id] = doc.data().reports || [];
-                });
-                if (Object.keys(tempReports).length > 0) {
-                    appState.savedReports = tempReports;
-                    localStorage.setItem('umg_field_reports_archive', JSON.stringify(appState.savedReports));
-                    
-                    const select = document.getElementById('pedagog-child-select');
-                    if (select && select.value) {
-                        renderReportHistoryStatus(select.value);
-                    }
-                }
-            }, (err) => console.error(err));
-        }
 
         function updateCloudSavedReports(childId) {
             if (useCloud && db && auth.currentUser) {
