@@ -443,9 +443,10 @@
         }
 
         // DINAMIČKI PWA GENERATOR
+// DINAMIČKI PWA GENERATOR
         function setupPWAAndServiceWorker() {
             try {
-const manifest = {
+                const manifest = {
                     "name": "UMG Terenski Asistent",
                     "short_name": "UMG Asistent",
                     "start_url": "index.html",
@@ -474,14 +475,10 @@ const manifest = {
                 link.href = manifestURL;
                 document.head.appendChild(link);
 
+                // Koristimo eksterni service worker koji već ispravno kešira i propušta Firebase zahteve
                 if ('serviceWorker' in navigator) {
-                    const swCode = `
-                        self.addEventListener('install', (e) => self.skipWaiting());
-                        self.addEventListener('fetch', (e) => {});
-                    `;
-                    const swBlob = new Blob([swCode], {type: 'text/javascript'});
-                    const swURL = URL.createObjectURL(swBlob);
-                    navigator.serviceWorker.register(swURL).catch(err => console.log("SW failed", err));
+                    navigator.serviceWorker.register('pwa_service_worker (1).js')
+                    .catch(err => console.log("SW failed", err));
                 }
             } catch (e) {
                 console.warn("PWA registracija nije dostupna u ovom okruženju.", e);
@@ -489,6 +486,7 @@ const manifest = {
         }
 
         // INICIJALIZACIJA FIREBASE
+// CLOUD SYNCHRONIZATION
 // CLOUD SYNCHRONIZATION
 function initFirebaseCloudSync() {
     try {
@@ -513,10 +511,11 @@ function initFirebaseCloudSync() {
         
         // Anonimna prijava za bezbedan upis na terenu bez kucanja lozinke
         auth.signInAnonymously().then(() => {
+            // Čim se anonimna prijava uspešno izvrši, prebacujemo UI u "Sinhronizovano"
             updateSyncStatusUI(true);
             
             // =========================================================================
-            // DIREKTNA SINHRONIZACIJA SA PROJEKTOM (Umesto setupFirestoreRealtimeSync)
+            // DIREKTNA SINHRONIZACIJA SA PROJEKTOM
             // =========================================================================
 
             // 1. Slušaj pin kodove i spisak vaspitača iz 'system/config'
@@ -626,12 +625,12 @@ function initFirebaseCloudSync() {
             }, (err) => console.error(err));
         }
 
-        function updateCloudDailyRecord(key, record) {
-            if (useCloud && db && auth.currentUser) {
-                db.collection(`artifacts/${appId}/public/data/dailyRecords`).doc(key).set(record)
-                  .catch(err => console.error("Greška pri upisu dnevnika na server:", err));
-            }
-        }
+function updateCloudDailyRecord(key, record) {
+    if (useCloud && db) {
+        db.collection("dailyRecords").doc(key).set(record, { merge: true })
+          .catch(err => console.error("Greška pri upisu dnevnika na server:", err));
+    }
+}
 
         // POPUNJAVANJE dropdown selektora grupa (Terenska sveska)
         function populateGroupSelects() {
