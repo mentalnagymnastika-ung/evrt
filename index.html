@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="UMG Asistent">
-    <link rel="apple-touch-icon" href="logo.png">
+    <link class="cite-source" rel="apple-touch-icon" href="logo.png">
     
     <!-- Tailwind CSS za moderan i responzivan dizajn -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;955&display=swap" rel="stylesheet">
     
     <!-- Link ka manifestu za PWA instalaciju -->
-    <link rel="manifest" href="manifest.json">
+    <link class="cite-source" rel="manifest" href="manifest.json">
     
     <!-- Firebase Compat SDKs za automatsku sinhronizaciju na oblaku (v10.8.0) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -343,6 +343,12 @@
                 return;
             }
 
+            // AUTOMATSKO POSTAVLJANJE DANAŠNJEG DATUMA ODMAH NA STARTU
+            const dateInput = document.getElementById('field-class-date');
+            if (dateInput) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+
             const savedGroups = localStorage.getItem('umg_field_groups');
             if (savedGroups) appState.groups = JSON.parse(savedGroups);
 
@@ -494,6 +500,7 @@
                             appState.dailyRecords = tempRecords;
                             localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
                             
+                            // PROVERA FOKUSA: Sprečava seckanje i zatvaranje tastature dok vaspitač kuca ili snima
                             const activeEl = document.activeElement;
                             const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
                             
@@ -939,31 +946,27 @@
             }
         }
 
-        let typingTimer;
-        const doneTypingInterval = 1200; 
-
         function updateChildNote(childId, val) {
             const key = getRecordKey();
             if (appState.dailyRecords[key] && appState.dailyRecords[key].children[childId]) {
                 appState.dailyRecords[key].children[childId].note = val;
-                
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(() => {
-                    saveDailyRecord(false);
-                }, doneTypingInterval);
+                saveDailyRecord(false);
             }
         }
         
-        let generalTypingTimer;
         function updateGroupGeneralNote(val) {
             const key = getRecordKey();
             if (appState.dailyRecords[key]) {
                 appState.dailyRecords[key].generalNote = val;
-                
-                clearTimeout(generalTypingTimer);
-                generalTypingTimer = setTimeout(() => {
-                    saveDailyRecord(false);
-                }, doneTypingInterval);
+                saveDailyRecord(false);
+            }
+        }
+
+        function updateClassTheme(val) {
+            const key = getRecordKey();
+            if (appState.dailyRecords[key]) {
+                appState.dailyRecords[key].theme = val;
+                saveDailyRecord(false);
             }
         }
 
@@ -1090,6 +1093,7 @@
                     }
                 }
                 if (transcript && inputField) {
+                    // Samo ispisuje u polje dok vaspitač priča, NE šalje u bazu
                     inputField.value = (originalVal ? originalVal.trim() + " " : "") + transcript.trim();
                 }
             };
@@ -1098,6 +1102,7 @@
             
             recognition.onend = () => {
                 if (inputField) {
+                    // SADA salje konačan tekst u bazu nakon gašenja mikrofona
                     if (childId) {
                         updateChildNote(childId, inputField.value);
                     } else {
