@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UMG - Terenski rad vaspitača</title>
+    
+    <!-- Meta tagovi za mobilnu aplikaciju (Moderna PWA & iOS podrška) -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="UMG Asistent">
+    <link rel="apple-touch-icon" href="logo.png">
+    
+    <!-- Tailwind CSS za moderan i responzivan dizajn -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome za ikonice -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;950&display=swap" rel="stylesheet">
+    
+    <!-- Link ka manifestu za PWA instalaciju -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Firebase Compat SDKs za automatsku sinhronizaciju na oblaku (v10.8.0) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: 'DM Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Fini klizači za desktop režim */
+        @media (min-width: 1024px) {
+            .custom-scrollbar::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: #f1f5f9;
+                border-radius: 8px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 8px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
+        }
+
+        /* Animacija talasanja aktivnog mikrofona */
+        @keyframes pulse-red {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        }
+        .mic-active {
+            animation: pulse-red 1.5s infinite;
+        }
+
+        /* Mobilna optimizacija za Terenski Asistent */
+        @media (max-width: 768px) {
+            .text-\\[8px\\] { font-size: 11px !important; }
+            .text-\\[9px\\] { font-size: 13px !important; }
+            .text-\\[10px\\] { font-size: 14px !important; }
+            .text-\\[11px\\] { font-size: 15px !important; }
+            
+            .text-xs { font-size: 16px !important; line-height: 1.4 !important; }
+            .text-sm { font-size: 18px !important; line-height: 1.5 !important; }
+            .text-base { font-size: 20px !important; line-height: 1.5 !important; }
+            
+            button, select, input { min-height: 48px !important; }
+            
+            .space-y-1 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.5rem !important; }
+            .space-y-1\\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen lg:h-screen lg:overflow-hidden select-none">
+
+    <!-- Glavno zaglavlje platforme (Premium svijetli dizajn) -->
+    <nav class="bg-white text-slate-800 shadow-sm py-4 px-4 md:px-6 shrink-0 border-b border-slate-200/80">
+        <div class="max-w-7xl mx-auto flex flex-row justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('welcome')">
+                <img src="logo.png" alt="eVrt Logo" class="w-12 h-12 rounded-2xl object-contain bg-white p-1 shadow-md border border-slate-200/60">
+                <div>
+                    <h1 class="font-black text-base tracking-wide leading-tight text-slate-900">Mentalna Gimnastika</h1>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Terenski Modul</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <!-- Indikator statusa sinhronizacije na oblaku -->
+                <div class="text-[9px] font-black px-2.5 py-2 rounded-xl flex items-center gap-1.5 transition-all duration-300" id="sync-status">
+                    <i class="fa-solid fa-cloud-slash text-slate-400"></i> Lokalno
+                </div>
+                <!-- Brzi povratak na Welcome stranu -->
+                <button onclick="switchTab('welcome')" id="btn-logout" class="text-xs font-black px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer border border-slate-200 hidden">
+                    <i class="fa-solid fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- OSNOVNI RADNI PROSTOR -->
+    <main class="max-w-7xl w-full mx-auto p-4 flex-grow flex flex-col lg:overflow-hidden">
+
+        <!-- ======================================================= -->
+        <!--  TAB 0: INDEX STRANA / PORTAL (WELCOME TAB)              -->
+        <!-- ======================================================= -->
+        <section id="tab-welcome" class="space-y-8 lg:h-full lg:overflow-y-auto custom-scrollbar pb-12 flex flex-col justify-between items-center py-6 flex-grow">
+            
+            <!-- Brendirani logo i zaglavlje -->
+            <div class="text-center max-w-xl space-y-4 my-auto">
+                <img src="logo.png" alt="eVrt Logo" class="w-24 h-24 rounded-[2rem] object-contain bg-white p-2 shadow-xl mx-auto border border-slate-100">
+                <div class="space-y-1">
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tight leading-tight">Mentalna Gimnastika</h2>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Sistem za praćenje i analizu razvoja dece</p>
+                </div>
+            </div>
+
+            <!-- Glavna forma za vaspitače na terenu -->
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-200/80 max-w-sm w-full shadow-lg space-y-5">
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Izaberi svoj profil:</label>
+                    <select id="welcome-educator-select" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 shadow-inner">
+                        <!-- Popunjava se dinamički -->
+                    </select>
+                </div>
+                <button onclick="loginAsEducator()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl text-xs transition-all shadow-lg flex items-center justify-center cursor-pointer tracking-wider uppercase">
+                    <i class="fa-solid fa-sign-in-alt mr-2 text-sm"></i> Pristupi radu
+                </button>
+            </div>
+
+            <!-- MINI DISKRETNI FOOTER SA DVE IKONICE -->
+            <div class="w-full max-w-sm border-t border-slate-200/80 pt-4 flex flex-col items-center space-y-2">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Zaštićene pedagoške i admin sekcije</span>
+                <div class="flex justify-center space-x-6">
+                    <a href="p_izvestaj.html" class="w-11 h-11 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-purple-600 hover:border-purple-500/30 transition-all relative group" title="Otključaj P-izveštaj">
+                        <i class="fa-solid fa-graduation-cap text-sm"></i>
+                        <span class="absolute -top-1 -right-1 bg-amber-500 text-slate-900 text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-black shadow"><i class="fa-solid fa-lock"></i></span>
+                    </a>
+                    <a href="administracija.html" class="w-11 h-11 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-500/30 transition-all relative group" title="Otključaj Administraciju">
+                        <i class="fa-solid fa-sliders-h text-sm"></i>
+                        <span class="absolute -top-1 -right-1 bg-amber-500 text-slate-900 text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-black shadow"><i class="fa-solid fa-lock"></i></span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================= -->
+        <!--  TAB 1: TERENSKI RAD VASPITAČA (DNEVNI UNOS)             -->
+        <!-- ======================================================= -->
+        <section id="tab-field" class="space-y-4 lg:h-full lg:overflow-y-auto custom-scrollbar pb-8 hidden">
+            
+            <!-- PAMETNA KOMPAKTNA TRAKA SA SAŽETKOM ČASA I INLINE BRZOM PRETRAGOM -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                <div class="flex items-center space-x-2 text-xs font-bold text-slate-700 flex-grow" id="summary-left-container">
+                    <span class="bg-emerald-50 text-emerald-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-emerald-100/60 font-black" id="summary-date">
+                        12.06.
+                    </span>
+                    <span class="text-slate-300">|</span>
+                    <span class="truncate text-slate-600 flex items-center gap-1" id="summary-info">Učitavanje...</span>
+                    <span class="text-slate-300">|</span>
+                    
+                    <div class="flex items-center space-x-1.5 text-[10px] shrink-0">
+                        <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-xl flex items-center gap-1" title="Prisutno dece">
+                            P: <span id="header-stat-present" class="font-black">0</span>
+                        </span>
+                        <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-xl flex items-center gap-1" title="Odsutno dece">
+                            O: <span id="header-stat-absent" class="font-black">0</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="hidden flex-grow items-center relative" id="inline-search-container">
+                    <input type="text" id="global-child-search" oninput="handleGlobalSearch()" placeholder="Pretraži dete po imenu..." class="w-full bg-slate-50 text-slate-800 placeholder-slate-400 rounded-xl pl-9 pr-8 py-2 text-xs outline-none border border-slate-200 focus:border-emerald-500 transition-all shadow-sm">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                    <button onclick="toggleInlineSearch(false)" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center space-x-2 shrink-0 justify-end">
+                    <button onclick="toggleInlineSearch(true)" id="btn-toggle-search" class="bg-slate-100 hover:bg-slate-200 text-slate-700 w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 cursor-pointer" title="Pretraži decu">
+                        <i class="fa-solid fa-magnifying-glass text-xs sm:text-sm"></i>
+                    </button>
+                    <button onclick="toggleSettingsPanel()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 h-9 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-slate-200">
+                        <i class="fa-solid fa-sliders text-emerald-600"></i>
+                        <span>Podesi</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300" id="settings-chevron"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SKLOPIVI PANEL SA SELEKTORIMA -->
+            <div id="settings-collapsible-panel" class="hidden bg-white border border-slate-200 rounded-3xl p-4 grid grid-cols-1 sm:grid-cols-4 gap-4 shadow-inner transition-all duration-300">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
+                        <i class="fa-solid fa-calendar-day text-emerald-500 mr-1.5"></i> 1. Datum časa
+                    </label>
+                    <input type="date" id="field-class-date" onchange="loadOrCreateDailyRecord(); updateSummaryBar();" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
+                        <i class="fa-solid fa-user-tie text-emerald-500 mr-1.5"></i> 2. Aktivni vaspitač
+                    </label>
+                    <select id="field-educator-select" onchange="changeActiveEducator(); updateSummaryBar();" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
+                        <i class="fa-solid fa-folder-tree text-emerald-500 mr-1.5"></i> 3. Aktivna grupa / Vrtić
+                    </label>
+                    <select id="field-group-select" onchange="changeActiveGroup(); updateSummaryBar();" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center">
+                        <i class="fa-solid fa-book-open text-emerald-500 mr-1.5"></i> 4. Aktivnost / Tema
+                    </label>
+                    <input type="text" id="field-class-theme" placeholder="Npr. Apstraktna logika i poligon..." onchange="updateClassTheme(this.value); updateSummaryBar();" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
+                </div>
+            </div>
+
+            <div id="substitute-alert-bar" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-medium leading-relaxed flex items-center space-x-2.5">
+                <i class="fa-solid fa-circle-exclamation text-base shrink-0 text-amber-600 animate-bounce"></i>
+                <span id="substitute-alert-text">Učitavanje režima zamene...</span>
+            </div>
+
+            <!-- DINAMIČKA LISTA DECE U GRUPI -->
+            <div class="space-y-3" id="children-field-list">
+                <!-- Generiše se kroz JS -->
+            </div>
+
+            <!-- Opšta beleška za ceo čas -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-4 space-y-3 shadow-md">
+                <div class="flex justify-between items-center">
+                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center">
+                        <i class="fa-solid fa-message-captions text-emerald-500 mr-1.5"></i>
+                        Zajednička beleška za celu grupu (opcionalno)
+                    </h4>
+                    <button onclick="startVoiceInput('group-general-note')" class="bg-slate-50 hover:bg-emerald-600 text-slate-505 hover:text-white w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer shadow border border-slate-200">
+                        <i class="fa-solid fa-microphone text-xs" id="mic-group-general-note"></i>
+                    </button>
+                </div>
+                <textarea id="group-general-note" rows="2" oninput="updateGroupGeneralNote(this.value)" placeholder="Unesite zapažanje koje se odnosi na celu grupu tokom današnjeg časa..." class="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 text-slate-800 placeholder-slate-400 shadow-inner"></textarea>
+            </div>
+
+            <!-- Taster za čuvanje -->
+            <button onclick="saveDailyRecord(true)" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 px-6 rounded-2xl shadow-lg transition-all flex items-center justify-center cursor-pointer text-xs uppercase tracking-wider">
+                <i class="fa-solid fa-floppy-disk mr-2 text-sm"></i> Sačuvaj i ažuriraj današnji čas
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Toast obaveštenja -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2.5 z-50 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-sm" id="toast-icon"></i>
+        <span id="toast-text" class="text-xs font-bold tracking-wide">Učitavanje...</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIKA PORTALA I VASPITAČKOG RADA -->
+    <script>
+        const LICENSE_CONFIG = {
+            expirationDate: "2026-09-01", 
+            clientName: "Predškolska Ustanova klijenta",
+            supportContact: "podrska@mentalgimnastika.rs"
+        };
+
+        const areas = [
+            { id: 1, name: "Memorija (Radna, Dugotrajna, Kratkotrajna)", short: "Memorija i prisećanje", desc: "Sposobnost skladištenja i pronalaženja informacija.", default: 75, icon: "fa-brain", category: "cognitive" },
+            { id: 2, name: "Grafo-motorika i koordinacija oko-ruka", short: "Grafo-motorika", desc: "Preciznost pokreta ruke, držanje olovke i vizuelno-motorna kontrola.", default: 75, icon: "fa-pen-clip", category: "motor" },
+            { id: 3, name: "Pažnja i Koncentracija", short: "Fokus i pažnja", desc: "Dužina zadržavanja fokusa na zadatku bez ometanja.", default: 75, icon: "fa-eye", category: "motor" },
+            { id: 4, name: "Apstraktno razmišljanje i brzina pronalaženja rešenja", short: "Apstraktna logika", desc: "Sposobnost rešavanja mentalnih zagonetki bez fizičkih objekata.", default: 75, icon: "fa-lightbulb", category: "cognitive" },
+            { id: 5, name: "Uočavanje odnosa (asocijativnost i zaključivanje)", short: "Asocijativnost", desc: "Povezivanje uzroka i posledica, pronalaženje sličnosti.", default: 75, icon: "fa-diagram-project", category: "cognitive" },
+            { id: 6, name: "Razumevanje složenih pojmova i verbalna komunikacija", short: "Verbalni pojmovi", desc: "Vokabular i verbalno izražavanje kompleksnih ideja.", default: 75, icon: "fa-comments", category: "social" },
+            { id: 7, name: "Socijalno i emotivno sazrevanje", short: "Socijalno i emotivno", desc: "Nošenje sa uspehom/neuspehom, empatija prema drugarima.", default: 75, icon: "fa-heart", category: "social" },
+            { id: 8, name: "Propriocepcija (usklađenost pokreta tela)", short: "Propriocepcija", desc: "Orijentacija u prostoru, motorička kontrola i kretanje na poligonu.", default: 75, icon: "fa-child-reaching", category: "motor" },
+            { id: 9, name: "Logika (verbalna, matematička...)", short: "Matematička logika", desc: "Struktuirano, logičko zaključivanje i razumevanje odnosa.", default: 75, icon: "fa-calculator", category: "cognitive" },
+            { id: 10, name: "Serijacija i Klasifikacija", short: "Serijacija i klasifikacija", desc: "Grupisanje po osobinama (boja, oblik) i ređanje po veličini.", default: 75, icon: "fa-arrow-down-short-wide", category: "cognitive" },
+            { id: 11, name: "Kreativnost i originalnost rešenja", short: "Kreativnost", desc: "Inovativan pristup igrama i sloboda u stvaranju rešenja.", default: 75, icon: "fa-palette", category: "social" }
+        ];
+
+        const categories = {
+            cognitive: { 
+                name: "Kognitivni razvoj i Logika", 
+                colorClass: "bg-blue-50/70 border-blue-100", 
+                activeBtnClass: "bg-blue-600 text-white border-transparent", 
+                inactiveBtnClass: "bg-white text-blue-600 border-blue-200/50 hover:bg-blue-50/50", 
+                textClass: "text-blue-700"
+            },
+            motor: { 
+                name: "Fokus, Pažnja i Motorika", 
+                colorClass: "bg-emerald-50/70 border-emerald-100", 
+                activeBtnClass: "bg-emerald-600 text-white border-transparent", 
+                inactiveBtnClass: "bg-white text-emerald-600 border-emerald-200/50 hover:bg-emerald-50/50", 
+                textClass: "text-emerald-700"
+            },
+            social: { 
+                name: "Socijalni, Govorni i Kreativni", 
+                colorClass: "bg-purple-50/70 border-purple-100", 
+                activeBtnClass: "bg-purple-600 text-white border-transparent", 
+                inactiveBtnClass: "bg-white text-purple-600 border-purple-200/50 hover:bg-purple-50/50", 
+                textClass: "text-purple-700"
+            }
+        };
+
+        const ratingLevels = [
+            { val: 120, label: "Iznad oček.", title: "120 - Iznad očekivanog (darovitost)", color: "from-purple-600 via-indigo-600 to-cyan-500", text: "text-purple-700", border: "border-purple-200", bg: "bg-purple-50" },
+            { val: 100, label: "Odlično", title: "100 - Odlično postignuće", color: "from-indigo-500 to-purple-600", text: "text-indigo-700", border: "border-indigo-200", bg: "bg-indigo-50" },
+            { val: 90, label: "Uobičajeno", title: "90 - Uobičajeni nivo", color: "from-emerald-500 to-teal-500", text: "text-emerald-700", border: "border-emerald-200", bg: "bg-emerald-50" },
+            { val: 75, label: "Dobro", title: "75 - Dobro u skladu sa uzrastom", color: "from-blue-500 to-cyan-500", text: "text-blue-700", border: "border-blue-200", bg: "bg-blue-50" },
+            { val: 50, label: "Podrška", title: "50 - Potrebna dodatna podrška", color: "from-rose-500 to-red-500", text: "text-rose-700", border: "border-rose-200", bg: "bg-rose-50" }
+        ];
+
+        let appState = {
+            groups: [],
+            dailyRecords: {}, 
+            educators: []
+        };
+
+        let activeGroupId = "";
+        let activeEducator = "";
+        let activeRecognition = null;
+        let originalTextMap = {};
+        let expandedChildIds = new Set();
+        
+        let db = null;
+        let auth = null;
+        let useCloud = false;
+        let appId = 'default-app-id';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (checkLicenseExpired()) {
+                showLicenseExpiredScreen();
+                return;
+            }
+
+            const savedGroups = localStorage.getItem('umg_field_groups');
+            if (savedGroups) appState.groups = JSON.parse(savedGroups);
+
+            const savedEducators = localStorage.getItem('umg_field_educators');
+            if (savedEducators) appState.educators = JSON.parse(savedEducators);
+
+            const savedRecords = localStorage.getItem('umg_field_records');
+            if (savedRecords) appState.dailyRecords = JSON.parse(savedRecords);
+
+            const savedSelectedEducator = localStorage.getItem('umg_active_educator');
+            if (savedSelectedEducator && appState.educators.includes(savedSelectedEducator)) {
+                activeEducator = savedSelectedEducator;
+            } else if (appState.educators.length > 0) {
+                activeEducator = appState.educators[0];
+            }
+
+            populateEducatorSelects();
+            populateGroupSelects(); 
+            loadOrCreateDailyRecord();
+            
+            initFirebaseCloudSync();
+            setupPWAAndServiceWorker();
+        });
+
+        function checkLicenseExpired() {
+            const today = new Date();
+            const expirationLimit = new Date(LICENSE_CONFIG.expirationDate);
+            return today > expirationLimit;
+        }
+
+        function showLicenseExpiredScreen() {
+            document.body.className = "bg-slate-900 text-slate-100 flex items-center justify-center min-h-screen p-4";
+            document.body.innerHTML = `
+                <div class="bg-slate-950 p-8 rounded-3xl border border-rose-500/30 max-w-md w-full text-center shadow-2xl space-y-6">
+                    <div class="w-20 h-20 bg-rose-500/10 text-rose-500 rounded-2xl flex items-center justify-center mx-auto text-3xl">
+                        <i class="fa-solid fa-hourglass-end animate-pulse"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="text-xl font-black text-rose-400">Licenca za korišćenje je istekla</h2>
+                        <p class="text-xs text-slate-400 leading-relaxed">Pristup aplikaciji UMG Asistent za ustanovu <strong class="text-slate-200">${LICENSE_CONFIG.clientName}</strong> je onemogućen jer je ugovorni ili probni period završen.</p>
+                    </div>
+                    <div class="p-4 bg-slate-900 rounded-xl text-left border border-slate-800 text-[11px] text-slate-500 leading-relaxed font-sans">
+                        Za produženje ugovora, tehničku podršku i reizdavanje licenci, molimo kontaktirajte nas direktno putem e-mail adrese.
+                    </div>
+                    <a href="mailto:${LICENSE_CONFIG.supportContact}" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition-all shadow-lg flex items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-envelope mr-2"></i> Kontaktiraj tehničku podršku
+                    </a>
+                </div>
+            `;
+        }
+
+        function setupPWAAndServiceWorker() {
+            try {
+                const manifest = {
+                    "name": "UMG Terenski Asistent",
+                    "short_name": "UMG Asistent",
+                    "start_url": "index.html",
+                    "display": "standalone",
+                    "background_color": "#ffffff",
+                    "theme_color": "#059669",
+                    "description": "Terenski rad za vaspitače Mentalne Gimnastike",
+                 "icons": [
+                        {
+                            "src": "logo.png",
+                            "sizes": "192x192",
+                            "type": "image/png",
+                            "purpose": "any maskable"
+                        },
+                        {
+                            "src": "logo.png",
+                            "sizes": "512x512",
+                            "type": "image/png",
+                            "purpose": "any maskable"
+                        }
+                    ]
+                };
+
+                const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+                const manifestURL = URL.createObjectURL(blob);
+                const link = document.createElement('link');
+                link.rel = 'manifest';
+                link.href = manifestURL;
+                document.head.appendChild(link);
+
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('pwa_service_worker (1).js')
+                    .catch(err => console.log("SW failed", err));
+                }
+            } catch (e) {
+                console.warn("PWA registracija nije dostupna u ovom okruženju.", e);
+            }
+        }
+
+        // CLOUD SYNCHRONIZATION
+        function initFirebaseCloudSync() {
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyDMRU0F7cH4EPk6ZJd_pr4YfKQ7i4xqKuY",
+                    authDomain: "evrtumg.firebaseapp.com",
+                    projectId: "evrtumg",
+                    storageBucket: "evrtumg.firebasestorage.app",
+                    messagingSenderId: "62747234765",
+                    appId: "1:62747234765:web:e92a188dc2fd8390e43484"
+                };
+
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                
+                db = firebase.firestore(); 
+                auth = firebase.auth(); 
+                useCloud = true;
+                
+                auth.signInAnonymously().then(() => {
+                    updateSyncStatusUI(true);
+                    
+                    db.collection("system").doc("config").onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            if (data.pedagogPin) appState.pedagogPin = data.pedagogPin;
+                            if (data.adminPin) appState.adminPin = data.adminPin;
+                            if (data.educators) {
+                                appState.educators = data.educators;
+                                if (typeof populateEducatorSelects === 'function') populateEducatorSelects();
+                                if (typeof renderSettingsEducatorList === 'function') renderSettingsEducatorList();
+                            }
+                        }
+                    }, (err) => console.error("Greška pri sinhronizaciji konfiguracije:", err));
+
+                    db.collection("groups").onSnapshot((snapshot) => {
+                        let tempGroups = [];
+                        snapshot.forEach(doc => {
+                            tempGroups.push(doc.data());
+                        });
+                        if (tempGroups.length > 0) {
+                            appState.groups = tempGroups;
+                            localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+                            if (typeof populateGroupSelects === 'function') populateGroupSelects();
+                            if (typeof populatePedagogGroups === 'function') populatePedagogGroups();
+                            if (typeof renderGroupsGrid === 'function') renderGroupsGrid();
+                        }
+                    }, (err) => console.error("Greška pri sinhronizaciji grupa:", err));
+
+                    db.collection("dailyRecords").onSnapshot((snapshot) => {
+                        let tempRecords = {};
+                        snapshot.forEach(doc => {
+                            tempRecords[doc.id] = doc.data();
+                        });
+                        if (Object.keys(tempRecords).length > 0) {
+                            appState.dailyRecords = tempRecords;
+                            localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
+                            
+                            // PROVERA FOKUSA: Sprečava seckanje i zatvaranje tastature dok vaspitač kuca ili snima
+                            const activeEl = document.activeElement;
+                            const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+                            
+                            if (!isTyping && !activeRecognition) {
+                                if (typeof loadOrCreateDailyRecord === 'function') loadOrCreateDailyRecord();
+                                if (typeof loadChildAnalysis === 'function') loadChildAnalysis();
+                            }
+                        }
+                    }, (err) => console.error("Greška pri sinhronizaciji dnevnika:", err));
+
+                }).catch(err => {
+                    console.error("Greška pri autentifikaciji na serveru:", err);
+                    updateSyncStatusUI(false);
+                });
+                
+            } catch (e) {
+                console.log("Sistem radi u lokalnom offline režimu.", e);
+                updateSyncStatusUI(false);
+            }
+        }
+
+        function updateSyncStatusUI(isOnline) {
+            const el = document.getElementById('sync-status');
+            if (!el) return;
+
+            if (isOnline) {
+                el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-emerald-600 animate-pulse"></i> Sinhronizovano`;
+                el.className = "text-[9px] font-black px-2.5 py-2 rounded-xl flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-sm";
+            } else {
+                el.innerHTML = `<i class="fa-solid fa-cloud-slash text-slate-400"></i> Lokalno`;
+                el.className = "text-[9px] font-bold px-2.5 py-2 rounded-xl flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-500";
+            }
+        }
+
+        function updateCloudDailyRecord(key, record) {
+            if (useCloud && db) {
+                db.collection("dailyRecords").doc(key).set(record, { merge: true })
+                  .catch(err => console.error("Greška pri upisu dnevnika na server:", err));
+            }
+        }
+
+        function populateGroupSelects() {
+            const fieldSelect = document.getElementById('field-group-select');
+            if (!fieldSelect) return;
+
+            fieldSelect.innerHTML = '';
+            const filteredGroups = appState.groups.filter(g => g.educator === activeEducator);
+
+            filteredGroups.forEach(group => {
+                const opt = document.createElement('option');
+                opt.value = group.id;
+                opt.innerText = group.name;
+                fieldSelect.appendChild(opt);
+            });
+
+            if (filteredGroups.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.innerText = "-- Nema dodeljenih grupa --";
+                fieldSelect.appendChild(opt);
+                activeGroupId = "";
+            } else {
+                activeGroupId = filteredGroups[0].id;
+            }
+        }
+
+        function populateEducatorSelects() {
+            const fieldEducatorSelect = document.getElementById('field-educator-select');
+            const welcomeEducatorSelect = document.getElementById('welcome-educator-select');
+
+            const populateList = (selectElement, selectValue) => {
+                if (!selectElement) return;
+                selectElement.innerHTML = '';
+                appState.educators.forEach(ed => {
+                    const opt = document.createElement('option');
+                    opt.value = ed;
+                    opt.innerText = ed;
+                    opt.selected = (ed === selectValue);
+                    selectElement.appendChild(opt);
+                });
+            };
+
+            populateList(fieldEducatorSelect, activeEducator);
+            populateList(welcomeEducatorSelect, activeEducator);
+        }
+
+        function loginAsEducator() {
+            const select = document.getElementById('welcome-educator-select');
+            if (select) {
+                activeEducator = select.value;
+                localStorage.setItem('umg_active_educator', activeEducator);
+                
+                const fieldSelect = document.getElementById('field-educator-select');
+                if (fieldSelect) fieldSelect.value = activeEducator;
+
+                const fieldTabBtn = document.getElementById('btn-tab-field');
+                if (fieldTabBtn) fieldTabBtn.classList.remove('hidden');
+
+                const logoutBtn = document.getElementById('btn-logout');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+
+                populateGroupSelects();
+                loadOrCreateDailyRecord();
+                switchTab('field');
+                showToast(`Prijavljeni ste kao: ${activeEducator}`);
+            }
+        }
+
+        function changeActiveEducator() {
+            const select = document.getElementById('field-educator-select');
+            if (select) {
+                activeEducator = select.value;
+                localStorage.setItem('umg_active_educator', activeEducator);
+                
+                const searchInput = document.getElementById('global-child-search');
+                if (searchInput) searchInput.value = '';
+
+                populateGroupSelects();
+                loadOrCreateDailyRecord();
+            }
+        }
+
+        function changeActiveGroup() {
+            const select = document.getElementById('field-group-select');
+            if (select) {
+                activeGroupId = select.value;
+                loadOrCreateDailyRecord();
+            }
+        }
+
+        function getRecordKey() {
+            const dateInput = document.getElementById('field-class-date');
+            const date = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+            return `${date}_${activeGroupId}`;
+        }
+
+        function loadOrCreateDailyRecord() {
+            if (!activeGroupId) {
+                const container = document.getElementById('children-field-list');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="text-center py-8 bg-white rounded-2xl border border-dashed border-slate-200 p-6">
+                            <i class="fa-solid fa-folder-open text-slate-400 text-3xl mb-2"></i>
+                            <p class="text-xs text-slate-600 font-bold">Nemate dodeljenih grupa u bazi podataka.</p>
+                            <p class="text-[10px] text-slate-400 mt-1">Nakon što vam uprava kroz Administraciju dodeli grupu, ona će se pojaviti ovde.</p>
+                        </div>
+                    `;
+                }
+                document.getElementById('header-stat-present').innerText = "0";
+                document.getElementById('header-stat-absent').innerText = "0";
+                const alertBar = document.getElementById('substitute-alert-bar');
+                if (alertBar) alertBar.classList.add('hidden');
+                return;
+            }
+
+            const key = getRecordKey();
+            const activeGroup = appState.groups.find(g => g.id === activeGroupId);
+            
+            if (!activeGroup) return;
+
+            const alertBar = document.getElementById('substitute-alert-bar');
+            const alertText = document.getElementById('substitute-alert-text');
+            
+            if (activeGroup.educator && activeGroup.educator !== activeEducator) {
+                if (alertBar && alertText) {
+                    alertText.innerHTML = `Zabeleženo kao <strong>ZAMENA na času</strong>. Prijavljeni ste kao vaspitač <strong>${activeEducator}</strong>, a radite sa grupom čiji je stalni instruktor <strong>${activeGroup.educator}</strong>. Svi unosi biće potpisani Vašim imenom.`;
+                    alertBar.classList.remove('hidden');
+                }
+            } else {
+                if (alertBar) alertBar.classList.add('hidden');
+            }
+
+            if (!appState.dailyRecords[key]) {
+                const childTracking = {};
+                activeGroup.children.forEach(child => {
+                    childTracking[child.id] = {
+                        present: true,          
+                        score: null,            
+                        highlightAreas: [],     
+                        note: ""                
+                    };
+                });
+
+                appState.dailyRecords[key] = {
+                    date: document.getElementById('field-class-date').value,
+                    groupId: activeGroupId,
+                    groupName: activeGroup.name,
+                    educator: activeGroup.educator || activeEducator, 
+                    writer: activeEducator, 
+                    theme: "",
+                    generalNote: "",
+                    children: childTracking
+                };
+            } else {
+                appState.dailyRecords[key].writer = activeEducator;
+            }
+
+            const record = appState.dailyRecords[key];
+            document.getElementById('field-class-theme').value = record.theme || "";
+            document.getElementById('group-general-note').value = record.generalNote || "";
+
+            updateSummaryBar();
+            renderChildrenTrackingList();
+        }
+
+        function renderChildrenTrackingList() {
+            const key = getRecordKey();
+            const record = appState.dailyRecords[key];
+            const activeGroup = appState.groups.find(g => g.id === activeGroupId);
+
+            const container = document.getElementById('children-field-list');
+            if (!container || !activeGroup || !record) return;
+
+            container.innerHTML = '';
+
+            let presentCount = 0;
+            let absentCount = 0;
+
+            activeGroup.children.forEach(child => {
+                const tr = record.children[child.id] || { present: true, score: null, highlightAreas: [], note: "" };
+                
+                if (tr.present) presentCount++; else absentCount++;
+
+                const card = document.createElement('div');
+                card.id = `child-card-${child.id}`;
+                
+                if (tr.present) {
+                    const isExpanded = expandedChildIds.has(child.id);
+                    card.className = "bg-white rounded-3xl border border-slate-200/80 shadow-sm transition-all duration-300 overflow-hidden";
+                    
+                    const groupedAreas = { cognitive: [], motor: [], social: [] };
+                    areas.forEach(area => {
+                        groupedAreas[area.category].push(area);
+                    });
+
+                    let categoriesHTML = '<div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-2.5">';
+                    
+                    Object.keys(groupedAreas).forEach(catKey => {
+                        const cat = categories[catKey];
+                        let iconsHTML = '<div class="flex flex-wrap gap-2.5">';
+                        
+                        groupedAreas[catKey].forEach(area => {
+                            const isSelected = tr.highlightAreas.includes(area.id);
+                            iconsHTML += `
+                                <div class="relative group">
+                                    <button onclick="toggleAreaHighlight('${child.id}', ${area.id})" 
+                                            class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center transition-all transform cursor-pointer text-xl sm:text-2xl ${
+                                                isSelected ? cat.activeBtnClass + ' shadow-md scale-110 border-transparent' : cat.inactiveBtnClass
+                                            }" title="${area.short}">
+                                        <i class="fa-solid ${area.icon}"></i>
+                                    </button>
+                                    <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 hidden group-hover:block bg-slate-900 text-white text-[10px] font-bold rounded-lg px-2.5 py-1 whitespace-nowrap mb-2.5 z-30 shadow-md">
+                                        ${area.short}
+                                    </span>
+                                </div>
+                            `;
+                        });
+                        iconsHTML += '</div>';
+
+                        categoriesHTML += `
+                            <div class="p-3.5 rounded-2xl border ${cat.colorClass} flex flex-col justify-between">
+                                <span class="text-[9px] font-black uppercase tracking-wider ${cat.textClass} mb-2.5 block">${cat.name}</span>
+                                ${iconsHTML}
+                            </div>
+                        `;
+                    });
+
+                    categoriesHTML += '</div>';
+
+                    let ratingButtonsHTML = '<div class="flex flex-wrap gap-3 py-1">';
+                    ratingLevels.forEach(level => {
+                        const isActive = (tr.score === level.val);
+                        ratingButtonsHTML += `
+                            <div class="flex flex-col items-center">
+                                <button onclick="setQuickScore('${child.id}', ${level.val})" 
+                                        class="w-12 h-12 rounded-full border flex items-center justify-center font-black text-xs sm:text-sm transition-all transform cursor-pointer ${
+                                            isActive 
+                                            ? 'bg-gradient-to-r ' + level.color + ' text-white border-transparent scale-115 shadow-md ring-4 ring-emerald-500/10' 
+                                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+                                        }" title="${level.title}">
+                                    ${level.val}
+                                </button>
+                                <span class="text-[9px] font-bold mt-1 text-slate-505 uppercase tracking-tight">${level.label}</span>
+                            </div>
+                        `;
+                    });
+                    ratingButtonsHTML += '</div>';
+
+                    card.innerHTML = `
+                        <!-- UVIJEK VIDLJIVO ZAGLAVLJE KARTICE DETETA -->
+                        <div class="flex items-center justify-between p-3.5 relative">
+                            <!-- OVO JE SLOJ ZA OTVARANJE KARTICE -->
+                            <div class="absolute inset-0 z-0 cursor-pointer" onclick="toggleChildCollapse('${child.id}', event)"></div>
+                            
+                            <div class="flex items-center space-x-3 relative z-10">
+                                <!-- PRAVO DUGME ZA PRISUSTVO SA VISOKIM Z-INDEXOM -->
+                                <button type="button" onclick="togglePresence('${child.id}', event)" class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-700 border-2 border-emerald-300 font-bold flex items-center justify-center text-lg shadow-sm transition-all cursor-pointer hover:bg-emerald-100 focus:outline-none">
+                                    ${child.name.charAt(0)}
+                                </button>
+                                <div class="pointer-events-none">
+                                    <h4 class="font-bold text-sm text-slate-800 flex items-center">
+                                        ${child.name}
+                                    </h4>
+                                    <p class="text-[9px] text-slate-400 font-semibold">Dodirni krug za prisustvo | Klikni za detalje</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-2 relative z-10 pointer-events-none">
+                                <span class="bg-emerald-100 text-emerald-800 text-[9px] font-black px-2.5 py-1 rounded-full uppercase">Prisutan</span>
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 transition-transform duration-300" id="chevron-child-${child.id}" style="transform: ${isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'}">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SKLOPIVI DETALJNI PANEL ZA RAD -->
+                        <div id="details-child-${child.id}" class="${isExpanded ? '' : 'hidden'} border-t border-slate-100 p-4 bg-slate-50/30 space-y-4">
+                            <div>
+                                <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-2">UMG Procena Časa:</span>
+                                ${ratingButtonsHTML}
+                            </div>
+
+                            <div>
+                                <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-505 mb-1.5">Izražene snage danas:</span>
+                                ${categoriesHTML}
+                            </div>
+
+                            <div class="relative flex items-center bg-slate-100/50 rounded-xl border border-slate-200 p-2">
+                                <input type="text" id="note-child-${child.id}" value="${tr.note || ''}" 
+                                       oninput="updateChildNote('${child.id}', this.value)" 
+                                       placeholder="Diktirajte ili upišite opasku za ${child.name.split(' ')[0]}..." 
+                                       class="w-full pr-12 pl-3 py-1.5 text-xs bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 font-medium">
+                                <button onclick="startVoiceInput('note-child-${child.id}', '${child.id}')" 
+                                        class="absolute right-2 bg-white hover:bg-emerald-600 hover:text-white text-slate-500 w-9 h-9 rounded-full flex items-center justify-center shadow border border-slate-200 transition-all cursor-pointer">
+                                    <i class="fa-solid fa-microphone text-xs" id="mic-note-child-${child.id}"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    card.className = "bg-slate-100 rounded-2xl shadow-sm border border-slate-200/60 opacity-60 transition-all duration-300";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center relative p-3">
+                            <button type="button" onclick="togglePresence('${child.id}', event)" class="flex items-center space-x-3 cursor-pointer text-left w-full relative z-10 outline-none hover:opacity-80 transition-all">
+                                <div class="w-12 h-12 rounded-full bg-slate-300 text-slate-600 font-bold flex items-center justify-center text-lg shadow-inner border-2 border-slate-300">
+                                    ${child.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-slate-500 line-through">${child.name}</h4>
+                                    <p class="text-[10px] text-slate-400">Dete je odsutno (dodirni ovde da vratiš)</p>
+                                </div>
+                            </button>
+                            <span class="bg-rose-100 text-rose-800 border border-rose-200 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase shrink-0 ml-2 relative z-10 pointer-events-none">Odsutan</span>
+                        </div>
+                    `;
+                }
+
+                container.appendChild(card);
+            });
+
+            const hPresent = document.getElementById('header-stat-present');
+            const hAbsent = document.getElementById('header-stat-absent');
+            if (hPresent) hPresent.innerText = presentCount;
+            if (hAbsent) hAbsent.innerText = absentCount;
+        }
+
+        function toggleChildCollapse(childId, event) {
+            const details = document.getElementById(`details-child-${childId}`);
+            const chevron = document.getElementById(`chevron-child-${childId}`);
+            
+            if (details && chevron) {
+                const isHidden = details.classList.contains('hidden');
+                if (isHidden) {
+                    details.classList.remove('hidden');
+                    chevron.style.transform = 'rotate(180deg)';
+                    expandedChildIds.add(childId);
+                } else {
+                    details.classList.add('hidden');
+                    chevron.style.transform = 'rotate(0deg)';
+                    expandedChildIds.delete(childId);
+                }
+            }
+        }
+
+        function handleGlobalSearch() {
+            const query = document.getElementById('global-child-search').value.toLowerCase().trim();
+            const activeGroup = appState.groups.find(g => g.id === activeGroupId);
+            if (!activeGroup) return;
+
+            activeGroup.children.forEach(child => {
+                const card = document.getElementById(`child-card-${child.id}`);
+                if (card) {
+                    if (!query || child.name.toLowerCase().includes(query)) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
+        function togglePresence(childId, event) {
+            if (event) event.stopPropagation(); 
+            
+            const key = getRecordKey();
+            if (appState.dailyRecords[key] && appState.dailyRecords[key].children[childId]) {
+                const current = appState.dailyRecords[key].children[childId].present;
+                appState.dailyRecords[key].children[childId].present = !current;
+                
+                if (current === true) {
+                    appState.dailyRecords[key].children[childId].score = null;
+                    appState.dailyRecords[key].children[childId].highlightAreas = [];
+                    appState.dailyRecords[key].children[childId].note = "";
+                    expandedChildIds.delete(childId); 
+                }
+                saveDailyRecord(false);
+                renderChildrenTrackingList();
+            }
+        }
+
+        function setQuickScore(childId, score) {
+            const key = getRecordKey();
+            if (appState.dailyRecords[key] && appState.dailyRecords[key].children[childId]) {
+                const current = appState.dailyRecords[key].children[childId].score;
+                appState.dailyRecords[key].children[childId].score = (current === score) ? null : score;
+                saveDailyRecord(false);
+                renderChildrenTrackingList();
+            }
+        }
+
+        function toggleAreaHighlight(childId, areaId) {
+            const key = getRecordKey();
+            if (appState.dailyRecords[key] && appState.dailyRecords[key].children[childId]) {
+                let list = appState.dailyRecords[key].children[childId].highlightAreas || [];
+                if (list.includes(areaId)) {
+                    list = list.filter(id => id !== areaId);
+                } else {
+                    list.push(areaId);
+                }
+                appState.dailyRecords[key].children[childId].highlightAreas = list;
+                saveDailyRecord(false);
+                renderChildrenTrackingList();
+            }
+        }
+
+        let typingTimer;
+        const doneTypingInterval = 1200; // Cekanje od 1.2 sekunde pre snimanja
+
+        function updateChildNote(childId, val) {
+            const key = getRecordKey();
+            if (appState.dailyRecords[key] && appState.dailyRecords[key].children[childId]) {
+                appState.dailyRecords[key].children[childId].note = val;
+                
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(() => {
+                    saveDailyRecord(false);
+                }, doneTypingInterval);
+            }
+        }
+        
+        let generalTypingTimer;
+        function updateGroupGeneralNote(val) {
+            const key = getRecordKey();
+            if (appState.dailyRecords[key]) {
+                appState.dailyRecords[key].generalNote = val;
+                
+                clearTimeout(generalTypingTimer);
+                generalTypingTimer = setTimeout(() => {
+                    saveDailyRecord(false);
+                }, doneTypingInterval);
+            }
+        }
+
+        function saveDailyRecord(showNotification = false) {
+            const key = getRecordKey();
+            if (appState.dailyRecords[key]) {
+                localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
+                updateCloudDailyRecord(key, appState.dailyRecords[key]);
+                if (showNotification) {
+                    showToast("Čas uspešno ažuriran i sačuvan!");
+                }
+            }
+        }
+
+        function updateSummaryBar() {
+            const dateInput = document.getElementById('field-class-date');
+            const educatorSelect = document.getElementById('field-educator-select');
+            const groupSelect = document.getElementById('field-group-select');
+            const themeInput = document.getElementById('field-class-theme');
+
+            let dateVal = '';
+            if (dateInput && dateInput.value) {
+                const parts = dateInput.value.split('-');
+                if (parts.length === 3) {
+                    dateVal = `${parts[2]}.${parts[1]}.`;
+                }
+            }
+            
+            const educatorVal = educatorSelect ? educatorSelect.value : '';
+            
+            let groupVal = '';
+            if (groupSelect && groupSelect.selectedIndex >= 0) {
+                groupVal = groupSelect.options[groupSelect.selectedIndex].text;
+            }
+            
+            const themeVal = themeInput ? themeInput.value.trim() : '';
+
+            const summaryDate = document.getElementById('summary-date');
+            const summaryInfo = document.getElementById('summary-info');
+
+            if (summaryDate) summaryDate.innerHTML = `<i class="fa-solid fa-calendar-day mr-1"></i> ${dateVal || '12.06.'}`;
+            if (summaryInfo) {
+                summaryInfo.innerHTML = `👤 <span class="font-bold text-slate-800">${educatorVal || 'Vaspitač'}</span> | <i class="fa-solid fa-house text-emerald-600 mr-1.5 ml-1"></i> <span class="font-bold text-slate-800">${groupVal || 'Nema grupe'}</span> ${themeVal ? ' | 📝 ' + themeVal : ''}`;
+            }
+        }
+
+        function toggleInlineSearch(show) {
+            const summaryLeft = document.getElementById('summary-left-container');
+            const inlineSearch = document.getElementById('inline-search-container');
+            const searchBtn = document.getElementById('btn-toggle-search');
+            const searchInput = document.getElementById('global-child-search');
+
+            if (show) {
+                summaryLeft.classList.add('hidden');
+                inlineSearch.classList.remove('hidden');
+                inlineSearch.classList.add('flex');
+                searchBtn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            } else {
+                summaryLeft.classList.remove('hidden');
+                inlineSearch.classList.add('hidden');
+                inlineSearch.classList.remove('flex');
+                searchBtn.className = "bg-slate-100 hover:bg-slate-200 text-slate-700 w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 cursor-pointer";
+                if (searchInput) {
+                    searchInput.value = '';
+                    handleGlobalSearch(); 
+                }
+            }
+        }
+
+        function toggleSettingsPanel() {
+            const panel = document.getElementById('settings-collapsible-panel');
+            const chevron = document.getElementById('settings-chevron');
+            if (panel && chevron) {
+                panel.classList.toggle('hidden');
+                if (panel.classList.contains('hidden')) {
+                    chevron.style.transform = 'rotate(0deg)';
+                } else {
+                    chevron.style.transform = 'rotate(180deg)';
+                }
+            }
+        }
+
+        function startVoiceInput(elementId, childId = null) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showToast("Pregledač ne podržava glasovni unos.", "warning");
+                return;
+            }
+
+            const micIcon = document.getElementById(`mic-${elementId}`);
+            const inputField = document.getElementById(elementId);
+
+            if (activeRecognition) {
+                activeRecognition.stop();
+                activeRecognition = null;
+                resetMicIcons();
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'sr-RS';
+            recognition.continuous = true; 
+            recognition.interimResults = false;
+
+            const originalVal = inputField ? inputField.value : "";
+
+            recognition.onstart = () => {
+                activeRecognition = recognition;
+                if (micIcon) {
+                    micIcon.className = "fa-solid fa-microphone-lines text-rose-500 animate-pulse";
+                    micIcon.parentElement.classList.add('mic-active', 'border-rose-500/40');
+                }
+                showToast("Slušam glas... Klikni opet za kraj.", "loading");
+            };
+
+            recognition.onresult = (event) => {
+                let transcript = "";
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        transcript += event.results[i][0].transcript + " ";
+                    }
+                }
+                if (transcript && inputField) {
+                    // Samo ispisuje u polje dok vaspitač priča, NE šalje u bazu
+                    inputField.value = (originalVal ? originalVal.trim() + " " : "") + transcript.trim();
+                }
+            };
+
+            recognition.onerror = () => { resetMicIcons(); };
+            
+            // onend se aktivira kada se mikrofon ugasi
+            recognition.onend = () => {
+                if (inputField) {
+                    // SADA salje konačan tekst u bazu
+                    if (childId) {
+                        updateChildNote(childId, inputField.value);
+                    } else {
+                        updateGroupGeneralNote(inputField.value);
+                    }
+                    // Forsira trenutno čuvanje bez čekanja tajmera
+                    saveDailyRecord(false);
+                }
+                
+                activeRecognition = null;
+                resetMicIcons();
+                showToast("Završen glasovni unos. Podatak sačuvan.");
+            };
+
+            recognition.start();
+        }
+
+        function resetMicIcons() {
+            const activeMics = document.querySelectorAll('.mic-active');
+            activeMics.forEach(m => {
+                m.classList.remove('mic-active', 'border-rose-500/40');
+                const icon = m.querySelector('i');
+                if (icon) icon.className = "fa-solid fa-microphone text-slate-400";
+            });
+        }
+
+        function switchTab(tabId) {
+            document.getElementById('tab-welcome').classList.add('hidden');
+            document.getElementById('tab-field').classList.add('hidden');
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            if (tabId === 'welcome') {
+                const fieldTabBtn = document.getElementById('btn-tab-field');
+                if (fieldTabBtn) fieldTabBtn.classList.add('hidden');
+                
+                const logoutBtn = document.getElementById('btn-logout');
+                if (logoutBtn) logoutBtn.classList.add('hidden');
+                
+                document.body.className = "bg-slate-50 text-slate-800 flex flex-col min-h-screen lg:h-screen lg:overflow-hidden select-none";
+            }
+        }
+
+        function showToast(text, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const textEl = document.getElementById('toast-text');
+            
+            if (!toast || !icon || !textEl) return;
+
+            textEl.innerText = text;
+            
+            if (type === 'success') {
+                icon.className = "fa-solid fa-circle-check text-emerald-400 text-sm";
+            } else if (type === 'warning') {
+                icon.className = "fa-solid fa-circle-exclamation text-rose-500 text-sm";
+            } else {
+                icon.className = "fa-solid fa-circle-notch text-purple-400 text-sm animate-spin";
+            }
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>
