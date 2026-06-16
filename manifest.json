@@ -1,0 +1,22 @@
+{
+  "name": "UMG Terenski Asistent",
+  "short_name": "UMG Asistent",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#059669",
+  "description": "Terenski rad i pedagoško praćenje dece za Udruženje Mentalna Gimnastika",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
