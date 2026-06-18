@@ -1166,8 +1166,14 @@ function importDatabaseFile(event, mode) {
                         finalizeImport("Baza je uspešno spojena i ažurirana novim podacima!");
                     }
                 } else if (mode === 'overwrite') {
-                    if (confirm("PAŽNJA: Ovo će OBRISATI SVE trenutne podatke na uređaju i potpuno ih zameniti podacima iz fajla. Da li ste sigurni?")) {
+                    if (confirm("PAŽNJA: Ovo će OBRISATI SVE trenutne podatke na uređaju i OČISTITI BAZU NA OBLAKU, a zatim ih zameniti podacima iz fajla. Da li ste sigurni?")) {
                         
+                        // KLJUČNA ISPRAVKA: Prvo brišemo svo "đubre" i duhove sa Firebase-a
+                        if (useCloud && db) {
+                            appState.groups.forEach(g => deleteCloudGroup(g.id));
+                        }
+
+                        // Zatim učitavamo nove čiste podatke iz JSON-a
                         appState.kindergartens = importedData.kindergartens || [];
                         appState.groups = importedData.groups || [];
                         appState.educators = importedData.educators || [];
@@ -1176,12 +1182,12 @@ function importDatabaseFile(event, mode) {
                         if (importedData.pedagogPin) appState.pedagogPin = importedData.pedagogPin;
                         if (importedData.adminPin) appState.adminPin = importedData.adminPin;
 
-                        // Pošalji sve grupe na cloud da se prepišu
+                        // Šaljemo samo čiste grupe nazad na oblak
                         appState.groups.forEach(g => {
                             if (typeof updateCloudGroup === 'function') updateCloudGroup(g);
                         });
 
-                        finalizeImport("Baza je uspešno prebrisana učitanim podacima!");
+                        finalizeImport("Baza je uspešno prebrisana i duhovi su obrisani!");
                     }
                 }
 
