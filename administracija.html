@@ -33,30 +33,24 @@
         .accordion-content.open { max-height: 2500px; opacity: 1; }
         .arrow-rotate { transition: transform 0.3s ease; }
         .open .arrow-rotate { transform: rotate(180deg); }
-/* Mobilna optimizacija za Terenski Asistent */
+
+        /* Mobilna optimizacija */
         @media (max-width: 768px) {
-            /* Povećavanje specifičnih mikro klasa */
             .text-\\[8px\\] { font-size: 11px !important; }
             .text-\\[9px\\] { font-size: 13px !important; }
             .text-\\[10px\\] { font-size: 14px !important; }
             .text-\\[11px\\] { font-size: 15px !important; }
             
-            /* Povećavanje standardnih Tailwind klasa */
             .text-xs { font-size: 16px !important; line-height: 1.4 !important; }
             .text-sm { font-size: 18px !important; line-height: 1.5 !important; }
             .text-base { font-size: 20px !important; line-height: 1.5 !important; }
             
-            /* Proširivanje interaktivnih polja za lakši dodir prstom */
             button, select, input { min-height: 48px !important; }
-            
-            /* Povećavanje okruglih dugmića za ocene iz dnevnika */
             .w-12.h-12 { width: 4rem !important; height: 4rem !important; }
             
-            /* Razmak između redova u listama da ne budu previše zbijeni */
             .space-y-1 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.5rem !important; }
             .space-y-1\\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem !important; }
         }
-
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen lg:h-screen lg:overflow-hidden select-none">
@@ -249,7 +243,6 @@
     </nav>
 
     <main class="max-w-7xl w-full mx-auto p-4 flex-grow flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:overflow-hidden">
-
         <section class="lg:col-span-7 space-y-4 lg:h-full lg:overflow-y-auto custom-scrollbar pr-0 lg:pr-4 pb-8">
             
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
@@ -315,11 +308,9 @@
                     </div>
                 </div>
             </div>
-
         </section>
 
         <section class="lg:col-span-5 space-y-6 lg:h-full lg:overflow-y-auto custom-scrollbar pb-8">
-            
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
                 <div onclick="toggleAccordion('accordion-admin-panel')" class="flex justify-between items-center p-5 cursor-pointer hover:bg-slate-50/80 transition-all">
                     <div class="flex items-center space-x-3">
@@ -366,12 +357,12 @@
 
                     <div class="space-y-2 pt-1">
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide"><i class="fa-solid fa-database mr-1 text-teal-600"></i> Rezervna kopija i prenos baze</label>
-                        <p class="text-[10px] text-slate-400 leading-tight">Redovno preuzimajte kopije. JSON fajl možete učitati ispod da vratite celokupno stanje baze podataka.</p>
+                        <p class="text-[10px] text-slate-400 leading-tight">Redovno preuzimajte kopije. JSON fajl možete učitati ispod da dodate i spojite podatke.</p>
                         <div class="grid grid-cols-2 gap-2.5">
                             <button onclick="exportDatabaseFile()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm"><i class="fa-solid fa-file-export mr-1"></i> Preuzmi JSON</button>
                             
                             <button onclick="document.getElementById('json-import-input').click()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer">
-                                <i class="fa-solid fa-file-import"></i> Učitaj JSON
+                                <i class="fa-solid fa-file-import"></i> Spoji JSON
                             </button>
                             <input type="file" id="json-import-input" class="hidden" accept=".json" onchange="importDatabaseFile(event)">
                         </div>
@@ -545,6 +536,12 @@ function createNewKindergarten() {
     const newK = { id: `k-${Date.now()}`, name: name };
     appState.kindergartens.push(newK);
     localStorage.setItem('umg_field_kindergartens', JSON.stringify(appState.kindergartens));
+    
+    // Čuvanje Vrtića i na Cloud
+    if (useCloud && db) {
+        db.collection("system").doc("config").set({ kindergartens: appState.kindergartens }, { merge: true });
+    }
+
     closeKindergartenModal();
     populateKindergartenSelects();
     showToast(`Vrtić "${name}" uspešno registrovan!`);
@@ -584,9 +581,19 @@ function deleteActiveKindergarten() {
     if (!selectedKindergartenId) return showToast("Nijedan vrtić nije izabran!", "warning");
     if (confirm("Da li brišete ovaj vrtić i sve grupe unutar njega?")) {
         appState.kindergartens = appState.kindergartens.filter(k => k.id !== selectedKindergartenId);
+        
+        const groupsToDelete = appState.groups.filter(g => g.kindergartenId === selectedKindergartenId);
         appState.groups = appState.groups.filter(g => g.kindergartenId !== selectedKindergartenId);
+        
         localStorage.setItem('umg_field_kindergartens', JSON.stringify(appState.kindergartens));
         localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+
+        // Brisanje Vrtića i Grupa i sa Clouda
+        if (useCloud && db) {
+            db.collection("system").doc("config").set({ kindergartens: appState.kindergartens }, { merge: true });
+            groupsToDelete.forEach(g => deleteCloudGroup(g.id));
+        }
+
         selectedKindergartenId = null; selectedGroupId = null;
         populateKindergartenSelects();
         showToast("Vrtić uklonjen.", "warning");
@@ -624,7 +631,7 @@ function renderGroupsGrid() {
     if (filteredGroups.length === 0) {
         container.innerHTML = `
             <div class="col-span-full text-center py-6 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
-                <p class="text-xs text-slate-400 italic">Nema formiranih grupa u ovom vrtiću.</p>
+                <p class="text-xs text-slate-400 italic">Nema formiranih grupi u ovom vrtiću.</p>
                 <p class="text-[10px] text-blue-500 font-bold mt-1 cursor-pointer" onclick="openAddGroupModal()"><i class="fa-solid fa-plus-circle"></i> Klikni ovde da kreiraš prvu grupu</p>
             </div>
         `;
@@ -745,7 +752,6 @@ function handleExcelImport(event) {
             // Provera da li je u pitanju CSV fajl (tvoj slučaj)
             if (file.name.endsWith('.csv')) {
                 const text = e.target.result;
-                // Delimo fajl na redove i čistimo prazne prostore
                 const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
                 
                 if (lines.length < 2) {
@@ -753,16 +759,13 @@ function handleExcelImport(event) {
                     return;
                 }
 
-                // Određivanje separatora (zarez ili tačka-zarez)
                 let separator = ',';
                 if (lines[0].includes(';')) {
                     separator = ';';
                 }
 
-                // Čitanje zaglavlja iz prvog reda
                 const headers = lines[0].split(separator).map(h => h.replace(/["']/g, "").trim());
                 
-                // Prolazak kroz ostale redove i pravljenje objekata
                 for (let i = 1; i < lines.length; i++) {
                     const columns = lines[i].split(separator).map(c => c.replace(/["']/g, "").trim());
                     let rowObj = {};
@@ -772,7 +775,6 @@ function handleExcelImport(event) {
                     jsonData.push(rowObj);
                 }
             } else {
-                // Ako je u pitanju standardni Excel (.xlsx ili .xls)
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -788,13 +790,11 @@ function handleExcelImport(event) {
             let importedCount = 0;
             
             jsonData.forEach((row) => {
-                // Prepoznavanje kolona na osnovu tvog fajla na srpskom jeziku
                 let fullName = row['Ime i prezime deteta'] || row['Ime i prezime'] || row['Ime'] || row['Prezime i ime'] || '';
                 let parent = row['Ime roditelja'] || row['Roditelj'] || row['Staratelj'] || '';
                 let phone = row['Telefon roditelja'] || row['Telefon'] || row['Tel'] || row['Kontakt'] || '';
                 let email = row['Email'] || row['E-mail'] || row['Mejl'] || '';
 
-                // Čišćenje i uvoz ako ime postoji
                 if (fullName && fullName.trim() !== '') {
                     group.children.push({
                         id: `c-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
@@ -808,10 +808,8 @@ function handleExcelImport(event) {
             });
 
             if (importedCount > 0) {
-                // Čuvanje u lokalnu bazu i osvežavanje ekrana
                 localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
                 
-                // Sinhronizacija sa cloudom ukoliko je aktivna
                 if (typeof updateCloudGroup === 'function') {
                     updateCloudGroup(group);
                 }
@@ -829,7 +827,6 @@ function handleExcelImport(event) {
         event.target.value = '';
     };
 
-    // Ako je CSV čitamo ga kao tekst sa UTF-8 podrškom za naša slova (Š, Đ, Č, Ć, Ž)
     if (file.name.endsWith('.csv')) {
         reader.readAsText(file, 'UTF-8');
     } else {
@@ -910,7 +907,6 @@ function renderChildrenList(group) {
     });
 }
 
-// FUNKCIJA KOJA PRETVARA TEKST U POLJA ZA IZMENU (INPUTE)
 function editChild(groupId, childId) {
     const group = appState.groups.find(g => g.id === groupId);
     if (!group) return;
@@ -921,27 +917,22 @@ function editChild(groupId, childId) {
     const arrowIcon = document.getElementById(`arrow-${childId}`);
     const editBtn = document.getElementById(`btn-edit-${childId}`);
     
-    // Automatski rasklapamo karticu ako je bila zatvorena
     if (detailsDiv && detailsDiv.classList.contains('hidden')) {
         detailsDiv.classList.remove('hidden');
         arrowIcon.classList.add('rotate-180');
     }
 
-    // Promena ikonice olovke u ikonicu za čuvanje (Check)
     if (editBtn) {
         editBtn.innerHTML = `<i class="fa-solid fa-floppy-disk text-emerald-500 text-xs"></i>`;
         editBtn.setAttribute('title', 'Sačuvaj izmene');
-        // Menjamo funkciju na klik da umesto "edit" sada "sačuva"
         editBtn.onclick = function(e) { e.stopPropagation(); saveChildChanges(groupId, childId); };
     }
 
-    // Zamena imena deteta input poljem
     const nameCont = document.getElementById(`name-container-${childId}`);
     if (nameCont) {
         nameCont.innerHTML = `<input type="text" id="input-name-${childId}" value="${child.name || ''}" class="w-full bg-slate-50 border border-purple-200 rounded px-1.5 py-0.5 text-xs font-bold text-slate-800 focus:outline-purple-500" onclick="event.stopPropagation()">`;
     }
 
-    // Zamena detalja input poljima
     const fieldsCont = document.getElementById(`fields-container-${childId}`);
     if (fieldsCont) {
         fieldsCont.innerHTML = `
@@ -963,14 +954,12 @@ function editChild(groupId, childId) {
     }
 }
 
-// FUNKCIJA KOJA UPISUJE I ČUVA NOVE PODATKE U BAZU
 function saveChildChanges(groupId, childId) {
     const group = appState.groups.find(g => g.id === groupId);
     if (!group) return;
     const child = group.children.find(c => c.id === childId);
     if (!child) return;
 
-    // Uzimanje vrednosti iz input polja
     const newName = document.getElementById(`input-name-${childId}`).value.trim();
     const newParent = document.getElementById(`input-parent-${childId}`).value.trim();
     const newPhone = document.getElementById(`input-phone-${childId}`).value.trim();
@@ -981,19 +970,16 @@ function saveChildChanges(groupId, childId) {
         return;
     }
 
-    // Ažuriranje podataka u aplikaciji
     child.name = newName;
     child.parent = newParent;
     child.phone = newPhone;
     child.email = newEmail;
 
-    // Čuvanje u LocalStorage i Cloud sinhronizacija
     localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
     if (typeof updateCloudGroup === 'function') {
         updateCloudGroup(group);
     }
 
-    // Ponovno rendersanje liste da se vrate obični tekstualni linkovi i kartica zatvori
     renderChildrenList(group);
     if (typeof renderGroupsGrid === 'function') {
         renderGroupsGrid();
@@ -1001,9 +987,7 @@ function saveChildChanges(groupId, childId) {
     showToast("Podaci uspešno izmenjeni!");
 }
 
-// FUNKCIJA ZA RASKLAPANJE/SKLAPANJE KARTICE
 function toggleChildDetails(childId) {
-    // Sprečavamo rasklapanje ako smo u modu za izmenu (da ne skače ekran dok kucamo)
     if (document.getElementById(`input-name-${childId}`)) return;
 
     const detailsDiv = document.getElementById(`details-${childId}`);
@@ -1020,7 +1004,6 @@ function toggleChildDetails(childId) {
     }
 }
 
-// FUNKCIJA ZA BRISANJE (ISPISIVANJE) DETETA
 function deleteChild(groupId, childId) {
     const group = appState.groups.find(g => g.id === groupId);
     if (!group) return;
@@ -1041,52 +1024,21 @@ function deleteChild(groupId, childId) {
     }
 }
 
-// POMOĆNA FUNKCIJA ZA RASKLAPANJE/SKLAPANJE KARTICE
-function toggleChildDetails(childId) {
-    const detailsDiv = document.getElementById(`details-${childId}`);
-    const arrowIcon = document.getElementById(`arrow-${childId}`);
-    
-    if (detailsDiv && arrowIcon) {
-        if (detailsDiv.classList.contains('hidden')) {
-            detailsDiv.classList.remove('hidden');
-            arrowIcon.classList.add('rotate-180');
-        } else {
-            detailsDiv.classList.add('hidden');
-            arrowIcon.classList.remove('rotate-180');
-        }
-    }
-}
-
-// NOVA FUNKCIJA ZA BRISANJE (ISPISIVANJE) DETETA
-function deleteChild(groupId, childId) {
-    const group = appState.groups.find(g => g.id === groupId);
-    if (!group) return;
-    
-    if (confirm("Da li ste sigurni da želite da ispišete ovo dete iz grupe?")) {
-        group.children = group.children.filter(c => c.id !== childId);
-        
-        // Sačuvanje izmena
-        localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-        if (typeof updateCloudGroup === 'function') {
-            updateCloudGroup(group);
-        }
-        
-        // Osvežavanje prikaza
-        renderChildrenList(group);
-        if (typeof renderGroupsGrid === 'function') {
-            renderGroupsGrid();
-        }
-        showToast("Član uspešno ispisan.", "warning");
-    }
-}
 // VASPITAČI I PIN LOGIKA
 function addNewEducator() {
     const input = document.getElementById('new-educator-name');
     const name = input ? input.value.trim() : '';
     if (!name) return showToast("Unesite ime vaspitača!", "warning");
     if (appState.educators.includes(name)) return showToast("Vaspitač već postoji!", "warning");
+    
     appState.educators.push(name);
     localStorage.setItem('umg_field_educators', JSON.stringify(appState.educators));
+    
+    // Slanje novog vaspitača na Firebase
+    if (useCloud && db) {
+        db.collection("system").doc("config").set({ educators: appState.educators }, { merge: true });
+    }
+    
     input.value = '';
     populateEducatorSelects(); renderSettingsEducatorList();
     showToast("Vaspitač uspešno unet.");
@@ -1110,6 +1062,12 @@ function deleteEducator(name) {
     if (confirm(`Ukloniti vaspitača ${name}?`)) {
         appState.educators = appState.educators.filter(e => e !== name);
         localStorage.setItem('umg_field_educators', JSON.stringify(appState.educators));
+        
+        // Brisanje vaspitača i sa Firebase-a
+        if (useCloud && db) {
+            db.collection("system").doc("config").set({ educators: appState.educators }, { merge: true });
+        }
+        
         populateEducatorSelects(); renderSettingsEducatorList();
     }
 }
@@ -1128,19 +1086,22 @@ function lockSecureTab() {
     document.getElementById('password-screen').classList.remove('hidden');
 }
 function goToHomePortal() { window.location.href = "index.html"; }
+
 function savePedagogPin() {
     appState.pedagogPin = document.getElementById('settings-pedagog-pin').value.trim();
     localStorage.setItem('umg_pedagog_pin', appState.pedagogPin);
+    if (useCloud && db) db.collection("system").doc("config").set({ pedagogPin: appState.pedagogPin }, { merge: true });
     showToast("P-PIN sačuvan.");
 }
 function saveAdminPin() {
     appState.adminPin = document.getElementById('settings-admin-pin').value.trim();
     localStorage.setItem('umg_admin_pin', appState.adminPin);
+    if (useCloud && db) db.collection("system").doc("config").set({ adminPin: appState.adminPin }, { merge: true });
     showToast("A-PIN sačuvan.");
 }
 
 // ==========================================
-// REZERVNE KOPIJE (IZVOZ I NOVI UVOZ JSON)
+// REZERVNE KOPIJE (IZVOZ I PAMETAN UVOZ JSON)
 // ==========================================
 function exportDatabaseFile() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState));
@@ -1149,7 +1110,7 @@ function exportDatabaseFile() {
     a.click();
 }
 
-// POTPUNA NOVA FUNKCIJA ZA UČITAVANJE (UVOZ) JSON FAJLA
+// POPRAVLJENO: Sada funkcija dodaje i spaja podatke, umesto da obriše sve!
 function importDatabaseFile(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1159,23 +1120,54 @@ function importDatabaseFile(event) {
         try {
             const importedData = JSON.parse(e.target.result);
             
-            // Bazična validacija strukture fajla da osiguramo da je pravi JSON
             if (importedData && (importedData.kindergartens || importedData.groups || importedData.educators)) {
                 
-                if (confirm("Pažnja! Učitavanjem ovog fajla prebrisat ćete trenutne lokalne podatke na ovom uređaju. Nastaviti?")) {
-                    // Prepisivanje globalnog stanja aplikacije
-                    appState.kindergartens = importedData.kindergartens || [];
-                    appState.groups = importedData.groups || [];
-                    appState.educators = importedData.educators || [];
-                    appState.dailyRecords = importedData.dailyRecords || {};
-                    appState.savedReports = importedData.savedReports || {};
+                if (confirm("Da li želite da DODATE i spojite podatke iz ovog fajla sa postojećom bazom? (Stari podaci neće biti obrisani)")) {
+                    
+                    // 1. Spajanje vrtića (Dodaje samo nove)
+                    if (importedData.kindergartens) {
+                        importedData.kindergartens.forEach(newK => {
+                            if (!appState.kindergartens.find(k => k.id === newK.id)) {
+                                appState.kindergartens.push(newK);
+                            }
+                        });
+                    }
+
+                    // 2. Spajanje grupa (Dodaje nove i osvežava oblak)
+                    if (importedData.groups) {
+                        importedData.groups.forEach(newG => {
+                            const existingIdx = appState.groups.findIndex(g => g.id === newG.id);
+                            if (existingIdx === -1) {
+                                appState.groups.push(newG);
+                            } else {
+                                appState.groups[existingIdx] = newG;
+                            }
+                            if (typeof updateCloudGroup === 'function') updateCloudGroup(newG);
+                        });
+                    }
+
+                    // 3. Spajanje vaspitača
+                    if (importedData.educators) {
+                        importedData.educators.forEach(newE => {
+                            if (!appState.educators.includes(newE)) {
+                                appState.educators.push(newE);
+                            }
+                        });
+                    }
+
+                    // Šaljemo nove vrtiće i vaspitače na Cloud
+                    if (useCloud && db) {
+                        db.collection("system").doc("config").set({
+                            kindergartens: appState.kindergartens,
+                            educators: appState.educators
+                        }, { merge: true });
+                    }
+
                     if (importedData.pedagogPin) appState.pedagogPin = importedData.pedagogPin;
                     if (importedData.adminPin) appState.adminPin = importedData.adminPin;
 
-                    // Sinhronizacija u localStorage
                     saveStateToLocalStorage();
 
-                    // Resetovanje selekcija i kompletno osvežavanje korisničkog interfejsa
                     selectedKindergartenId = null;
                     selectedGroupId = null;
                     
@@ -1183,11 +1175,10 @@ function importDatabaseFile(event) {
                     populateEducatorSelects();
                     renderSettingsEducatorList();
                     
-                    // Osvežavanje input polja za PIN kodove u Kontrolnom Centru
                     document.getElementById('settings-pedagog-pin').value = appState.pedagogPin;
                     document.getElementById('settings-admin-pin').value = appState.adminPin;
 
-                    showToast("Baza podataka uspešno učitana i obnovljena!");
+                    showToast("Novi podaci su uspešno DODATI u bazu!");
                 }
             } else {
                 showToast("Fajl nema ispravnu strukturu UMG baze!", "warning");
@@ -1195,7 +1186,6 @@ function importDatabaseFile(event) {
         } catch (err) {
             showToast("Greška pri čitanju JSON datoteke!", "warning");
         }
-        // Resetovanje inputa da omogući ponovno učitavanje istog fajla ako zatreba
         event.target.value = '';
     };
     reader.readAsText(file);
@@ -1207,7 +1197,7 @@ function copyDatabaseAsTextCode() {
     navigator.clipboard.writeText(encoded).then(() => showToast("Viber kod kopiran!"));
 }
 
-// CLOUD SYNCHRONIZATION
+// CLOUD SYNCHRONIZATION FOR ADMIN
 function initFirebaseCloudSync() {
     try {
         const firebaseConfig = {
@@ -1228,23 +1218,37 @@ function initFirebaseCloudSync() {
         useCloud = true;
         
         auth.signInAnonymously().then(() => {
-            // Menjamo indikator u "Sinhronizovano"
             const status = document.getElementById('sync-status');
             if (status) {
                 status.innerHTML = `<i class="fa-solid fa-cloud text-emerald-600"></i> Sinhronizovano`;
                 status.className = "text-[9px] font-black px-2.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 flex items-center gap-1.5";
             }
             
-            // 1. Slušaj pin kodove i vaspitače iz 'system/config'
+            // 1. Slušaj pin kodove, vaspitače i VRTIĆE iz 'system/config'
             db.collection("system").doc("config").onSnapshot((doc) => {
                 if (doc.exists) {
                     const data = doc.data();
                     if (data.pedagogPin) appState.pedagogPin = data.pedagogPin;
                     if (data.adminPin) appState.adminPin = data.adminPin;
+                    
                     if (data.educators) {
                         appState.educators = data.educators;
                         if (typeof populateEducatorSelects === 'function') populateEducatorSelects();
                         if (typeof renderSettingsEducatorList === 'function') renderSettingsEducatorList();
+                    }
+                    
+                    // OVO JE NEDOSTAJALO: Vrtići se sada vuku sa Clouda!
+                    if (data.kindergartens) {
+                        appState.kindergartens = data.kindergartens;
+                        localStorage.setItem('umg_field_kindergartens', JSON.stringify(appState.kindergartens));
+                        
+                        // Zadrži selektovan vrtić ako još uvek postoji
+                        const currentVal = selectedKindergartenId;
+                        populateKindergartenSelects();
+                        if (currentVal && appState.kindergartens.find(k => k.id === currentVal)) {
+                            document.getElementById('active-kindergarten-select').value = currentVal;
+                            selectedKindergartenId = currentVal;
+                        }
                     }
                 }
             }, (err) => console.error("Admin config sync error:", err));
