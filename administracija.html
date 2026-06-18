@@ -356,15 +356,22 @@
                     </div>
 
                     <div class="space-y-2 pt-1">
-                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide"><i class="fa-solid fa-database mr-1 text-teal-600"></i> Rezervna kopija i prenos baze</label>
-                        <p class="text-[10px] text-slate-400 leading-tight">Redovno preuzimajte kopije. JSON fajl možete učitati ispod da dodate i spojite podatke.</p>
-                        <div class="grid grid-cols-2 gap-2.5">
-                            <button onclick="exportDatabaseFile()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm"><i class="fa-solid fa-file-export mr-1"></i> Preuzmi JSON</button>
-                            
-                            <button onclick="document.getElementById('json-import-input').click()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer">
-                                <i class="fa-solid fa-file-import"></i> Spoji JSON
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide"><i class="fa-solid fa-database mr-1 text-teal-600"></i> Rezervna kopija i upravljanje bazom</label>
+                        <p class="text-[10px] text-slate-400 leading-tight">Upravljajte rezervnim kopijama (JSON fajlovi).</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <button onclick="exportDatabaseFile()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-download"></i> Preuzmi
                             </button>
-                            <input type="file" id="json-import-input" class="hidden" accept=".json" onchange="importDatabaseFile(event)">
+                            
+                            <button onclick="document.getElementById('json-merge-input').click()" class="bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer" title="Dodaje samo nove promene, čuva postojeće">
+                                <i class="fa-solid fa-code-merge"></i> Spoji izmene
+                            </button>
+                            <input type="file" id="json-merge-input" class="hidden" accept=".json" onchange="importDatabaseFile(event, 'merge')">
+
+                            <button onclick="document.getElementById('json-overwrite-input').click()" class="bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer" title="Potpuno brisanje i zamena fajlom">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Prebriši sve
+                            </button>
+                            <input type="file" id="json-overwrite-input" class="hidden" accept=".json" onchange="importDatabaseFile(event, 'overwrite')">
                         </div>
                         <div class="pt-1">
                             <button onclick="copyDatabaseAsTextCode()" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2 rounded-xl transition-all shadow-sm"><i class="fa-solid fa-copy mr-1"></i> Generiši Viber Kod</button>
@@ -537,7 +544,6 @@ function createNewKindergarten() {
     appState.kindergartens.push(newK);
     localStorage.setItem('umg_field_kindergartens', JSON.stringify(appState.kindergartens));
     
-    // Čuvanje Vrtića i na Cloud
     if (useCloud && db) {
         db.collection("system").doc("config").set({ kindergartens: appState.kindergartens }, { merge: true });
     }
@@ -588,7 +594,6 @@ function deleteActiveKindergarten() {
         localStorage.setItem('umg_field_kindergartens', JSON.stringify(appState.kindergartens));
         localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
 
-        // Brisanje Vrtića i Grupa i sa Clouda
         if (useCloud && db) {
             db.collection("system").doc("config").set({ kindergartens: appState.kindergartens }, { merge: true });
             groupsToDelete.forEach(g => deleteCloudGroup(g.id));
@@ -749,7 +754,6 @@ function handleExcelImport(event) {
         try {
             let jsonData = [];
             
-            // Provera da li je u pitanju CSV fajl (tvoj slučaj)
             if (file.name.endsWith('.csv')) {
                 const text = e.target.result;
                 const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
@@ -1034,7 +1038,6 @@ function addNewEducator() {
     appState.educators.push(name);
     localStorage.setItem('umg_field_educators', JSON.stringify(appState.educators));
     
-    // Slanje novog vaspitača na Firebase
     if (useCloud && db) {
         db.collection("system").doc("config").set({ educators: appState.educators }, { merge: true });
     }
@@ -1063,7 +1066,6 @@ function deleteEducator(name) {
         appState.educators = appState.educators.filter(e => e !== name);
         localStorage.setItem('umg_field_educators', JSON.stringify(appState.educators));
         
-        // Brisanje vaspitača i sa Firebase-a
         if (useCloud && db) {
             db.collection("system").doc("config").set({ educators: appState.educators }, { merge: true });
         }
@@ -1101,7 +1103,7 @@ function saveAdminPin() {
 }
 
 // ==========================================
-// REZERVNE KOPIJE (IZVOZ I PAMETAN UVOZ JSON)
+// REZERVNE KOPIJE (NOVI SISTEM SA 3 DUGMETA)
 // ==========================================
 function exportDatabaseFile() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState));
@@ -1110,8 +1112,7 @@ function exportDatabaseFile() {
     a.click();
 }
 
-// POPRAVLJENO: Sada funkcija dodaje i spaja podatke, umesto da obriše sve!
-function importDatabaseFile(event) {
+function importDatabaseFile(event, mode) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -1122,64 +1123,68 @@ function importDatabaseFile(event) {
             
             if (importedData && (importedData.kindergartens || importedData.groups || importedData.educators)) {
                 
-                if (confirm("Da li želite da DODATE i spojite podatke iz ovog fajla sa postojećom bazom? (Stari podaci neće biti obrisani)")) {
-                    
-                    // 1. Spajanje vrtića (Dodaje samo nove)
-                    if (importedData.kindergartens) {
-                        importedData.kindergartens.forEach(newK => {
-                            if (!appState.kindergartens.find(k => k.id === newK.id)) {
-                                appState.kindergartens.push(newK);
-                            }
+                if (mode === 'merge') {
+                    if (confirm("Da li želite da SPOJITE podatke iz ovog fajla sa postojećom bazom? Sistem će prepoznati razlike, dodati nove podatke i osvežiti stare bez dupliranja.")) {
+                        
+                        // 1. Spajanje vrtića
+                        if (importedData.kindergartens) {
+                            importedData.kindergartens.forEach(newK => {
+                                const existingK = appState.kindergartens.find(k => k.id === newK.id);
+                                if (existingK) {
+                                    existingK.name = newK.name; // Osveži ime ako je menjano
+                                } else {
+                                    appState.kindergartens.push(newK);
+                                }
+                            });
+                        }
+
+                        // 2. Spajanje grupa
+                        if (importedData.groups) {
+                            importedData.groups.forEach(newG => {
+                                const existingIdx = appState.groups.findIndex(g => g.id === newG.id);
+                                if (existingIdx === -1) {
+                                    appState.groups.push(newG);
+                                } else {
+                                    appState.groups[existingIdx] = newG; // Potpuno osveži decu i podatke grupe
+                                }
+                                if (typeof updateCloudGroup === 'function') updateCloudGroup(newG);
+                            });
+                        }
+
+                        // 3. Spajanje vaspitača
+                        if (importedData.educators) {
+                            importedData.educators.forEach(newE => {
+                                if (!appState.educators.includes(newE)) {
+                                    appState.educators.push(newE);
+                                }
+                            });
+                        }
+
+                        if (importedData.pedagogPin) appState.pedagogPin = importedData.pedagogPin;
+                        if (importedData.adminPin) appState.adminPin = importedData.adminPin;
+                        
+                        finalizeImport("Baza je uspešno spojena i ažurirana novim podacima!");
+                    }
+                } else if (mode === 'overwrite') {
+                    if (confirm("PAŽNJA: Ovo će OBRISATI SVE trenutne podatke na uređaju i potpuno ih zameniti podacima iz fajla. Da li ste sigurni?")) {
+                        
+                        appState.kindergartens = importedData.kindergartens || [];
+                        appState.groups = importedData.groups || [];
+                        appState.educators = importedData.educators || [];
+                        appState.dailyRecords = importedData.dailyRecords || {};
+                        appState.savedReports = importedData.savedReports || {};
+                        if (importedData.pedagogPin) appState.pedagogPin = importedData.pedagogPin;
+                        if (importedData.adminPin) appState.adminPin = importedData.adminPin;
+
+                        // Pošalji sve grupe na cloud da se prepišu
+                        appState.groups.forEach(g => {
+                            if (typeof updateCloudGroup === 'function') updateCloudGroup(g);
                         });
+
+                        finalizeImport("Baza je uspešno prebrisana učitanim podacima!");
                     }
-
-                    // 2. Spajanje grupa (Dodaje nove i osvežava oblak)
-                    if (importedData.groups) {
-                        importedData.groups.forEach(newG => {
-                            const existingIdx = appState.groups.findIndex(g => g.id === newG.id);
-                            if (existingIdx === -1) {
-                                appState.groups.push(newG);
-                            } else {
-                                appState.groups[existingIdx] = newG;
-                            }
-                            if (typeof updateCloudGroup === 'function') updateCloudGroup(newG);
-                        });
-                    }
-
-                    // 3. Spajanje vaspitača
-                    if (importedData.educators) {
-                        importedData.educators.forEach(newE => {
-                            if (!appState.educators.includes(newE)) {
-                                appState.educators.push(newE);
-                            }
-                        });
-                    }
-
-                    // Šaljemo nove vrtiće i vaspitače na Cloud
-                    if (useCloud && db) {
-                        db.collection("system").doc("config").set({
-                            kindergartens: appState.kindergartens,
-                            educators: appState.educators
-                        }, { merge: true });
-                    }
-
-                    if (importedData.pedagogPin) appState.pedagogPin = importedData.pedagogPin;
-                    if (importedData.adminPin) appState.adminPin = importedData.adminPin;
-
-                    saveStateToLocalStorage();
-
-                    selectedKindergartenId = null;
-                    selectedGroupId = null;
-                    
-                    populateKindergartenSelects();
-                    populateEducatorSelects();
-                    renderSettingsEducatorList();
-                    
-                    document.getElementById('settings-pedagog-pin').value = appState.pedagogPin;
-                    document.getElementById('settings-admin-pin').value = appState.adminPin;
-
-                    showToast("Novi podaci su uspešno DODATI u bazu!");
                 }
+
             } else {
                 showToast("Fajl nema ispravnu strukturu UMG baze!", "warning");
             }
@@ -1189,6 +1194,31 @@ function importDatabaseFile(event) {
         event.target.value = '';
     };
     reader.readAsText(file);
+}
+
+function finalizeImport(successMessage) {
+    if (useCloud && db) {
+        db.collection("system").doc("config").set({
+            kindergartens: appState.kindergartens,
+            educators: appState.educators,
+            pedagogPin: appState.pedagogPin,
+            adminPin: appState.adminPin
+        }, { merge: true });
+    }
+
+    saveStateToLocalStorage();
+
+    selectedKindergartenId = null;
+    selectedGroupId = null;
+    
+    populateKindergartenSelects();
+    populateEducatorSelects();
+    renderSettingsEducatorList();
+    
+    document.getElementById('settings-pedagog-pin').value = appState.pedagogPin;
+    document.getElementById('settings-admin-pin').value = appState.adminPin;
+
+    showToast(successMessage);
 }
 
 function copyDatabaseAsTextCode() {
@@ -1224,7 +1254,6 @@ function initFirebaseCloudSync() {
                 status.className = "text-[9px] font-black px-2.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 flex items-center gap-1.5";
             }
             
-            // 1. Slušaj pin kodove, vaspitače i VRTIĆE iz 'system/config'
             db.collection("system").doc("config").onSnapshot((doc) => {
                 if (doc.exists) {
                     const data = doc.data();
@@ -1237,12 +1266,10 @@ function initFirebaseCloudSync() {
                         if (typeof renderSettingsEducatorList === 'function') renderSettingsEducatorList();
                     }
                     
-                    // OVO JE NEDOSTAJALO: Vrtići se sada vuku sa Clouda!
                     if (data.kindergartens) {
                         appState.kindergartens = data.kindergartens;
                         localStorage.setItem('umg_field_kindergartens', JSON.stringify(appState.kindergartens));
                         
-                        // Zadrži selektovan vrtić ako još uvek postoji
                         const currentVal = selectedKindergartenId;
                         populateKindergartenSelects();
                         if (currentVal && appState.kindergartens.find(k => k.id === currentVal)) {
@@ -1253,7 +1280,6 @@ function initFirebaseCloudSync() {
                 }
             }, (err) => console.error("Admin config sync error:", err));
 
-            // 2. Slušaj vrtiće/grupe i decu iz kolekcije 'groups'
             db.collection("groups").onSnapshot((snapshot) => {
                 let tempGroups = [];
                 snapshot.forEach(doc => {
