@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UMG - Pedagoški Izvještaji (P-izvještaj)</title>
+    <!-- Tailwind CSS za moderan i responzivan dizajn -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome za ikonice -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2canvas za pretvaranje HTML-a u sliku za slanje preko Vibera -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;950&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     
+    <!-- Firebase Compat SDKs za automatsku sinhronizaciju na oblaku (v10.8.0) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -131,6 +136,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen lg:h-screen lg:overflow-hidden">
 
+    <!-- BEZBEDNOSNI EKRAN ZA UNOS PIN KODA -->
     <div id="password-screen" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-50 flex items-center justify-center no-print">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl border border-slate-100 text-center">
             <div class="w-16 h-16 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
@@ -157,6 +163,7 @@
         </div>
     </div>
 
+    <!-- Glavno zajedničko zaglavlje platforme -->
     <nav class="bg-slate-900 text-white shadow-md py-3.5 px-4 md:px-6 shrink-0 no-print">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="goToHomePortal()">
@@ -169,7 +176,7 @@
             
             <div class="flex items-center space-x-3">
                 <div class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300" id="sync-status">
-                    <i class="fa-solid fa-cloud-slash text-slate-400"></i> Lokalni režim (Offline)
+                    <i class="fa-solid fa-cloud-slash text-slate-400"></i> Režim učitavanja...
                 </div>
                 <button onclick="lockSecureTab()" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-rose-950/40 text-rose-300 hover:bg-rose-900 hover:text-white border border-rose-800/40 transition-all cursor-pointer" title="Zaključaj poverljive podatke">
                     <i class="fa-solid fa-sign-out-alt mr-1"></i> Zaključaj
@@ -178,10 +185,13 @@
         </div>
     </nav>
 
+    <!-- OSNOVNI RADNI PROSTOR -->
     <main class="max-w-7xl w-full mx-auto p-4 flex-grow flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:overflow-hidden">
 
+        <!-- LEVA STRANA: SELEKCIJA, SLIDERI I TEKSTOVI -->
         <section id="left-editor-pane" class="lg:col-span-7 space-y-6 lg:h-full lg:overflow-y-auto custom-scrollbar pr-0 lg:pr-4 pb-8 no-print">
             
+            <!-- Korak A: Kaskadni izbor deteta i uzrasta -->
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                 <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center">
                     <span class="bg-emerald-50 text-emerald-600 w-8 h-8 rounded-lg flex items-center justify-center mr-2.5 text-xs font-black">A</span>
@@ -206,6 +216,7 @@
                     </div>
                 </div>
                 
+                <!-- STATUSI & ISTORIJA IZVEŠTAJA -->
                 <div class="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-bold text-slate-700">Status pedagoškog izveštaja:</span>
@@ -229,6 +240,7 @@
                 </div>
             </div>
 
+            <!-- Korak B: Finofazno podešavanje oblasti -->
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
                     <div>
@@ -256,12 +268,14 @@
                 </div>
             </div>
 
+            <!-- Korak C: Pedagoški osvrt i dorada -->
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-4">
                 <h3 class="text-sm font-bold text-slate-900 flex items-center">
                     <span class="bg-emerald-50 text-emerald-600 w-8 h-8 rounded-lg flex items-center justify-center mr-2.5 text-xs font-black">C</span>
                     Pedagoški osvrt i dorada
                 </h3>
 
+                <!-- Generalni utisak o napredovanju -->
                 <div class="p-4 bg-purple-50/30 rounded-xl border border-purple-100">
                     <label class="block text-xs font-bold text-purple-900 uppercase tracking-wide mb-1.5">Generalni utisak o napredovanju:</label>
                     <select id="overall-impression" onchange="generateLocalReport()" class="w-full bg-white border border-purple-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-purple-500 outline-none text-slate-800 shadow-sm">
@@ -269,6 +283,17 @@
                         <option value="U skladu sa očekivanjima za uzrast">U skladu sa očekivanjima za uzrast</option>
                         <option value="Potrebna dodatna podrška i podsticaj">Potrebna dodatna podrška i podsticaj</option>
                     </select>
+                </div>
+
+                <!-- NOVO POLJE: Uvodno pismo roditeljima (Promenljivo uživo) -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 relative">
+                    <label class="block text-xs font-bold text-emerald-800 mb-1.5 flex items-center">
+                        <i class="fa-solid fa-envelope-open-text mr-1.5 text-emerald-600"></i> Uvodno pismo / Pozdrav roditeljima
+                    </label>
+                    <div class="relative flex items-center">
+                        <textarea id="qa-uvod" rows="3" onchange="generateLocalReport()" class="w-full pr-12 pl-4 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none leading-relaxed"></textarea>
+                        <button onclick="startVoiceInput('qa-uvod')" class="absolute right-3 bg-white border border-slate-100 shadow-sm text-slate-600 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"><i class="fa-solid fa-microphone text-xs" id="mic-qa-uvod"></i></button>
+                    </div>
                 </div>
 
                 <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 relative">
@@ -316,7 +341,7 @@
                             <input type="text" id="pedagog-author" placeholder="Ime i prezime..." onchange="generateLocalReport()" class="w-full bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-emerald-800 uppercase tracking-wider mb-1">Edukator / Instruktor na časovima</label>
+                            <label class="block text-[10px] font-bold text-emerald-800 uppercase tracking-wider mb-1">EUniform / Instruktor na časovima</label>
                             <input type="text" id="pedagog-instructor" placeholder="Ime i prezime..." onchange="generateLocalReport()" class="w-full bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                     </div>
@@ -334,6 +359,7 @@
 
         </section>
 
+        <!-- DESNA STRANA: PREGLED DOKUMENTA I ŠTAMPA -->
         <section id="right-preview-pane" class="lg:col-span-5 lg:h-full lg:overflow-y-auto custom-scrollbar pl-0 lg:pl-2 pb-8">
             <div class="space-y-4">
                 <div class="flex justify-between items-center px-2 no-print">
@@ -367,9 +393,8 @@
                             </p>
                         </div>
 
-                        <div class="serif-font text-[11px] text-slate-600 leading-relaxed mb-5 space-y-2">
-                            <p>Poštovani roditelji,</p>
-                            <p>Tokom realizacije programa Mentalne Gimnastike, kontinuirano pratimo razvojne parametre Vašeg deteta kroz pažljivo odabrane oblasti mentalnog, socijalno-emotivnog i fizičkog razvoja. U nastavku je grafički prikaz uspešnosti i stručni osvrt na dosadašnje rezultate.</p>
+                        <!-- POPRAVLJENO: Tekst ovde se sada puni dinamički iz polja za uvod -->
+                        <div class="serif-font text-[11px] text-slate-600 leading-relaxed mb-5 space-y-2 select-text" id="generated-uvod-area">
                         </div>
 
                         <div class="mb-5">
@@ -405,6 +430,7 @@
 
     </main>
 
+    <!-- GEMINI PROMPT KOPIR-MODAL -->
     <div id="copy-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300 no-print">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-slate-100 text-center transform scale-95 transition-transform duration-300" id="modal-content">
             <div class="w-15 h-15 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">
@@ -465,14 +491,6 @@
             }
         };
 
-        const ratingLevels = [
-            { val: 120, label: "Iznad oček.", title: "120 - Iznad očekivanog (darovitost)", color: "from-purple-600 via-indigo-600 to-cyan-500", text: "text-purple-700", border: "border-purple-200", bg: "bg-purple-50" },
-            { val: 100, label: "Odlično", title: "100 - Odlično postignuće", color: "from-indigo-500 to-purple-600", text: "text-indigo-700", border: "border-indigo-200", bg: "bg-indigo-50" },
-            { val: 90, label: "Uobičajeno", title: "90 - Uobičajeni nivo", color: "from-emerald-500 to-teal-500", text: "text-emerald-700", border: "border-emerald-200", bg: "bg-emerald-50" },
-            { val: 75, label: "Dobro", title: "75 - Dobro u skladu sa uzrastom", color: "from-blue-500 to-cyan-500", text: "text-blue-700", border: "border-blue-200", bg: "bg-blue-50" },
-            { val: 50, label: "Podrška", title: "50 - Potrebna dodatna podrška", color: "from-rose-500 to-red-500", text: "text-rose-700", border: "border-rose-200", bg: "bg-rose-50" }
-        ];
-
         let appState = {
             groups: [],
             dailyRecords: {}, 
@@ -513,6 +531,12 @@
             const savedReports = localStorage.getItem('umg_field_reports_archive');
             if (savedReports) appState.savedReports = JSON.parse(savedReports);
 
+            // Postavi podrazumevani tekst u uvodno polje na samom početku
+            const uvodEl = document.getElementById('qa-uvod');
+            if (uvodEl) {
+                uvodEl.value = "Poštovani roditelji,\n\nTokom realizacije programa Mentalne Gimnastike, kontinuirano pratimo razvojne parametre Vašeg deteta kroz pažljivo odabrane oblasti mentalnog, socijalno-emotivnog i fizičkog razvoja. U nastavku je grafički prikaz uspešnosti i stručni osvrt na dosadašnje rezultate.";
+            }
+
             renderPedagogSliders();
             populatePedagogGroups();
             initFirebaseCloudSync();
@@ -547,7 +571,6 @@
             window.location.href = "index.html";
         }
 
-        // CLOUD SYNCHRONIZATION FOR PEDAGOGUE
         function initFirebaseCloudSync() {
             try {
                 const firebaseConfig = {
@@ -602,7 +625,6 @@
                         }
                     });
 
-                    // POPRAVLJENO: Slušaj arhivu pedagoških izveštaja uživo sa oblaka
                     db.collection("savedReports").onSnapshot((snapshot) => {
                         let tempReports = {};
                         snapshot.forEach(doc => {
@@ -641,7 +663,6 @@
             }
         }
 
-        // POPRAVLJENO: Putanja usklađena sa čistim root direktorijumom
         function updateCloudSavedReports(childId) {
             if (useCloud && db) {
                 db.collection("savedReports").doc(childId).set({
@@ -780,7 +801,6 @@
                 }
             });
 
-            // Postavi izračunate vrednosti na slajdere i izračunaj opšti prosek
             let totalSum = 0;
             areas.forEach(a => {
                 const slider = document.getElementById(`ped-slider-${a.id}`);
@@ -797,7 +817,6 @@
                 }
             });
 
-            // POPRAVLJENO: Pametno automatsko biranje utiska na osnovu proseka (ako korisnik ne promeni sam)
             const generalAvg = totalSum / areas.length;
             const impressionSelect = document.getElementById('overall-impression');
             if (impressionSelect) {
@@ -809,14 +828,12 @@
             const notesEl = document.getElementById('qa-notes');
             const emotivnoEl = document.getElementById('qa-emotivno');
             const intelektEl = document.getElementById('qa-intelekt');
-            const closingEl = document.getElementById('qa-closing');
             const authorEl = document.getElementById('pedagog-author');
             const instructorEl = document.getElementById('pedagog-instructor');
 
             if (notesEl) notesEl.value = hronoloskeBeleske.trim();
             if (emotivnoEl) emotivnoEl.value = sakupljeneSocEmotivne.join(" ") || "";
             if (intelektEl) intelektEl.value = sakupljeneKognitivne.join(" ") || "";
-            if (closingEl) closingEl.value = "";
 
             if (authorEl) authorEl.value = localStorage.getItem('umg_last_author') || "Stručni saradnik UMG tima";
             const instruktoriListaStr = sakupljeniEdukatori.size > 0 ? Array.from(sakupljeniEdukatori).join(', ') : "Instruktor UMG";
@@ -956,9 +973,11 @@
                 const ageGroup = foundGroup.ageGroup || "3-4 godine"; 
                 const authorInput = document.getElementById('pedagog-author');
                 const impressionSelect = document.getElementById('overall-impression');
+                const uvodInput = document.getElementById('qa-uvod');
                 
                 const author = authorInput ? authorInput.value.trim() : "";
                 const impression = impressionSelect ? impressionSelect.value : "Izuzetan napredak";
+                const uvodTekst = uvodInput ? uvodInput.value.trim() : "";
 
                 if (author) localStorage.setItem('umg_last_author', author);
 
@@ -967,12 +986,18 @@
                 const repGroup = document.getElementById('rep-group');
                 const repImpression = document.getElementById('rep-impression');
                 const repAuthor = document.getElementById('rep-author');
+                const repUvodArea = document.getElementById('generated-uvod-area');
 
                 if (repChildName) repChildName.innerText = foundChild.name;
                 if (repAge) repAge.innerText = ageGroup;
                 if (repGroup) repGroup.innerText = foundGroup.name;
                 if (repImpression) repImpression.innerText = impression;
                 if (repAuthor) repAuthor.innerText = author || "stručni saradnik";
+
+                // POPRAVLJENO: Prikaz uvodnog teksta uživo na desnoj strani papira
+                if (repUvodArea) {
+                    repUvodArea.innerHTML = uvodTekst ? uvodTekst.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '<br>').join('') : '';
+                }
 
                 const chartContainer = document.getElementById('rep-chart');
                 if (chartContainer) {
@@ -1086,7 +1111,7 @@
         }
 
         function startVoiceInput(elementId, childId = null) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const SpeechRecognition = window.SpeechRecognition || window.webkitRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
                 showToast("Pregledač ne podržava glasovni unos.", "warning");
                 return;
@@ -1182,6 +1207,7 @@
             const authorEl = document.getElementById('pedagog-author');
             const instructorEl = document.getElementById('pedagog-instructor');
             const impressionEl = document.getElementById('rep-impression');
+            const uvodInput = document.getElementById('qa-uvod');
 
             const name = nameEl ? nameEl.innerText : "__________";
             const ageGroup = ageEl ? ageEl.innerText : "3-4 godine";
@@ -1189,6 +1215,7 @@
             const author = authorEl ? authorEl.value.trim() : 'Stručni saradnik tima';
             const instructor = instructorEl ? instructorEl.value.trim() : 'Instruktor';
             const impression = impressionEl ? impressionEl.innerText : "Izuzetan napredak";
+            const uvodTekst = uvodInput ? uvodInput.value.trim() : '';
 
             let scoresText = '';
             areas.forEach(area => {
@@ -1227,6 +1254,7 @@ PODACI O DETETU:
 - Instruktor na časovima: ${instructor}
 - Izveštaj formira: ${author}
 - Generalni utisak o napredovanju: ${impression}
+- Uvodni ton izveštaja (koristi ovo kao bazu za početak pisma): ${uvodTekst}
 
 PROSEČNE OCENE PO OBLASTIMA (Skala je od 0 do 120):
 - Ispod 40: Razvojna zona
@@ -1245,7 +1273,7 @@ BELEŠKE SA ČASOVA I ZAPAŽANJA IZ DNEVNIKA:
 5. Završna reč / komentar: ${closing}
 
 SMERNICE ZA PISANJE PISMA:
-1. Počni toplo i partnerski ("Poštovani roditelji...").
+1. Počni pismo u skladu sa smernicama iz uvodnog tona izveštaja.
 2. Izbegavaj robotski i hladan stil. Koristi reči pune empatije, profesionalnog tona i razumevanja dečije psihologije.
 3. Ako su neke ocene preko 100, naglasi ih sa ponosom kao "dokaz rane darovitosti i prirodne snage" deteta.
 4. Ako su neke oblasti u razvojnoj zoni (ispod 40), predstavi ih blago i ohrabrujuće, kao "prostor za dalju igru i stimulaciju", nikako kao manu.
