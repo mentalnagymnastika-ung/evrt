@@ -223,13 +223,18 @@
                         <span id="report-status-badge" class="text-[10px] font-black px-2.5 py-1 rounded-full uppercase bg-slate-200 text-slate-600">🔴 Bez podataka</span>
                     </div>
                     
-                    <!-- POPRAVLJENO: Selektor kompletne istorije svih izveštaja iz arhive -->
+                    <!-- POPRAVLJENO: Selektor kompletne istorije svih izveštaja iz arhive + Dugme za brisanje pojedinačnog izveštaja -->
                     <div id="archived-reports-dropdown-container" class="hidden space-y-1">
                         <label class="block text-[10px] font-bold uppercase tracking-wider text-purple-700 flex items-center gap-1">
                             <i class="fa-solid fa-clock-rotate-left"></i> Izaberi i učitaj izveštaj iz istorije razvoja:
                         </label>
-                        <select id="archived-reports-select" onchange="selectArchivedReport(this.value)" class="w-full bg-white border border-purple-200 rounded-xl px-3 py-2 text-xs font-black focus:ring-2 focus:ring-purple-500 outline-none text-slate-800 shadow-sm cursor-pointer">
-                        </select>
+                        <div class="flex gap-2">
+                            <select id="archived-reports-select" onchange="selectArchivedReport(this.value)" class="flex-grow bg-white border border-purple-200 rounded-xl px-3 py-2 text-xs font-black focus:ring-2 focus:ring-purple-500 outline-none text-slate-800 shadow-sm cursor-pointer">
+                            </select>
+                            <button onclick="deleteSelectedArchivedReport()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-2 rounded-xl text-xs transition-all border border-rose-200 shadow-sm flex items-center justify-center shrink-0" title="Obriši samo ovaj izveštaj iz istorije">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
                     </div>
                     
                     <button id="btn-archive-report" onclick="archiveCurrentReport()" class="w-full bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-800 text-[10px] font-bold py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5 shadow-sm hidden">
@@ -814,6 +819,24 @@
                 }
             });
 
+            const childReports = appState.savedReports[childId] || [];
+            if (childReports.length > 0 && !skipArchiveLoad) {
+                const lastReport = childReports[childReports.length - 1];
+                if (lastReport.scores) {
+                    totalSum = 0;
+                    areas.forEach(a => {
+                        const slider = document.getElementById(`ped-slider-${a.id}`);
+                        const valDisplay = document.getElementById(`ped-val-${a.id}`);
+                        if (slider && valDisplay && lastReport.scores[a.id] !== undefined) {
+                            const savedScore = lastReport.scores[a.id];
+                            slider.value = savedScore;
+                            valDisplay.innerText = savedScore;
+                            totalSum += savedScore;
+                        }
+                    });
+                }
+            }
+
             const generalAvg = totalSum / areas.length;
             const impressionSelect = document.getElementById('overall-impression');
             if (impressionSelect) {
@@ -825,21 +848,17 @@
             const notesEl = document.getElementById('qa-notes');
             const emotivnoEl = document.getElementById('qa-emotivno');
             const intelektEl = document.getElementById('qa-intelekt');
-            const verbalnoEl = document.getElementById('qa-verbalno');
             const authorEl = document.getElementById('pedagog-author');
             const instructorEl = document.getElementById('pedagog-instructor');
 
             if (notesEl) notesEl.value = hronoloskeBeleske.trim();
             if (emotivnoEl) emotivnoEl.value = sakupljeneSocEmotivne.join(" ") || "";
             if (intelektEl) intelektEl.value = sakupljeneKognitivne.join(" ") || "";
-            if (verbalnoEl) verbalnoEl.value = "";
-            resetUvodToDefault();
 
             if (authorEl) authorEl.value = localStorage.getItem('umg_last_author') || "Stručni saradnik UMG tima";
             const instruktoriListaStr = sakupljeniEdukatori.size > 0 ? Array.from(sakupljeniEdukatori).join(', ') : "Instruktor UMG";
             if (instructorEl) instructorEl.value = instruktoriListaStr;
 
-            // Renderuj padajući meni cele istorije (ako skipArchiveLoad nije True, učitaće automatski zadnji)
             renderReportHistoryStatus(childId, !skipArchiveLoad);
             
             if (skipArchiveLoad) {
@@ -847,7 +866,6 @@
             }
         }
 
-        // POPRAVLJENO: Renderovanje padajućeg menija za pregled i učitavanje SVIH sačuvanih izveštaja
         function renderReportHistoryStatus(childId, selectLatest = true) {
             const statusBadge = document.getElementById('report-status-badge');
             const dropdownContainer = document.getElementById('archived-reports-dropdown-container');
@@ -868,7 +886,6 @@
                 statusBadge.innerText = `🟢 Izveštaj završen / Broj unosa: ${childReports.length}`;
                 statusBadge.className = "text-[10px] font-black px-2.5 py-1 rounded-full uppercase bg-emerald-100 text-emerald-800 border border-emerald-200";
                 
-                // Popunjavanje istorijskog selektora svim datumima
                 reportsSelect.innerHTML = '<option value="baseline">-- Trenutni svež prosek sa terena (Baseline) --</option>';
                 childReports.forEach((rep, idx) => {
                     const opt = document.createElement('option');
@@ -886,7 +903,6 @@
             }
         }
 
-        // POPRAVLJENO: Funkcija koja aktivira izabrani izveštaj i ubacuje sve podatke direktno u polja za pisanje
         function selectArchivedReport(val) {
             const select = document.getElementById('pedagog-child-select');
             if (!select || !select.value) return;
@@ -906,11 +922,44 @@
             }
         }
 
-        // POPRAVLJENO: Ubacuje sve sačuvane parametre (tekstove i ocene) nazad u radne HTML komponente
+        // POPRAVLJENO: Funkcija za brisanje POJEDINAČNOG istorijskog izveštaja bez ispisivanja deteta
+        function deleteSelectedArchivedReport() {
+            const childSelect = document.getElementById('pedagog-child-select');
+            const reportsSelect = document.getElementById('archived-reports-select');
+            if (!childSelect || !reportsSelect || !childSelect.value) return;
+
+            const childId = childSelect.value;
+            const selectedVal = reportsSelect.value;
+
+            if (selectedVal === 'baseline') {
+                showToast("Ne možete obrisati baseline prosek sa terena!", "warning");
+                return;
+            }
+
+            const idx = parseInt(selectedVal);
+            const childReports = appState.savedReports[childId] || [];
+
+            if (childReports[idx]) {
+                if (confirm(`Da li ste sigurni da želite TRAJNO da obrišete samo ovaj izveštaj iz istorije od dana: ${childReports[idx].date}?\n(Dete i svi ostali podaci ostaju bezbedni)`)) {
+                    
+                    // Izbaci izveštaj iz niza
+                    childReports.splice(idx, 1);
+                    
+                    // Ažuriraj stanje i lokalno i na cloud
+                    appState.savedReports[childId] = childReports;
+                    localStorage.setItem('umg_field_reports_archive', JSON.stringify(appState.savedReports));
+                    updateCloudSavedReports(childId);
+                    
+                    // Ponovo napuni analitiku deteta
+                    loadChildAnalysis();
+                    showToast("Izveštaj uspešno trajno obrisan iz istorije razvoja.", "warning");
+                }
+            }
+        }
+
         function applyReportToInputs(rep) {
             if (!rep) return;
             
-            // 1. Vraćanje ocena i slajdera na grafikonu
             if (rep.scores) {
                 areas.forEach(a => {
                     const slider = document.getElementById(`ped-slider-${a.id}`);
@@ -922,7 +971,6 @@
                 });
             }
             
-            // 2. Vraćanje svih tekstualnih polja i potpisnika za izmenu (sa podrškom za stare strukture)
             if (rep.impression !== undefined) document.getElementById('overall-impression').value = rep.impression;
             if (rep.uvod !== undefined) document.getElementById('qa-uvod').value = rep.uvod;
             if (rep.emotivno !== undefined) document.getElementById('qa-emotivno').value = rep.emotivno;
@@ -932,11 +980,9 @@
             if (rep.author !== undefined) document.getElementById('pedagog-author').value = rep.author;
             if (rep.instructor !== undefined) document.getElementById('pedagog-instructor').value = rep.instructor;
             
-            // Osveži vizuelni dokument za roditelje
             generateLocalReport();
         }
 
-        // POPRAVLJENO: Funkcija arhiviranja sada čuva APSOLUTNO SVA radna polja odvojeno radi modifikacije
         function archiveCurrentReport() {
             const childSelect = document.getElementById('pedagog-child-select');
             if (!childSelect || !childSelect.value) return;
@@ -959,7 +1005,6 @@
                 if (slider) currentScores[area.id] = parseInt(slider.value);
             });
 
-            // Čuvanje kompletnog stanja svih polja
             const newReport = {
                 date: dateStr,
                 text: narrativeText,
@@ -981,7 +1026,6 @@
             
             updateCloudSavedReports(childId);
             
-            // Osveži i automatski postavi selektor na novokreirani izveštaj
             loadChildAnalysis(true); 
             const reportsSelect = document.getElementById('archived-reports-select');
             if (reportsSelect) {
