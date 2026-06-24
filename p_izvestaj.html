@@ -4,18 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UMG - Pedagoški Izvještaji (P-izvještaj)</title>
-    <!-- Tailwind CSS za moderan i responzivan dizajn -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome za ikonice -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- html2canvas za pretvaranje HTML-a u sliku za slanje preko Vibera -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;950&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     
-    <!-- Firebase Compat SDKs za automatsku sinhronizaciju na oblaku (v10.8.0) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -115,35 +110,27 @@
             }
         }
 
-/* Mobilna optimizacija za Terenski Asistent */
+        /* Mobilna optimizacija */
         @media (max-width: 768px) {
-            /* Povećavanje specifičnih mikro klasa */
             .text-\\[8px\\] { font-size: 11px !important; }
             .text-\\[9px\\] { font-size: 13px !important; }
             .text-\\[10px\\] { font-size: 14px !important; }
             .text-\\[11px\\] { font-size: 15px !important; }
             
-            /* Povećavanje standardnih Tailwind klasa */
             .text-xs { font-size: 16px !important; line-height: 1.4 !important; }
             .text-sm { font-size: 18px !important; line-height: 1.5 !important; }
             .text-base { font-size: 20px !important; line-height: 1.5 !important; }
             
-            /* Proširivanje interaktivnih polja za lakši dodir prstom */
             button, select, input { min-height: 48px !important; }
-            
-            /* Povećavanje okruglih dugmića za ocene iz dnevnika */
             .w-12.h-12 { width: 4rem !important; height: 4rem !important; }
             
-            /* Razmak između redova u listama da ne budu previše zbijeni */
             .space-y-1 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.5rem !important; }
             .space-y-1\\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem !important; }
         }
-
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen lg:h-screen lg:overflow-hidden">
 
-    <!-- BEZBEDNOSNI EKRAN ZA UNOS PIN KODA (Zaključani režim) -->
     <div id="password-screen" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-50 flex items-center justify-center no-print">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl border border-slate-100 text-center">
             <div class="w-16 h-16 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
@@ -170,13 +157,10 @@
         </div>
     </div>
 
-    <!-- Glavno zajedničko zaglavlje platforme (Prikazuje se nakon otključavanja) -->
     <nav class="bg-slate-900 text-white shadow-md py-3.5 px-4 md:px-6 shrink-0 no-print">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="goToHomePortal()">
-                <div class="bg-emerald-600 text-white w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg shadow-md">
-                    UMG
-                </div>
+                <img src="logo.png" alt="eVrt Logo" class="w-10 h-10 object-contain drop-shadow-[0_2px_4px_rgba(252,252,252,0.2)]">
                 <div>
                     <h1 class="font-bold text-base leading-tight">Udruženje Mentalna Gimnastika</h1>
                     <p class="text-[10px] text-purple-400 font-black uppercase tracking-wider">Modul za pedagoške izveštaje (P-izveštaj)</p>
@@ -184,11 +168,9 @@
             </div>
             
             <div class="flex items-center space-x-3">
-                <!-- Indikator statusa sinhronizacije na oblaku -->
                 <div class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300" id="sync-status">
                     <i class="fa-solid fa-cloud-slash text-slate-400"></i> Lokalni režim (Offline)
                 </div>
-                <!-- Dugme za brzi Lock -->
                 <button onclick="lockSecureTab()" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-rose-950/40 text-rose-300 hover:bg-rose-900 hover:text-white border border-rose-800/40 transition-all cursor-pointer" title="Zaključaj poverljive podatke">
                     <i class="fa-solid fa-sign-out-alt mr-1"></i> Zaključaj
                 </button>
@@ -196,13 +178,10 @@
         </div>
     </nav>
 
-    <!-- OSNOVNI RADNI PROSTOR (Dve kolone na desktopu za optimalan rad) -->
     <main class="max-w-7xl w-full mx-auto p-4 flex-grow flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:overflow-hidden">
 
-        <!-- LEVA STRANA: SELEKCIJA, SLIDERI I TEKSTOVI (Nezavisno skrolovanje) -->
         <section id="left-editor-pane" class="lg:col-span-7 space-y-6 lg:h-full lg:overflow-y-auto custom-scrollbar pr-0 lg:pr-4 pb-8 no-print">
             
-            <!-- Korak A: Kaskadni izbor deteta i uzrasta -->
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                 <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center">
                     <span class="bg-emerald-50 text-emerald-600 w-8 h-8 rounded-lg flex items-center justify-center mr-2.5 text-xs font-black">A</span>
@@ -213,31 +192,26 @@
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">1. Izaberi Grupu / Uzrast</label>
                         <select id="pedagog-group-select" onchange="populatePedagogEducators()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none">
-                            <!-- Popunjava se dinamički iz baze -->
                         </select>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">2. Vaspitač / Instruktor</label>
                         <select id="pedagog-educator-select" onchange="populatePedagogChildren()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none">
-                            <!-- Popunjava se dinamički na osnovu izabrane grupe -->
                         </select>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">3. Izaberi Dete</label>
                         <select id="pedagog-child-select" onchange="loadChildAnalysis()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none">
-                            <!-- Prikazuje decu samo iz izabrane grupe i vaspitača -->
                         </select>
                     </div>
                 </div>
                 
-                <!-- PAMETNI STATUSI & ISTORIJA IZVEŠTAJA (Upoređivanje doslednosti) -->
                 <div class="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-bold text-slate-700">Status pedagoškog izveštaja:</span>
                         <span id="report-status-badge" class="text-[10px] font-black px-2.5 py-1 rounded-full uppercase bg-slate-200 text-slate-600">🔴 Bez podataka</span>
                     </div>
                     
-                    <!-- Sklopivi prozor za preview prethodnog izveštaja -->
                     <div id="previous-report-container" class="hidden space-y-2">
                         <button onclick="togglePreviousReportPreview()" class="w-full bg-white border border-slate-200 hover:bg-slate-100 text-[10px] font-black py-2 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5 shadow-sm">
                             <i class="fa-solid fa-history"></i> <span id="toggle-prev-rep-text">Prikaži prethodni izveštaj</span>
@@ -249,14 +223,12 @@
                         </div>
                     </div>
                     
-                    <!-- Dugme za čuvanje tekućeg u arhivu -->
                     <button id="btn-archive-report" onclick="archiveCurrentReport()" class="w-full bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-800 text-[10px] font-bold py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5 shadow-sm hidden">
                         <i class="fa-solid fa-box-archive"></i> <span>Sačuvaj ovaj izveštaj u arhivu deteta</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Korak B: Izračunati profil od 11 oblasti sa predeljenim vrednostima -->
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
                     <div>
@@ -268,7 +240,6 @@
                     </div>
                 </div>
 
-                <!-- Brzi filteri za pedagogov grafikon -->
                 <div class="grid grid-cols-3 gap-2 mb-4 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
                     <button onclick="selectPreset('all')" class="bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-100 hover:border-emerald-200 text-[10px] font-bold py-2 rounded-lg shadow-sm transition-all flex items-center justify-center cursor-pointer">
                         Prikaži sve
@@ -282,75 +253,76 @@
                 </div>
 
                 <div class="space-y-3.5" id="pedagog-sliders-container">
-                    <!-- Slajderi se pune dinamički kroz JS -->
                 </div>
             </div>
 
-            <!-- Korak C: Pedagoške i stručne dopune -->
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-4">
                 <h3 class="text-sm font-bold text-slate-900 flex items-center">
                     <span class="bg-emerald-50 text-emerald-600 w-8 h-8 rounded-lg flex items-center justify-center mr-2.5 text-xs font-black">C</span>
                     Pedagoški osvrt i dorada
                 </h3>
 
-                <!-- Socijalno-emotivni osvrt -->
+                <div class="p-4 bg-purple-50/30 rounded-xl border border-purple-100">
+                    <label class="block text-xs font-bold text-purple-900 uppercase tracking-wide mb-1.5">Generalni utisak o napredovanju:</label>
+                    <select id="overall-impression" onchange="generateLocalReport()" class="w-full bg-white border border-purple-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:ring-2 focus:ring-purple-500 outline-none text-slate-800 shadow-sm">
+                        <option value="Izuzetan napredak">Izuzetan napredak</option>
+                        <option value="U skladu sa očekivanjima za uzrast">U skladu sa očekivanjima za uzrast</option>
+                        <option value="Potrebna dodatna podrška i podsticaj">Potrebna dodatna podrška i podsticaj</option>
+                    </select>
+                </div>
+
                 <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 relative">
                     <label class="block text-xs font-semibold text-slate-700 mb-1.5">Socijalno-emotivni razvoj (nošenje sa neuspehom, uloga deteta edukatora...)</label>
                     <div class="relative flex items-center">
-                        <textarea id="qa-emotivno" rows="2" oninput="generateLocalReport()" placeholder="Povući će se automatski iz dnevnika vaspitača ako postoji unet tekst..." class="w-full pr-12 pl-4 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                        <textarea id="qa-emotivno" rows="2" onchange="generateLocalReport()" placeholder="Zapažanja o socijalno-emotivnom razvoju..." class="w-full pr-12 pl-4 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
                         <button onclick="startVoiceInput('qa-emotivno')" class="absolute right-3 bg-white border border-slate-100 shadow-sm text-slate-600 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"><i class="fa-solid fa-microphone text-xs" id="mic-qa-emotivno"></i></button>
                     </div>
                 </div>
 
-                <!-- Intelektualni osvrt -->
                 <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 relative">
                     <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kognitivni razvoj i asocijativnost (rešavanje problema, logika...)</label>
                     <div class="relative flex items-center">
-                        <textarea id="qa-intelekt" rows="2" oninput="generateLocalReport()" placeholder="Sistem sam računa i popunjava, ali možeš upisati detalje..." class="w-full pr-12 pl-4 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                        <textarea id="qa-intelekt" rows="2" onchange="generateLocalReport()" placeholder="Zapažanja o kognitivnom razvoju..." class="w-full pr-12 pl-4 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
                         <button onclick="startVoiceInput('qa-intelekt')" class="absolute right-3 bg-white border border-slate-100 shadow-sm text-slate-600 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"><i class="fa-solid fa-microphone text-xs" id="mic-qa-intelekt"></i></button>
                     </div>
                 </div>
 
-                <!-- Verbalna i motorička zapažanja -->
                 <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 relative">
                     <label class="block text-xs font-semibold text-slate-700 mb-1.5">Verbalni i motorički razvoj (vokabular, propriocepcija...)</label>
                     <div class="relative flex items-center">
-                        <textarea id="qa-verbalno" rows="2" oninput="generateLocalReport()" placeholder="Upiši specifičnosti u verbalnom izražavanju..." class="w-full pr-12 pl-4 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                        <textarea id="qa-verbalno" rows="2" onchange="generateLocalReport()" placeholder="Zapažanja o verbalnom i motoričkom razvoju..." class="w-full pr-12 pl-4 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
                         <button onclick="startVoiceInput('qa-verbalno')" class="absolute right-3 bg-white border border-slate-100 shadow-sm text-slate-600 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"><i class="fa-solid fa-microphone text-xs" id="mic-qa-verbalno"></i></button>
                     </div>
                 </div>
 
-                <!-- Spojene beleške sa časova sa datumima -->
                 <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
                     <label class="block text-xs font-semibold text-slate-700 mb-1.5">Hronološki trenuci i beleške sa časova (Auto-povučeni iz dnevnika)</label>
-                    <textarea id="qa-notes" rows="3" oninput="generateLocalReport()" placeholder="Ovde će se prikazati hronološke beleške sa časova..." class="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                    <textarea id="qa-notes" rows="3" onchange="generateLocalReport()" placeholder="Hronološke opaske sa terena..." class="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
                 </div>
 
-                <!-- Završni komentar / Potpisnici -->
                 <div class="p-4 bg-emerald-50/30 rounded-xl border border-emerald-100 space-y-3">
                     <div class="relative">
                         <label class="block text-xs font-bold text-emerald-800 mb-1 flex items-center">
                             <i class="fa-solid fa-quote-left mr-1 text-emerald-600"></i> Završna reč / Zaključni komentar stručnog saradnika
                         </label>
                         <div class="relative flex items-center">
-                            <textarea id="qa-closing" rows="2" oninput="generateLocalReport()" class="w-full pr-12 pl-4 py-2 rounded-xl border border-emerald-200 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                            <textarea id="qa-closing" rows="2" onchange="generateLocalReport()" class="w-full pr-12 pl-4 py-2 rounded-xl border border-emerald-200 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
                             <button onclick="startVoiceInput('qa-closing')" class="absolute right-3 bg-white border border-slate-100 shadow-sm text-slate-600 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"><i class="fa-solid fa-microphone text-xs" id="mic-qa-closing"></i></button>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         <div>
                             <label class="block text-[10px] font-bold text-emerald-800 uppercase tracking-wider mb-1">Pedagog / Osoba koja potpisuje</label>
-                            <input type="text" id="pedagog-author" placeholder="Ime i prezime..." oninput="generateLocalReport()" class="w-full bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+                            <input type="text" id="pedagog-author" placeholder="Ime i prezime..." onchange="generateLocalReport()" class="w-full bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-emerald-800 uppercase tracking-wider mb-1">Edukator / Instruktor na časovima</label>
-                            <input type="text" id="pedagog-instructor" placeholder="Ime i prezime..." oninput="generateLocalReport()" class="w-full bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+                            <input type="text" id="pedagog-instructor" placeholder="Ime i prezime..." onchange="generateLocalReport()" class="w-full bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Akcione kontrole -->
             <div class="grid grid-cols-2 gap-3">
                 <button onclick="generateLocalReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center cursor-pointer">
                     <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> Osveži lokalni izveštaj
@@ -362,7 +334,6 @@
 
         </section>
 
-        <!-- DESNA STRANA: PREGLED DOKUMENTA I ŠTAMPA (Fiksni vizuelni papir) -->
         <section id="right-preview-pane" class="lg:col-span-5 lg:h-full lg:overflow-y-auto custom-scrollbar pl-0 lg:pl-2 pb-8">
             <div class="space-y-4">
                 <div class="flex justify-between items-center px-2 no-print">
@@ -377,20 +348,16 @@
                     </div>
                 </div>
 
-                <!-- Papirni predložak koji se skida ili štampa -->
                 <div id="print-area" class="bg-white rounded-2xl p-6 md:p-8 shadow-md border border-slate-100 min-h-[600px] flex flex-col justify-between transition-all duration-300">
-                    
-                    <!-- Zaglavlje UMG -->
                     <div>
                         <div class="flex justify-between items-start border-b border-slate-100 pb-4 mb-4">
                             <div>
                                 <h2 class="font-bold text-emerald-700 text-lg tracking-wide uppercase">Udruženje Mentalna Gimnastika</h2>
                                 <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Društvo za razvoj mentalnih sposobnosti Srbije</p>
                             </div>
-                            <span class="bg-emerald-50 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-100" id="rep-date">2026</span>
+                            <img src="logo.png" alt="eVrt Logo" class="w-12 h-12 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.08)] scale-110">
                         </div>
 
-                        <!-- Naslov izveštaja -->
                         <div class="mb-5 text-center">
                             <h3 class="serif-font italic text-lg text-slate-800 font-semibold">Pregled postignuća i pedagoški izveštaj</h3>
                             <p class="text-[10px] text-slate-500 mt-1">
@@ -405,27 +372,22 @@
                             <p>Tokom realizacije programa Mentalne Gimnastike, kontinuirano pratimo razvojne parametre Vašeg deteta kroz pažljivo odabrane oblasti mentalnog, socijalno-emotivnog i fizičkog razvoja. U nastavku je grafički prikaz uspešnosti i stručni osvrt na dosadašnje rezultate.</p>
                         </div>
 
-                        <!-- DINAMIČKI GRAFIKON (Crtan pomoću SVG-a) -->
                         <div class="mb-5">
                             <h4 class="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-2.5 flex justify-between">
                                 <span>Profil Razvoja po Oblastima</span>
                                 <span class="text-[9px] text-purple-600 font-black">Skala 0 - 120 (100+ označava darovitost)</span>
                             </h4>
                             <div class="space-y-2" id="rep-chart">
-                                <!-- Vizuelni grafikon -->
                             </div>
                         </div>
 
-                        <!-- Analiza -->
                         <div class="serif-font text-[11px] text-slate-700 leading-relaxed space-y-3.5 pt-4 border-t border-slate-100">
                             <p><strong>Utisak o napredovanju:</strong> <span class="font-semibold text-emerald-700" id="rep-impression">Izuzetan napredak</span></p>
                             <div class="pl-3 border-l-2 border-emerald-500 space-y-2.5 text-justify" id="generated-narrative">
-                                <!-- Auto-izgenerisani ili korigovani tekstovi -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Potpisi na dnu -->
                     <div class="border-t border-slate-100 pt-4 mt-6 flex justify-between items-end text-[9px] text-slate-400 font-medium">
                         <div>
                             <p>Edukator / Pedagog: <strong class="text-slate-600" id="rep-author">__________</strong></p>
@@ -443,7 +405,6 @@
 
     </main>
 
-    <!-- GEMINI PROMPT KOPIR-MODAL -->
     <div id="copy-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300 no-print">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-slate-100 text-center transform scale-95 transition-transform duration-300" id="modal-content">
             <div class="w-15 h-15 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">
@@ -457,15 +418,12 @@
         </div>
     </div>
 
-    <!-- Toast obaveštenja -->
     <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2.5 z-50 pointer-events-none no-print">
         <i class="fa-solid fa-circle-check text-emerald-400" id="toast-icon"></i>
         <span id="toast-text" class="text-xs font-medium">Učitavanje...</span>
     </div>
 
-    <!-- JAVASCRIPT LOGIKA PORTALA I PEDAGOGA -->
     <script>
-        // Definicija 11 ključnih oblasti sa kategorizacijom
         const areas = [
             { id: 1, name: "Memorija (Radna, Dugotrajna, Kratkotrajna)", short: "Memorija i prisećanje", desc: "Sposobnost skladištenja i pronalaženja informacija.", default: 75, icon: "fa-brain", category: "cognitive" },
             { id: 2, name: "Grafo-motorika i koordinacija oko-ruka", short: "Grafo-motorika", desc: "Preciznost pokreta ruke, držanje olovke i vizuelno-motorna kontrola.", default: 75, icon: "fa-pen-clip", category: "motor" },
@@ -480,13 +438,12 @@
             { id: 11, name: "Kreativnost i originalnost rešenja", short: "Kreativnost", desc: "Inovativan pristup igrama i sloboda u stvaranju rešenja.", default: 75, icon: "fa-palette", category: "social" }
         ];
 
-        // Definisanje CSS stilova i klasa za tri kategorije
         const categories = {
             cognitive: { 
                 name: "Kognitivni razvoj i Logika", 
                 colorClass: "bg-blue-50/70 border-blue-100", 
                 activeBtnClass: "bg-blue-600 text-white border-transparent", 
-                inactiveBtnClass: "bg-white text-blue-600 border-blue-200 hover:bg-blue-50", 
+                inactiveBtnClass: "bg-white text-blue-600 border-emerald-200 hover:bg-blue-50", 
                 textClass: "text-blue-700",
                 pedagogBorderClass: "border-blue-200 hover:bg-blue-50/20"
             },
@@ -502,13 +459,20 @@
                 name: "Socijalni, Govorni i Kreativni", 
                 colorClass: "bg-purple-50/70 border-purple-100", 
                 activeBtnClass: "bg-purple-600 text-white border-transparent", 
-                inactiveBtnClass: "bg-white text-purple-600 border-purple-200 hover:bg-purple-50", 
+                inactiveBtnClass: "bg-white text-purple-600 border-emerald-200 hover:bg-purple-50", 
                 textClass: "text-purple-700",
                 pedagogBorderClass: "border-purple-200 hover:bg-purple-50/20"
             }
         };
 
-        // Stanje aplikacije
+        const ratingLevels = [
+            { val: 120, label: "Iznad oček.", title: "120 - Iznad očekivanog (darovitost)", color: "from-purple-600 via-indigo-600 to-cyan-500", text: "text-purple-700", border: "border-purple-200", bg: "bg-purple-50" },
+            { val: 100, label: "Odlično", title: "100 - Odlično postignuće", color: "from-indigo-500 to-purple-600", text: "text-indigo-700", border: "border-indigo-200", bg: "bg-indigo-50" },
+            { val: 90, label: "Uobičajeno", title: "90 - Uobičajeni nivo", color: "from-emerald-500 to-teal-500", text: "text-emerald-700", border: "border-emerald-200", bg: "bg-emerald-50" },
+            { val: 75, label: "Dobro", title: "75 - Dobro u skladu sa uzrastom", color: "from-blue-500 to-cyan-500", text: "text-blue-700", border: "border-blue-200", bg: "bg-blue-50" },
+            { val: 50, label: "Podrška", title: "50 - Potrebna dodatna podrška", color: "from-rose-500 to-red-500", text: "text-rose-700", border: "border-rose-200", bg: "bg-rose-50" }
+        ];
+
         let appState = {
             groups: [],
             dailyRecords: {}, 
@@ -521,15 +485,12 @@
         let originalTextMap = {};
         let isAuthorized = false;
         
-        // Firebase Cloud Storage sistemske promenljive
         let db = null;
         let auth = null;
         let useCloud = false;
         let appId = 'default-app-id';
 
-        // INICIJALIZACIJA pri pokretanju
         window.addEventListener('DOMContentLoaded', () => {
-            // Provjera bezbjednosnog stanja iz localStorage
             const authState = localStorage.getItem('umg_pedagog_authenticated');
             if (authState === 'true') {
                 isAuthorized = true;
@@ -537,7 +498,6 @@
                 if (passwordScreen) passwordScreen.classList.add('hidden');
             }
 
-            // Učitavanje iz localStorage
             const savedGroups = localStorage.getItem('umg_field_groups');
             if (savedGroups) appState.groups = JSON.parse(savedGroups);
 
@@ -545,10 +505,7 @@
             if (savedEducators) appState.educators = JSON.parse(savedEducators);
 
             const savedPin = localStorage.getItem('umg_pedagog_pin');
-            if (savedPin) {
-                appState.pedagogPin = savedPin;
-                document.getElementById('pedagog-password-input').value = "";
-            }
+            if (savedPin) appState.pedagogPin = savedPin;
 
             const savedRecords = localStorage.getItem('umg_field_records');
             if (savedRecords) appState.dailyRecords = JSON.parse(savedRecords);
@@ -556,17 +513,11 @@
             const savedReports = localStorage.getItem('umg_field_reports_archive');
             if (savedReports) appState.savedReports = JSON.parse(savedReports);
 
-            // Prvo renderuj slajdere
             renderPedagogSliders();
-
-            // Zatim popuni selektore i pokreni analizu
             populatePedagogGroups();
-
-            // Inicijalizacija Firebase automatske sinhronizacije
             initFirebaseCloudSync();
         });
 
-        // BEZBEDNOSNE FUNKCIJE
         function verifySecureAccess() {
             const enteredEl = document.getElementById('pedagog-password-input');
             const entered = enteredEl ? enteredEl.value.trim() : '';
@@ -580,10 +531,6 @@
                 showToast("Pristup odobren!");
             } else {
                 if (error) error.classList.remove('hidden');
-                if (enteredEl) {
-                    enteredEl.value = '';
-                    enteredEl.focus();
-                }
             }
         }
 
@@ -600,105 +547,114 @@
             window.location.href = "index.html";
         }
 
-        // CLOUD STORAGE SINHRONIZACIJA
-// CLOUD SYNCHRONIZATION
-// CLOUD SYNCHRONIZATION
-function initFirebaseCloudSync() {
-    try {
-        // Konfiguracija tvog aktivnog Firebase projekta
-        const firebaseConfig = {
-            apiKey: "AIzaSyDMRU0F7cH4EPk6ZJd_pr4YfKQ7i4xqKuY",
-            authDomain: "evrtumg.firebaseapp.com",
-            projectId: "evrtumg",
-            storageBucket: "evrtumg.firebasestorage.app",
-            messagingSenderId: "62747234765",
-            appId: "1:62747234765:web:e92a188dc2fd8390e43484"
-        };
+        // CLOUD SYNCHRONIZATION FOR PEDAGOGUE
+        function initFirebaseCloudSync() {
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyDMRU0F7cH4EPk6ZJd_pr4YfKQ7i4xqKuY",
+                    authDomain: "evrtumg.firebaseapp.com",
+                    projectId: "evrtumg",
+                    storageBucket: "evrtumg.firebasestorage.app",
+                    messagingSenderId: "62747234765",
+                    appId: "1:62747234765:web:e92a188dc2fd8390e43484"
+                };
 
-        // Pokretanje Firebase-a ako već nije pokrenut
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        
-        db = firebase.firestore(); 
-        auth = firebase.auth(); 
-        useCloud = true;
-        
-        // Anonimna prijava za bezbedan upis na terenu bez kucanja lozinke
-        auth.signInAnonymously().then(() => {
-            // Čim se anonimna prijava uspešno izvrši, prebacujemo UI u "Sinhronizovano"
-            updateSyncStatusUI(true);
-            
-            // =========================================================================
-            // DIREKTNA SINHRONIZACIJA SA PROJEKTOM
-            // =========================================================================
-
-            // 1. Slušaj pin kodove i spisak vaspitača iz 'system/config'
-            db.collection("system").doc("config").onSnapshot((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (data.pedagogPin) appState.pedagogPin = data.pedagogPin;
-                    if (data.adminPin) appState.adminPin = data.adminPin;
-                    if (data.educators) {
-                        appState.educators = data.educators;
-                        if (typeof populateEducatorSelects === 'function') populateEducatorSelects();
-                        if (typeof renderSettingsEducatorList === 'function') renderSettingsEducatorList();
-                    }
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
                 }
-            }, (err) => console.error("Greška pri sinhronizaciji konfiguracije:", err));
+                
+                db = firebase.firestore(); 
+                auth = firebase.auth(); 
+                useCloud = true;
+                
+                auth.signInAnonymously().then(() => {
+                    updateSyncStatusUI(true);
+                    
+                    db.collection("system").doc("config").onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            if (data.pedagogPin) appState.pedagogPin = data.pedagogPin;
+                            if (data.educators) appState.educators = data.educators;
+                        }
+                    });
 
-            // 2. Slušaj vrtiće, grupe i decu iz kolekcije 'groups'
-            db.collection("groups").onSnapshot((snapshot) => {
-                let tempGroups = [];
-                snapshot.forEach(doc => {
-                    tempGroups.push(doc.data());
+                    db.collection("groups").onSnapshot((snapshot) => {
+                        let tempGroups = [];
+                        snapshot.forEach(doc => {
+                            tempGroups.push(doc.data());
+                        });
+                        if (tempGroups.length > 0) {
+                            appState.groups = tempGroups;
+                            localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
+                            populatePedagogGroups();
+                        }
+                    });
+
+                    db.collection("dailyRecords").onSnapshot((snapshot) => {
+                        let tempRecords = {};
+                        snapshot.forEach(doc => {
+                            tempRecords[doc.id] = doc.data();
+                        });
+                        if (Object.keys(tempRecords).length > 0) {
+                            appState.dailyRecords = tempRecords;
+                            localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
+                            loadChildAnalysis();
+                        }
+                    });
+
+                    // POPRAVLJENO: Slušaj arhivu pedagoških izveštaja uživo sa oblaka
+                    db.collection("savedReports").onSnapshot((snapshot) => {
+                        let tempReports = {};
+                        snapshot.forEach(doc => {
+                            tempReports[doc.id] = doc.data().reports || [];
+                        });
+                        if (Object.keys(tempReports).length > 0) {
+                            appState.savedReports = tempReports;
+                            localStorage.setItem('umg_field_reports_archive', JSON.stringify(appState.savedReports));
+                            const select = document.getElementById('pedagog-child-select');
+                            if (select && select.value) {
+                                renderReportHistoryStatus(select.value);
+                            }
+                        }
+                    });
+
+                }).catch(err => {
+                    console.error("Greška pri autentifikaciji:", err);
+                    updateSyncStatusUI(false);
                 });
-                if (tempGroups.length > 0) {
-                    appState.groups = tempGroups;
-                    localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
-                    if (typeof populateGroupSelects === 'function') populateGroupSelects();
-                    if (typeof populatePedagogGroups === 'function') populatePedagogGroups();
-                    if (typeof renderGroupsGrid === 'function') renderGroupsGrid();
-                }
-            }, (err) => console.error("Greška pri sinhronizaciji grupa:", err));
-
-            // 3. Slušaj ocene i unose sa časova iz kolekcije 'dailyRecords'
-            db.collection("dailyRecords").onSnapshot((snapshot) => {
-                let tempRecords = {};
-                snapshot.forEach(doc => {
-                    tempRecords[doc.id] = doc.data();
-                });
-                if (Object.keys(tempRecords).length > 0) {
-                    appState.dailyRecords = tempRecords;
-                    localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
-                    if (typeof loadOrCreateDailyRecord === 'function') loadOrCreateDailyRecord();
-                    if (typeof loadChildAnalysis === 'function') loadChildAnalysis();
-                }
-            }, (err) => console.error("Greška pri sinhronizaciji dnevnika:", err));
-
-        }).catch(err => {
-            console.error("Greška pri autentifikaciji na serveru:", err);
-            updateSyncStatusUI(false);
-        });
-        
-    } catch (e) {
-        console.log("Sistem radi u lokalnom offline režimu.", e);
-        updateSyncStatusUI(false);
-    }
-}
-
-        function updateCloudSavedReports(childId) {
-            if (useCloud && db && auth.currentUser) {
-                db.collection(`artifacts/${appId}/public/data/savedReports`).doc(childId).set({
-                    reports: appState.savedReports[childId] || []
-                }).catch(err => console.error("Greška pri upisu arhive izveštaja na server:", err));
+                
+            } catch (e) {
+                console.log("Sistem radi offline.");
+                updateSyncStatusUI(false);
             }
         }
 
-        // KASKADNI SELEKTOR ZA PEDAGOGA (Grupa -> Vaspitač -> Dete)
+        function updateSyncStatusUI(isOnline) {
+            const el = document.getElementById('sync-status');
+            if (!el) return;
+            if (isOnline) {
+                el.innerHTML = `<i class="fa-solid fa-cloud text-emerald-500"></i> Sinhronizovano`;
+                el.className = "text-[10px] font-black px-2.5 py-1.5 rounded-lg bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 shadow-sm";
+            } else {
+                el.innerHTML = `<i class="fa-solid fa-cloud-slash text-slate-400"></i> Lokalni režim (Offline)`;
+                el.className = "text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-400";
+            }
+        }
+
+        // POPRAVLJENO: Putanja usklađena sa čistim root direktorijumom
+        function updateCloudSavedReports(childId) {
+            if (useCloud && db) {
+                db.collection("savedReports").doc(childId).set({
+                    reports: appState.savedReports[childId] || []
+                }).catch(err => console.error("Greška pri upisu arhive na server:", err));
+            }
+        }
+
         function populatePedagogGroups() {
             const select = document.getElementById('pedagog-group-select');
             if (!select) return;
+            
+            const currentSelected = select.value;
             select.innerHTML = '';
 
             if (appState.groups.length === 0) {
@@ -712,6 +668,10 @@ function initFirebaseCloudSync() {
                 opt.innerText = g.name;
                 select.appendChild(opt);
             });
+
+            if (currentSelected && appState.groups.find(g => g.id === currentSelected)) {
+                select.value = currentSelected;
+            }
 
             populatePedagogEducators();
         }
@@ -747,7 +707,7 @@ function initFirebaseCloudSync() {
             const group = appState.groups.find(g => g.id === groupId);
             childSelect.innerHTML = '';
 
-            if (!group || group.children.length === 0) {
+            if (!group || !group.children || group.children.length === 0) {
                 childSelect.innerHTML = '<option value="">-- Nema dece --</option>';
                 return;
             }
@@ -762,38 +722,26 @@ function initFirebaseCloudSync() {
             loadChildAnalysis();
         }
 
-        // PRETRAGA I ANALIZA PODATAKA ZA DETE
         function loadChildAnalysis() {
             const select = document.getElementById('pedagog-child-select');
             if (!select || !select.value) return;
 
             const childId = select.value;
-            
             let foundChild = null;
             let foundGroup = null;
+            
             appState.groups.forEach(g => {
-                const c = g.children.find(ch => ch.id === childId);
-                if (c) {
-                    foundChild = c;
-                    foundGroup = g;
+                if (g.children) {
+                    const c = g.children.find(ch => ch.id === childId);
+                    if (c) { foundChild = c; foundGroup = g; }
                 }
             });
 
             if (!foundChild || !foundGroup) return;
 
-            // Automatsko vezivanje uzrasta na osnovu grupe kojoj dete pripada
-            const ageSelect = document.getElementById('pedagog-age-select');
-            if (ageSelect) {
-                ageSelect.value = foundGroup.ageGroup || "3-4 godine";
-            }
-
-            // Izračunaj profile na osnovu svih istorijskih podataka
             let totals = {};
             let counts = {};
-            areas.forEach(a => {
-                totals[a.id] = 0;
-                counts[a.id] = 0;
-            });
+            areas.forEach(a => { totals[a.id] = 0; counts[a.id] = 0; });
 
             let hronoloskeBeleske = "";
             let sakupljeneSocEmotivne = [];
@@ -801,57 +749,63 @@ function initFirebaseCloudSync() {
             let sakupljeniEdukatori = new Set();
 
             Object.values(appState.dailyRecords).forEach(record => {
-                const tr = record.children[childId];
-                if (tr && tr.present) {
-                    const dateFormated = record.date.split('-').reverse().join('.');
-                    
-                    if (record.educator) {
-                        sakupljeniEdukatori.add(record.educator);
-                    }
-                    
-                    const dailyScore = tr.score || 75;
-                    areas.forEach(a => {
-                        if (tr.highlightAreas && tr.highlightAreas.includes(a.id)) {
-                            totals[a.id] += dailyScore;
-                            counts[a.id]++;
-                        } else {
-                            totals[a.id] += (dailyScore >= 100 ? 85 : (dailyScore <= 50 ? 65 : 75));
-                            counts[a.id]++;
-                        }
-                    });
-
-                    if (tr.note && tr.note.trim() !== "") {
-                        hronoloskeBeleske += `${dateFormated}. ${tr.note.trim()}\n`;
+                if (record.children && record.children[childId]) {
+                    const tr = record.children[childId];
+                    if (tr.present) {
+                        const dateFormated = record.date ? record.date.split('-').reverse().join('.') : '';
+                        if (record.educator) sakupljeniEdukatori.add(record.educator);
                         
-                        const noteLower = tr.note.toLowerCase();
-                        if (noteLower.includes("emoc") || noteLower.includes("socijal") || noteLower.includes("druga") || noteLower.includes("pomaže")) {
-                            sakupljeneSocEmotivne.push(tr.note.trim());
-                        }
-                        if (noteLower.includes("logik") || noteLower.includes("apstrakt") || noteLower.includes("problem") || noteLower.includes("shvata")) {
-                            sakupljeneKognitivne.push(tr.note.trim());
+                        const dailyScore = tr.score || 75;
+                        areas.forEach(a => {
+                            if (tr.highlightAreas && tr.highlightAreas.includes(a.id)) {
+                                totals[a.id] += dailyScore;
+                                counts[a.id]++;
+                            } else {
+                                totals[a.id] += (dailyScore >= 100 ? 85 : (dailyScore <= 50 ? 65 : 75));
+                                counts[a.id]++;
+                            }
+                        });
+
+                        if (tr.note && tr.note.trim() !== "") {
+                            hronoloskeBeleske += `${dateFormated}. ${tr.note.trim()}\n`;
+                            const noteLower = tr.note.toLowerCase();
+                            if (noteLower.includes("emoc") || noteLower.includes("socijal") || noteLower.includes("druga") || noteLower.includes("pomaže")) {
+                                sakupljeneSocEmotivne.push(tr.note.trim());
+                            }
+                            if (noteLower.includes("logik") || noteLower.includes("apstrakt") || noteLower.includes("problem") || noteLower.includes("shvata")) {
+                                sakupljeneKognitivne.push(tr.note.trim());
+                            }
                         }
                     }
                 }
             });
 
-            // Postavi izračunate vrednosti na slajdere
+            // Postavi izračunate vrednosti na slajdere i izračunaj opšti prosek
+            let totalSum = 0;
             areas.forEach(a => {
                 const slider = document.getElementById(`ped-slider-${a.id}`);
                 const valDisplay = document.getElementById(`ped-val-${a.id}`);
                 
                 if (slider && valDisplay) {
                     let avg = 75; 
-                    if (counts[a.id] > 0) {
-                        avg = Math.round(totals[a.id] / counts[a.id]);
-                    }
+                    if (counts[a.id] > 0) avg = Math.round(totals[a.id] / counts[a.id]);
                     avg = Math.max(0, Math.min(120, avg));
                     
                     slider.value = avg;
                     valDisplay.innerText = avg;
+                    totalSum += avg;
                 }
             });
 
-            // Popuni tekstualna polja zapažanjima
+            // POPRAVLJENO: Pametno automatsko biranje utiska na osnovu proseka (ako korisnik ne promeni sam)
+            const generalAvg = totalSum / areas.length;
+            const impressionSelect = document.getElementById('overall-impression');
+            if (impressionSelect) {
+                if (generalAvg >= 92) impressionSelect.value = "Izuzetan napredak";
+                else if (generalAvg >= 68) impressionSelect.value = "U skladu sa očekivanjima za uzrast";
+                else impressionSelect.value = "Potrebna dodatna podrška i podsticaj";
+            }
+
             const notesEl = document.getElementById('qa-notes');
             const emotivnoEl = document.getElementById('qa-emotivno');
             const intelektEl = document.getElementById('qa-intelekt');
@@ -865,17 +819,13 @@ function initFirebaseCloudSync() {
             if (closingEl) closingEl.value = "";
 
             if (authorEl) authorEl.value = localStorage.getItem('umg_last_author') || "Stručni saradnik UMG tima";
-            
             const instruktoriListaStr = sakupljeniEdukatori.size > 0 ? Array.from(sakupljeniEdukatori).join(', ') : "Instruktor UMG";
             if (instructorEl) instructorEl.value = instruktoriListaStr;
 
-            // Učitavanje i renderovanje statusa i arhive izveštaja
             renderReportHistoryStatus(childId);
-
             generateLocalReport();
         }
 
-        // RENDER STATUS I ISTORIJA IZVEŠTAJA (Upoređivanje doslednosti)
         function renderReportHistoryStatus(childId) {
             const statusBadge = document.getElementById('report-status-badge');
             const prevContainer = document.getElementById('previous-report-container');
@@ -884,7 +834,6 @@ function initFirebaseCloudSync() {
             const archiveBtn = document.getElementById('btn-archive-report');
 
             if (!statusBadge || !prevContainer) return;
-
             if (archiveBtn) archiveBtn.classList.remove('hidden');
 
             const childReports = appState.savedReports[childId] || [];
@@ -900,17 +849,11 @@ function initFirebaseCloudSync() {
                 statusBadge.className = "text-[10px] font-black px-2.5 py-1 rounded-full uppercase bg-emerald-100 text-emerald-800 border border-emerald-200";
                 
                 prevContainer.classList.remove('hidden');
-                
-                if (prevTextContent) {
-                    prevTextContent.innerText = lastReport.text;
-                }
-                if (prevDateTag) {
-                    prevDateTag.innerText = `Prethodni izveštaj: ${lastReport.date}`;
-                }
+                if (prevTextContent) prevTextContent.innerText = lastReport.text;
+                if (prevDateTag) prevDateTag.innerText = `Prethodni izveštaj: ${lastReport.date}`;
             }
         }
 
-        // SAČUVAJ TEKUĆI IZVEŠTAJ U ARHIVU DETETA (Usklađen Cloud i Local upis)
         function archiveCurrentReport() {
             const childSelect = document.getElementById('pedagog-child-select');
             if (!childSelect || !childSelect.value) return;
@@ -927,7 +870,6 @@ function initFirebaseCloudSync() {
             const today = new Date();
             const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}. u ${today.getHours()}:${String(today.getMinutes()).padStart(2, '0')}h`;
 
-            // Sačuvaj trenutne ocene
             const currentScores = {};
             areas.forEach(area => {
                 const slider = document.getElementById(`ped-slider-${area.id}`);
@@ -940,25 +882,19 @@ function initFirebaseCloudSync() {
                 scores: currentScores
             };
 
-            if (!appState.savedReports[childId]) {
-                appState.savedReports[childId] = [];
-            }
+            if (!appState.savedReports[childId]) appState.savedReports[childId] = [];
 
             appState.savedReports[childId].push(newReport);
             localStorage.setItem('umg_field_reports_archive', JSON.stringify(appState.savedReports));
             
-            // Automatsko slanje u cloud
             updateCloudSavedReports(childId);
-
             renderReportHistoryStatus(childId);
             showToast("Pedagoški izveštaj uspešno trajno arhiviran!");
         }
 
-        // Toggling sklopivog previews prethodnog izveštaja
         function togglePreviousReportPreview() {
             const box = document.getElementById('previous-report-preview-box');
             const buttonText = document.getElementById('toggle-prev-rep-text');
-
             if (!box) return;
 
             if (box.classList.contains('hidden')) {
@@ -970,12 +906,11 @@ function initFirebaseCloudSync() {
             }
         }
 
-        // RENDER Slajdera za pedagoga
         function renderPedagogSliders() {
             const container = document.getElementById('pedagog-sliders-container');
             if (!container) return;
-
             container.innerHTML = '';
+            
             areas.forEach(area => {
                 const cat = categories[area.category];
                 const div = document.createElement('div');
@@ -997,13 +932,10 @@ function initFirebaseCloudSync() {
         function updatePedSlider(id) {
             const slider = document.getElementById(`ped-slider-${id}`);
             const display = document.getElementById(`ped-val-${id}`);
-            if (slider && display) {
-                display.innerText = slider.value;
-            }
+            if (slider && display) display.innerText = slider.value;
             generateLocalReport();
         }
 
-        // GENERISANJE PAPIRNOG PEDAGOŠKOG IZVEŠTAJA (Tabela i profil razvoja)
         function generateLocalReport() {
             try {
                 const select = document.getElementById('pedagog-child-select');
@@ -1013,10 +945,9 @@ function initFirebaseCloudSync() {
                 let foundChild = null;
                 let foundGroup = null;
                 appState.groups.forEach(g => {
-                    const c = g.children.find(ch => ch.id === childId);
-                    if (c) {
-                        foundChild = c;
-                        foundGroup = g;
+                    if (g.children) {
+                        const c = g.children.find(ch => ch.id === childId);
+                        if (c) { foundChild = c; foundGroup = g; }
                     }
                 });
 
@@ -1024,11 +955,9 @@ function initFirebaseCloudSync() {
 
                 const ageGroup = foundGroup.ageGroup || "3-4 godine"; 
                 const authorInput = document.getElementById('pedagog-author');
-                const instructorInput = document.getElementById('pedagog-instructor');
                 const impressionSelect = document.getElementById('overall-impression');
-
+                
                 const author = authorInput ? authorInput.value.trim() : "";
-                const instructor = instructorInput ? instructorInput.value.trim() : "";
                 const impression = impressionSelect ? impressionSelect.value : "Izuzetan napredak";
 
                 if (author) localStorage.setItem('umg_last_author', author);
@@ -1048,7 +977,6 @@ function initFirebaseCloudSync() {
                 const chartContainer = document.getElementById('rep-chart');
                 if (chartContainer) {
                     chartContainer.innerHTML = '';
-
                     areas.forEach(area => {
                         const checkEl = document.getElementById(`ped-check-${area.id}`);
                         const sliderEl = document.getElementById(`ped-slider-${area.id}`);
@@ -1063,7 +991,7 @@ function initFirebaseCloudSync() {
                         let isGifted = false;
 
                         if (val >= 100) {
-                            barColor = 'bg-gradient-to-r from-purple-600 via-indigo-500 to-cyan-400 animate-pulse';
+                            barColor = 'bg-gradient-to-r from-purple-600 via-indigo-500 to-cyan-400';
                             isGifted = true;
                         } else if (val >= 90) {
                             barColor = 'bg-emerald-500';
@@ -1122,14 +1050,10 @@ function initFirebaseCloudSync() {
             }
         }
 
-        // PRESET FILTERI ZA OBLASTI
         function selectPreset(type) {
             const list = areas.map(area => {
                 const sliderEl = document.getElementById(`ped-slider-${area.id}`);
-                return {
-                    id: area.id,
-                    val: sliderEl ? parseInt(sliderEl.value) : 75
-                };
+                return { id: area.id, val: sliderEl ? parseInt(sliderEl.value) : 75 };
             });
 
             if (type === 'all') {
@@ -1158,11 +1082,9 @@ function initFirebaseCloudSync() {
                 });
                 showToast(`Selektovano ${count} oblasti za dodatni podsticaj.`);
             }
-
             generateLocalReport();
         }
 
-        // GLASOVNI UNOS (Kontinuirano slušanje)
         function startVoiceInput(elementId, childId = null) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -1205,12 +1127,12 @@ function initFirebaseCloudSync() {
                 }
                 if (transcript && inputField) {
                     inputField.value = (originalVal ? originalVal.trim() + " " : "") + transcript.trim();
-                    generateLocalReport();
                 }
             };
 
             recognition.onerror = () => { resetMicIcons(); };
             recognition.onend = () => {
+                if (inputField) generateLocalReport();
                 activeRecognition = null;
                 resetMicIcons();
                 showToast("Završen glasovni unos.");
@@ -1228,7 +1150,6 @@ function initFirebaseCloudSync() {
             });
         }
 
-        // PREUZIMANJE SLIKE ZA VIBER
         function downloadReportAsImage() {
             const element = document.getElementById('print-area');
             const nameEl = document.getElementById('rep-child-name');
@@ -1254,7 +1175,6 @@ function initFirebaseCloudSync() {
             });
         }
 
-        // GEMINI PROMPT KOPIRANJE
         function copyGeminiPrompt() {
             const nameEl = document.getElementById('rep-child-name');
             const ageEl = document.getElementById('rep-age');
@@ -1297,7 +1217,7 @@ function initFirebaseCloudSync() {
             const notes = notesEl ? notesEl.value.trim() : 'Bez hronoloških zabeleški.';
             const closing = closingEl ? closingEl.value.trim() : 'Nema završnih komentara.';
 
-            const prompt = `Deluješ kao iskusni stručni saradnik i pedagog u Udruženju za mentalnu gimnastiku Srbije (UMG). 
+            const prompt = `Deluješ kao iskusni stručni saradnik i pedagog u Udruženje za mentalnu gimnastiku Srbije (UMG). 
 Tvoj zadatak je da na osnovu unetih prosečnih ocena i sirovih zapažanja sa terena napišeš prelepo, toplo, visoko profesionalno pedagoško pismo (izveštaj) roditeljima.
 
 PODACI O DETETU:
@@ -1346,7 +1266,6 @@ Generiši samo tekst pisma na srpskom jeziku, bez uvodnih i zaključnih napomena
             document.body.removeChild(tempTextarea);
         }
 
-        // MODAL I TOAST KONTROLE
         function showModal() {
             const modal = document.getElementById('copy-modal');
             const content = document.getElementById('modal-content');
@@ -1365,9 +1284,7 @@ Generiši samo tekst pisma na srpskom jeziku, bez uvodnih i zaključnih napomena
             if (modal && content) {
                 modal.classList.add('opacity-0');
                 content.classList.add('scale-95');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 300);
+                setTimeout(() => { modal.classList.add('hidden'); }, 300);
             }
         }
 
@@ -1375,18 +1292,10 @@ Generiši samo tekst pisma na srpskom jeziku, bez uvodnih i zaključnih napomena
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toast-icon');
             const textEl = document.getElementById('toast-text');
-            
             if (!toast || !icon || !textEl) return;
 
             textEl.innerText = text;
-            
-            if (type === 'success') {
-                icon.className = "fa-solid fa-circle-check text-emerald-400";
-            } else if (type === 'warning') {
-                icon.className = "fa-solid fa-circle-exclamation text-rose-400";
-            } else {
-                icon.className = "fa-solid fa-circle-notch text-purple-400 animate-spin";
-            }
+            icon.className = type === 'success' ? "fa-solid fa-circle-check text-emerald-400" : (type === 'warning' ? "fa-solid fa-circle-exclamation text-rose-400" : "fa-solid fa-circle-notch text-purple-400 animate-spin");
             
             toast.classList.remove('translate-y-20', 'opacity-0');
             toast.classList.add('translate-y-0', 'opacity-100');
