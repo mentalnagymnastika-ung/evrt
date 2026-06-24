@@ -13,7 +13,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;950&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;955&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     
     <!-- Firebase Compat SDKs za automatsku sinhronizaciju na oblaku (v10.8.0) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -223,7 +223,7 @@
                         <span id="report-status-badge" class="text-[10px] font-black px-2.5 py-1 rounded-full uppercase bg-slate-200 text-slate-600">🔴 Bez podataka</span>
                     </div>
                     
-                    <!-- POPRAVLJENO: Selektor kompletne istorije svih izveštaja iz arhive + Dugme za brisanje pojedinačnog izveštaja -->
+                    <!-- Selektor kompletne istorije svih izveštaja iz arhive + Kantica za brisanje -->
                     <div id="archived-reports-dropdown-container" class="hidden space-y-1">
                         <label class="block text-[10px] font-bold uppercase tracking-wider text-purple-700 flex items-center gap-1">
                             <i class="fa-solid fa-clock-rotate-left"></i> Izaberi i učitaj izveštaj iz istorije razvoja:
@@ -231,7 +231,7 @@
                         <div class="flex gap-2">
                             <select id="archived-reports-select" onchange="selectArchivedReport(this.value)" class="flex-grow bg-white border border-purple-200 rounded-xl px-3 py-2 text-xs font-black focus:ring-2 focus:ring-purple-500 outline-none text-slate-800 shadow-sm cursor-pointer">
                             </select>
-                            <button onclick="deleteSelectedArchivedReport()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-2 rounded-xl text-xs transition-all border border-rose-200 shadow-sm flex items-center justify-center shrink-0" title="Obriši samo ovaj izveštaj iz istorije">
+                            <button onclick="deleteSelectedArchivedReport()" class="bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-600 font-bold px-3 py-2 rounded-xl text-xs transition-all shadow-sm flex items-center justify-center shrink-0" title="Obriši samo ovaj izveštaj iz istorije">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
@@ -540,13 +540,6 @@
             initFirebaseCloudSync();
         });
 
-        function resetUvodToDefault() {
-            const uvodEl = document.getElementById('qa-uvod');
-            if (uvodEl) {
-                uvodEl.value = "Poštovani roditelji,\n\nTokom realizacije programa Mentalne Gimnastike, kontinuirano pratimo razvojne parametre Vašeg deteta kroz pažljivo odabrane oblasti mentalnog, socijalno-emotivnog i fizičkog razvoja. U nastavku je grafički prikaz uspešnosti i stručni osvrt na dosadašnje rezultate.";
-            }
-        }
-
         function verifySecureAccess() {
             const enteredEl = document.getElementById('pedagog-password-input');
             const entered = enteredEl ? enteredEl.value.trim() : '';
@@ -848,12 +841,15 @@
             const notesEl = document.getElementById('qa-notes');
             const emotivnoEl = document.getElementById('qa-emotivno');
             const intelektEl = document.getElementById('qa-intelekt');
+            const verbalnoEl = document.getElementById('qa-verbalno');
             const authorEl = document.getElementById('pedagog-author');
             const instructorEl = document.getElementById('pedagog-instructor');
 
             if (notesEl) notesEl.value = hronoloskeBeleske.trim();
             if (emotivnoEl) emotivnoEl.value = sakupljeneSocEmotivne.join(" ") || "";
             if (intelektEl) intelektEl.value = sakupljeneKognitivne.join(" ") || "";
+            if (verbalnoEl) verbalnoEl.value = "";
+            resetUvodToDefault();
 
             if (authorEl) authorEl.value = localStorage.getItem('umg_last_author') || "Stručni saradnik UMG tima";
             const instruktoriListaStr = sakupljeniEdukatori.size > 0 ? Array.from(sakupljeniEdukatori).join(', ') : "Instruktor UMG";
@@ -922,7 +918,6 @@
             }
         }
 
-        // POPRAVLJENO: Funkcija za brisanje POJEDINAČNOG istorijskog izveštaja bez ispisivanja deteta
         function deleteSelectedArchivedReport() {
             const childSelect = document.getElementById('pedagog-child-select');
             const reportsSelect = document.getElementById('archived-reports-select');
@@ -941,25 +936,22 @@
 
             if (childReports[idx]) {
                 if (confirm(`Da li ste sigurni da želite TRAJNO da obrišete samo ovaj izveštaj iz istorije od dana: ${childReports[idx].date}?\n(Dete i svi ostali podaci ostaju bezbedni)`)) {
-                    
-                    // Izbaci izveštaj iz niza
                     childReports.splice(idx, 1);
-                    
-                    // Ažuriraj stanje i lokalno i na cloud
                     appState.savedReports[childId] = childReports;
                     localStorage.setItem('umg_field_reports_archive', JSON.stringify(appState.savedReports));
                     updateCloudSavedReports(childId);
                     
-                    // Ponovo napuni analitiku deteta
                     loadChildAnalysis();
                     showToast("Izveštaj uspešno trajno obrisan iz istorije razvoja.", "warning");
                 }
             }
         }
 
+        // POPRAVLJENO: Pametno i bezbedno učitavanje svih novih i starih tekstova i opaski u HTML polja
         function applyReportToInputs(rep) {
             if (!rep) return;
             
+            // 1. Vraćanje ocena i slajdera na grafikonu
             if (rep.scores) {
                 areas.forEach(a => {
                     const slider = document.getElementById(`ped-slider-${a.id}`);
@@ -971,16 +963,41 @@
                 });
             }
             
-            if (rep.impression !== undefined) document.getElementById('overall-impression').value = rep.impression;
-            if (rep.uvod !== undefined) document.getElementById('qa-uvod').value = rep.uvod;
-            if (rep.emotivno !== undefined) document.getElementById('qa-emotivno').value = rep.emotivno;
-            if (rep.intelekt !== undefined) document.getElementById('qa-intelekt').value = rep.intelekt;
-            if (rep.verbalno !== undefined) document.getElementById('qa-verbalno').value = rep.verbalno;
-            if (rep.closing !== undefined) document.getElementById('qa-closing').value = rep.closing;
-            if (rep.author !== undefined) document.getElementById('pedagog-author').value = rep.author;
-            if (rep.instructor !== undefined) document.getElementById('pedagog-instructor').value = rep.instructor;
-            
-            generateLocalReport();
+            // 2. Provera formata izveštaja (Novi format sa odvojenim poljima vs Stari format)
+            if (rep.emotivno !== undefined) {
+                // NOVI FORMAT: Sve se upisuje u polja za pisanje da možeš odmah da prepravljaš
+                if (rep.impression !== undefined) document.getElementById('overall-impression').value = rep.impression;
+                if (rep.uvod !== undefined) document.getElementById('qa-uvod').value = rep.uvod;
+                if (rep.emotivno !== undefined) document.getElementById('qa-emotivno').value = rep.emotivno;
+                if (rep.intelekt !== undefined) document.getElementById('qa-intelekt').value = rep.intelekt;
+                if (rep.verbalno !== undefined) document.getElementById('qa-verbalno').value = rep.verbalno;
+                if (rep.notes !== undefined) document.getElementById('qa-notes').value = rep.notes; 
+                if (rep.closing !== undefined) document.getElementById('qa-closing').value = rep.closing;
+                if (rep.author !== undefined) document.getElementById('pedagog-author').value = rep.author;
+                if (rep.instructor !== undefined) document.getElementById('pedagog-instructor').value = rep.instructor;
+                
+                generateLocalReport();
+            } else {
+                // STARI FORMAT (Od prošle nedelje): Pošto nije bilo razbijenih polja, ubacujemo kompletan tekst direktno na desnu stranu
+                if (rep.impression !== undefined) document.getElementById('overall-impression').value = rep.impression;
+                if (rep.author !== undefined) document.getElementById('pedagog-author').value = rep.author;
+                if (rep.instructor !== undefined) document.getElementById('pedagog-instructor').value = rep.instructor;
+                
+                // Osveži grafikon
+                generateLocalReport();
+                
+                // Ubaci stari tekst u desni prozor
+                const generatedNarrative = document.getElementById('generated-narrative');
+                if (generatedNarrative && rep.text) {
+                    generatedNarrative.innerHTML = rep.text;
+                }
+                
+                // Čistimo leva polja kako ne bi pomešao stari tekst sa novim baseline podacima
+                document.getElementById('qa-emotivno').value = "";
+                document.getElementById('qa-intelekt').value = "";
+                document.getElementById('qa-verbalno').value = "";
+                document.getElementById('qa-closing').value = "Učitan stari format izveštaja od prošle nedelje. Kompletan sačuvani tekst se nalazi prikazan na desnoj strani.";
+            }
         }
 
         function archiveCurrentReport() {
@@ -1005,6 +1022,7 @@
                 if (slider) currentScores[area.id] = parseInt(slider.value);
             });
 
+            // Čuvanje kompletnog stanja svih polja, bez preskakanja
             const newReport = {
                 date: dateStr,
                 text: narrativeText,
@@ -1014,6 +1032,7 @@
                 emotivno: document.getElementById('qa-emotivno').value,
                 intelekt: document.getElementById('qa-intelekt').value,
                 verbalno: document.getElementById('qa-verbalno').value,
+                notes: document.getElementById('qa-notes').value, 
                 closing: document.getElementById('qa-closing').value,
                 author: document.getElementById('pedagog-author').value,
                 instructor: document.getElementById('pedagog-instructor').value
