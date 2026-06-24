@@ -285,7 +285,7 @@
                     </select>
                 </div>
 
-                <!-- NOVO POLJE: Uvodno pismo roditeljima (Promenljivo uživo) -->
+                <!-- Uvodno pismo roditeljima -->
                 <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 relative">
                     <label class="block text-xs font-bold text-emerald-800 mb-1.5 flex items-center">
                         <i class="fa-solid fa-envelope-open-text mr-1.5 text-emerald-600"></i> Uvodno pismo / Pozdrav roditeljima
@@ -393,7 +393,6 @@
                             </p>
                         </div>
 
-                        <!-- POPRAVLJENO: Tekst ovde se sada puni dinamički iz polja za uvod -->
                         <div class="serif-font text-[11px] text-slate-600 leading-relaxed mb-5 space-y-2 select-text" id="generated-uvod-area">
                         </div>
 
@@ -531,7 +530,6 @@
             const savedReports = localStorage.getItem('umg_field_reports_archive');
             if (savedReports) appState.savedReports = JSON.parse(savedReports);
 
-            // Postavi podrazumevani tekst u uvodno polje na samom početku
             const uvodEl = document.getElementById('qa-uvod');
             if (uvodEl) {
                 uvodEl.value = "Poštovani roditelji,\n\nTokom realizacije programa Mentalne Gimnastike, kontinuirano pratimo razvojne parametre Vašeg deteta kroz pažljivo odabrane oblasti mentalnog, socijalno-emotivnog i fizičkog razvoja. U nastavku je grafički prikaz uspešnosti i stručni osvrt na dosadašnje rezultate.";
@@ -590,6 +588,7 @@
                 auth = firebase.auth(); 
                 useCloud = true;
                 
+                auth.signInAnously = auth.signInAnonymously;
                 auth.signInAnonymously().then(() => {
                     updateSyncStatusUI(true);
                     
@@ -603,9 +602,7 @@
 
                     db.collection("groups").onSnapshot((snapshot) => {
                         let tempGroups = [];
-                        snapshot.forEach(doc => {
-                            tempGroups.push(doc.data());
-                        });
+                        snapshot.forEach(doc => { tempGroups.push(doc.data()); });
                         if (tempGroups.length > 0) {
                             appState.groups = tempGroups;
                             localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
@@ -615,9 +612,7 @@
 
                     db.collection("dailyRecords").onSnapshot((snapshot) => {
                         let tempRecords = {};
-                        snapshot.forEach(doc => {
-                            tempRecords[doc.id] = doc.data();
-                        });
+                        snapshot.forEach(doc => { tempRecords[doc.id] = doc.data(); });
                         if (Object.keys(tempRecords).length > 0) {
                             appState.dailyRecords = tempRecords;
                             localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
@@ -627,9 +622,7 @@
 
                     db.collection("savedReports").onSnapshot((snapshot) => {
                         let tempReports = {};
-                        snapshot.forEach(doc => {
-                            tempReports[doc.id] = doc.data().reports || [];
-                        });
+                        snapshot.forEach(doc => { tempReports[doc.id] = doc.data().reports || []; });
                         if (Object.keys(tempReports).length > 0) {
                             appState.savedReports = tempReports;
                             localStorage.setItem('umg_field_reports_archive', JSON.stringify(appState.savedReports));
@@ -760,6 +753,9 @@
 
             if (!foundChild || !foundGroup) return;
 
+            const ageSelect = document.getElementById('pedagog-age-select');
+            if (ageSelect) { ageSelect.value = foundGroup.ageGroup || "3-4 godine"; }
+
             let totals = {};
             let counts = {};
             areas.forEach(a => { totals[a.id] = 0; counts[a.id] = 0; });
@@ -801,6 +797,7 @@
                 }
             });
 
+            // Postavi osnovne izračunate vrednosti sa terena na slajdere
             let totalSum = 0;
             areas.forEach(a => {
                 const slider = document.getElementById(`ped-slider-${a.id}`);
@@ -817,6 +814,26 @@
                 }
             });
 
+            // KLJUČNA ISPRAVKA: Ako postoji arhiviran izveštaj, prebriši slajdere sa sačuvanim istorijskim ocenama!
+            const childReports = appState.savedReports[childId] || [];
+            if (childReports.length > 0) {
+                const lastReport = childReports[childReports.length - 1];
+                if (lastReport.scores) {
+                    totalSum = 0;
+                    areas.forEach(a => {
+                        const slider = document.getElementById(`ped-slider-${a.id}`);
+                        const valDisplay = document.getElementById(`ped-val-${a.id}`);
+                        if (slider && valDisplay && lastReport.scores[a.id] !== undefined) {
+                            const savedScore = lastReport.scores[a.id];
+                            slider.value = savedScore;
+                            valDisplay.innerText = savedScore;
+                            totalSum += savedScore;
+                        }
+                    });
+                }
+            }
+
+            // Izračunaj i postavi utisak o napredovanju na osnovu učitanih ocena
             const generalAvg = totalSum / areas.length;
             const impressionSelect = document.getElementById('overall-impression');
             if (impressionSelect) {
@@ -994,7 +1011,6 @@
                 if (repImpression) repImpression.innerText = impression;
                 if (repAuthor) repAuthor.innerText = author || "stručni saradnik";
 
-                // POPRAVLJENO: Prikaz uvodnog teksta uživo na desnoj strani papira
                 if (repUvodArea) {
                     repUvodArea.innerHTML = uvodTekst ? uvodTekst.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '<br>').join('') : '';
                 }
