@@ -216,26 +216,24 @@
                     </div>
                 </div>
                 
-                <!-- STATUSI & ISTORIJA IZVEŠTAJA -->
+                <!-- STATUSI & ISTORIJA ARHIVE -->
                 <div class="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-bold text-slate-700">Status pedagoškog izveštaja:</span>
                         <span id="report-status-badge" class="text-[10px] font-black px-2.5 py-1 rounded-full uppercase bg-slate-200 text-slate-600">🔴 Bez podataka</span>
                     </div>
                     
-                    <div id="previous-report-container" class="hidden space-y-2">
-                        <button onclick="togglePreviousReportPreview()" class="w-full bg-white border border-slate-200 hover:bg-slate-100 text-[10px] font-black py-2 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5 shadow-sm">
-                            <i class="fa-solid fa-history"></i> <span id="toggle-prev-rep-text">Prikaži prethodni izveštaj</span>
-                        </button>
-                        
-                        <div id="previous-report-preview-box" class="hidden p-3.5 bg-white border border-slate-150 rounded-xl max-h-48 overflow-y-auto custom-scrollbar text-[11px] text-slate-600 leading-relaxed font-sans relative">
-                            <div class="absolute top-2 right-2 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100" id="prev-rep-date-tag">Arhiva</div>
-                            <div id="previous-report-text-content" class="whitespace-pre-wrap select-text">Nema unosa.</div>
-                        </div>
+                    <!-- POPRAVLJENO: Selektor kompletne istorije svih izveštaja iz arhive -->
+                    <div id="archived-reports-dropdown-container" class="hidden space-y-1">
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-purple-700 flex items-center gap-1">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Izaberi i učitaj izveštaj iz istorije razvoja:
+                        </label>
+                        <select id="archived-reports-select" onchange="selectArchivedReport(this.value)" class="w-full bg-white border border-purple-200 rounded-xl px-3 py-2 text-xs font-black focus:ring-2 focus:ring-purple-500 outline-none text-slate-800 shadow-sm cursor-pointer">
+                        </select>
                     </div>
                     
                     <button id="btn-archive-report" onclick="archiveCurrentReport()" class="w-full bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-800 text-[10px] font-bold py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5 shadow-sm hidden">
-                        <i class="fa-solid fa-box-archive"></i> <span>Sačuvaj ovaj izveštaj u arhivu deteta</span>
+                        <i class="fa-solid fa-box-archive"></i> <span>Sačuvaj trenutno stanje kao novi izveštaj u istoriju</span>
                     </button>
                 </div>
             </div>
@@ -530,15 +528,19 @@
             const savedReports = localStorage.getItem('umg_field_reports_archive');
             if (savedReports) appState.savedReports = JSON.parse(savedReports);
 
-            const uvodEl = document.getElementById('qa-uvod');
-            if (uvodEl) {
-                uvodEl.value = "Poštovani roditelji,\n\nTokom realizacije programa Mentalne Gimnastike, kontinuirano pratimo razvojne parametre Vašeg deteta kroz pažljivo odabrane oblasti mentalnog, socijalno-emotivnog i fizičkog razvoja. U nastavku je grafički prikaz uspešnosti i stručni osvrt na dosadašnje rezultate.";
-            }
+            resetUvodToDefault();
 
             renderPedagogSliders();
             populatePedagogGroups();
             initFirebaseCloudSync();
         });
+
+        function resetUvodToDefault() {
+            const uvodEl = document.getElementById('qa-uvod');
+            if (uvodEl) {
+                uvodEl.value = "Poštovani roditelji,\n\nTokom realizacije programa Mentalne Gimnastike, kontinuirano pratimo razvojne parametre Vašeg deteta kroz pažljivo odabrane oblasti mentalnog, socijalno-emotivnog i fizičkog razvoja. U nastavku je grafički prikaz uspešnosti i stručni osvrt na dosadašnje rezultate.";
+            }
+        }
 
         function verifySecureAccess() {
             const enteredEl = document.getElementById('pedagog-password-input');
@@ -588,7 +590,6 @@
                 auth = firebase.auth(); 
                 useCloud = true;
                 
-                auth.signInAnously = auth.signInAnonymously;
                 auth.signInAnonymously().then(() => {
                     updateSyncStatusUI(true);
                     
@@ -628,7 +629,7 @@
                             localStorage.setItem('umg_field_reports_archive', JSON.stringify(appState.savedReports));
                             const select = document.getElementById('pedagog-child-select');
                             if (select && select.value) {
-                                renderReportHistoryStatus(select.value);
+                                renderReportHistoryStatus(select.value, true);
                             }
                         }
                     });
@@ -736,7 +737,7 @@
             loadChildAnalysis();
         }
 
-        function loadChildAnalysis() {
+        function loadChildAnalysis(skipArchiveLoad = false) {
             const select = document.getElementById('pedagog-child-select');
             if (!select || !select.value) return;
 
@@ -797,7 +798,6 @@
                 }
             });
 
-            // Postavi osnovne izračunate vrednosti sa terena na slajdere
             let totalSum = 0;
             areas.forEach(a => {
                 const slider = document.getElementById(`ped-slider-${a.id}`);
@@ -814,26 +814,6 @@
                 }
             });
 
-            // KLJUČNA ISPRAVKA: Ako postoji arhiviran izveštaj, prebriši slajdere sa sačuvanim istorijskim ocenama!
-            const childReports = appState.savedReports[childId] || [];
-            if (childReports.length > 0) {
-                const lastReport = childReports[childReports.length - 1];
-                if (lastReport.scores) {
-                    totalSum = 0;
-                    areas.forEach(a => {
-                        const slider = document.getElementById(`ped-slider-${a.id}`);
-                        const valDisplay = document.getElementById(`ped-val-${a.id}`);
-                        if (slider && valDisplay && lastReport.scores[a.id] !== undefined) {
-                            const savedScore = lastReport.scores[a.id];
-                            slider.value = savedScore;
-                            valDisplay.innerText = savedScore;
-                            totalSum += savedScore;
-                        }
-                    });
-                }
-            }
-
-            // Izračunaj i postavi utisak o napredovanju na osnovu učitanih ocena
             const generalAvg = totalSum / areas.length;
             const impressionSelect = document.getElementById('overall-impression');
             if (impressionSelect) {
@@ -845,29 +825,36 @@
             const notesEl = document.getElementById('qa-notes');
             const emotivnoEl = document.getElementById('qa-emotivno');
             const intelektEl = document.getElementById('qa-intelekt');
+            const verbalnoEl = document.getElementById('qa-verbalno');
             const authorEl = document.getElementById('pedagog-author');
             const instructorEl = document.getElementById('pedagog-instructor');
 
             if (notesEl) notesEl.value = hronoloskeBeleske.trim();
             if (emotivnoEl) emotivnoEl.value = sakupljeneSocEmotivne.join(" ") || "";
             if (intelektEl) intelektEl.value = sakupljeneKognitivne.join(" ") || "";
+            if (verbalnoEl) verbalnoEl.value = "";
+            resetUvodToDefault();
 
             if (authorEl) authorEl.value = localStorage.getItem('umg_last_author') || "Stručni saradnik UMG tima";
             const instruktoriListaStr = sakupljeniEdukatori.size > 0 ? Array.from(sakupljeniEdukatori).join(', ') : "Instruktor UMG";
             if (instructorEl) instructorEl.value = instruktoriListaStr;
 
-            renderReportHistoryStatus(childId);
-            generateLocalReport();
+            // Renderuj padajući meni cele istorije (ako skipArchiveLoad nije True, učitaće automatski zadnji)
+            renderReportHistoryStatus(childId, !skipArchiveLoad);
+            
+            if (skipArchiveLoad) {
+                generateLocalReport();
+            }
         }
 
-        function renderReportHistoryStatus(childId) {
+        // POPRAVLJENO: Renderovanje padajućeg menija za pregled i učitavanje SVIH sačuvanih izveštaja
+        function renderReportHistoryStatus(childId, selectLatest = true) {
             const statusBadge = document.getElementById('report-status-badge');
-            const prevContainer = document.getElementById('previous-report-container');
-            const prevTextContent = document.getElementById('previous-report-text-content');
-            const prevDateTag = document.getElementById('prev-rep-date-tag');
+            const dropdownContainer = document.getElementById('archived-reports-dropdown-container');
+            const reportsSelect = document.getElementById('archived-reports-select');
             const archiveBtn = document.getElementById('btn-archive-report');
 
-            if (!statusBadge || !prevContainer) return;
+            if (!statusBadge || !dropdownContainer || !reportsSelect) return;
             if (archiveBtn) archiveBtn.classList.remove('hidden');
 
             const childReports = appState.savedReports[childId] || [];
@@ -875,19 +862,81 @@
             if (childReports.length === 0) {
                 statusBadge.innerText = "🔴 Nije rađen / Bez arhive";
                 statusBadge.className = "text-[10px] font-black px-2.5 py-1 rounded-full uppercase bg-rose-100 text-rose-700 border border-rose-200";
-                prevContainer.classList.add('hidden');
-                if (prevTextContent) prevTextContent.innerText = "Nema prethodnih izveštaja.";
+                dropdownContainer.classList.add('hidden');
             } else {
                 const lastReport = childReports[childReports.length - 1];
-                statusBadge.innerText = `🟢 Izveštaj završen / ${lastReport.date}`;
+                statusBadge.innerText = `🟢 Izveštaj završen / Broj unosa: ${childReports.length}`;
                 statusBadge.className = "text-[10px] font-black px-2.5 py-1 rounded-full uppercase bg-emerald-100 text-emerald-800 border border-emerald-200";
                 
-                prevContainer.classList.remove('hidden');
-                if (prevTextContent) prevTextContent.innerText = lastReport.text;
-                if (prevDateTag) prevDateTag.innerText = `Prethodni izveštaj: ${lastReport.date}`;
+                // Popunjavanje istorijskog selektora svim datumima
+                reportsSelect.innerHTML = '<option value="baseline">-- Trenutni svež prosek sa terena (Baseline) --</option>';
+                childReports.forEach((rep, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = idx;
+                    opt.innerText = `Izveštaj od: ${rep.date}`;
+                    reportsSelect.appendChild(opt);
+                });
+                
+                dropdownContainer.classList.remove('hidden');
+                
+                if (selectLatest) {
+                    reportsSelect.value = childReports.length - 1;
+                    applyReportToInputs(lastReport);
+                }
             }
         }
 
+        // POPRAVLJENO: Funkcija koja aktivira izabrani izveštaj i ubacuje sve podatke direktno u polja za pisanje
+        function selectArchivedReport(val) {
+            const select = document.getElementById('pedagog-child-select');
+            if (!select || !select.value) return;
+            
+            const childId = select.value;
+            const childReports = appState.savedReports[childId] || [];
+
+            if (val === 'baseline') {
+                loadChildAnalysis(true);
+                showToast("Učitan je svež prosek i beleške direktno sa terena!");
+            } else {
+                const idx = parseInt(val);
+                if (childReports[idx]) {
+                    applyReportToInputs(childReports[idx]);
+                    showToast(`Učitan kompletiran izveštaj iz arhive (${childReports[idx].date})`);
+                }
+            }
+        }
+
+        // POPRAVLJENO: Ubacuje sve sačuvane parametre (tekstove i ocene) nazad u radne HTML komponente
+        function applyReportToInputs(rep) {
+            if (!rep) return;
+            
+            // 1. Vraćanje ocena i slajdera na grafikonu
+            if (rep.scores) {
+                areas.forEach(a => {
+                    const slider = document.getElementById(`ped-slider-${a.id}`);
+                    const valDisplay = document.getElementById(`ped-val-${a.id}`);
+                    if (slider && valDisplay && rep.scores[a.id] !== undefined) {
+                        slider.value = rep.scores[a.id];
+                        valDisplay.innerText = rep.scores[a.id];
+                    }
+                });
+            }
+            
+            // 2. Vraćanje svih tekstualnih polja i potpisnika za izmenu (sa podrškom za stare strukture)
+            if (rep.impression !== undefined) document.getElementById('overall-impression').value = rep.impression;
+            if (rep.uvod !== undefined) document.getElementById('qa-uvod').value = rep.uvod;
+            if (rep.emotivno !== undefined) document.getElementById('qa-emotivno').value = rep.emotivno;
+            if (rep.intelekt !== undefined) document.getElementById('qa-intelekt').value = rep.intelekt;
+            if (rep.verbalno !== undefined) document.getElementById('qa-verbalno').value = rep.verbalno;
+            if (rep.closing !== undefined) document.getElementById('qa-closing').value = rep.closing;
+            if (rep.author !== undefined) document.getElementById('pedagog-author').value = rep.author;
+            if (rep.instructor !== undefined) document.getElementById('pedagog-instructor').value = rep.instructor;
+            
+            // Osveži vizuelni dokument za roditelje
+            generateLocalReport();
+        }
+
+        // POPRAVLJENO: Funkcija arhiviranja sada čuva APSOLUTNO SVA radna polja odvojeno radi modifikacije
         function archiveCurrentReport() {
             const childSelect = document.getElementById('pedagog-child-select');
             if (!childSelect || !childSelect.value) return;
@@ -902,7 +951,7 @@
             }
 
             const today = new Date();
-            const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}. u ${today.getHours()}:${String(today.getMinutes()).padStart(2, '0')}h`;
+            const dateStr = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}. u ${today.getHours()}:${String(today.getMinutes()).padStart(2, '0')}h`;
 
             const currentScores = {};
             areas.forEach(area => {
@@ -910,10 +959,19 @@
                 if (slider) currentScores[area.id] = parseInt(slider.value);
             });
 
+            // Čuvanje kompletnog stanja svih polja
             const newReport = {
                 date: dateStr,
                 text: narrativeText,
-                scores: currentScores
+                scores: currentScores,
+                impression: document.getElementById('overall-impression').value,
+                uvod: document.getElementById('qa-uvod').value,
+                emotivno: document.getElementById('qa-emotivno').value,
+                intelekt: document.getElementById('qa-intelekt').value,
+                verbalno: document.getElementById('qa-verbalno').value,
+                closing: document.getElementById('qa-closing').value,
+                author: document.getElementById('pedagog-author').value,
+                instructor: document.getElementById('pedagog-instructor').value
             };
 
             if (!appState.savedReports[childId]) appState.savedReports[childId] = [];
@@ -922,8 +980,16 @@
             localStorage.setItem('umg_field_reports_archive', JSON.stringify(appState.savedReports));
             
             updateCloudSavedReports(childId);
-            renderReportHistoryStatus(childId);
-            showToast("Pedagoški izveštaj uspešno trajno arhiviran!");
+            
+            // Osveži i automatski postavi selektor na novokreirani izveštaj
+            loadChildAnalysis(true); 
+            const reportsSelect = document.getElementById('archived-reports-select');
+            if (reportsSelect) {
+                reportsSelect.value = appState.savedReports[childId].length - 1;
+                applyReportToInputs(newReport);
+            }
+            
+            showToast("Pedagoški izveštaj uspešno dodat u istoriju razvoja deteta!");
         }
 
         function togglePreviousReportPreview() {
