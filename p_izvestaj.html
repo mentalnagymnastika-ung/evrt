@@ -540,6 +540,14 @@
             initFirebaseCloudSync();
         });
 
+// Funkcija koja postavlja podrazumevani tekst uvoda ako je polje prazno
+function resetUvodToDefault() {
+    const uvodArea = document.getElementById('qa-uvod');
+    if (uvodArea && uvodArea.value.trim() === "") {
+        uvodArea.value = "Poštovani roditelji, sa velikim zadovoljstvom vam šaljemo pregled napretka vašeg deteta kroz naše aktivnosti u prethodnom periodu.";
+    }
+}
+        
         function verifySecureAccess() {
             const enteredEl = document.getElementById('pedagog-password-input');
             const entered = enteredEl ? enteredEl.value.trim() : '';
