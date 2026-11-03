@@ -2,7 +2,7 @@
 <html lang="sr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>UMG - Terenski rad vaspitača</title>
     
     <!-- Meta tagovi za mobilnu aplikaciju (Moderna PWA & iOS podrška) -->
@@ -10,22 +10,21 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="UMG Asistent">
-    <meta name="theme-color" content="#059669">
     <link rel="apple-touch-icon" href="logo.png">
     
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS za moderan i responzivan dizajn -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome ikonice -->
+    <!-- Font Awesome za ikonice -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,900;1,9..40,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
     
-    <!-- Manifest za PWA instalaciju -->
-    <link rel="manifest" href="manifest.json">
-    
-    <!-- Firebase Compat SDKs (v10.8.0) -->
+    <!-- QRCode biblioteka za generisanje QR koda u meniju -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Firebase Compat SDKs za automatsku sinhronizaciju na oblaku (v10.8.0) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -36,124 +35,78 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* Zlatno-narandžasti i smaragdni akcenti */
-        .gold-gradient {
-            background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+        /* Fini klizači za preglednost */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
-        .gold-border {
-            border-color: rgba(245, 158, 11, 0.4);
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
         }
-
-        /* Fini klizači za desktop režim */
-        @media (min-width: 1024px) {
-            .custom-scrollbar::-webkit-scrollbar {
-                width: 6px;
-                height: 6px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-track {
-                background: #f8fafc;
-                border-radius: 8px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-thumb {
-                background: #cbd5e1;
-                border-radius: 8px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                background: #f59e0b;
-            }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
 
-        /* Pulsirajuća animacija mikrofona */
+        /* Pulsiranje centralnog dugmeta za izbor profila */
+        @keyframes subtle-pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.25); }
+            50% { transform: scale(1.02); box-shadow: 0 15px 35px -5px rgba(245, 158, 11, 0.4); }
+        }
+        .pulse-profile-btn {
+            animation: subtle-pulse 3s infinite ease-in-out;
+        }
+
+        /* Animacija talasanja aktivnog mikrofona */
         @keyframes pulse-red {
             0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
             50% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
         }
         .mic-active {
-            animation: pulse-red 1.2s infinite !important;
-            background-color: #ef4444 !important;
-            color: #ffffff !important;
-            border-color: #dc2626 !important;
-        }
-
-        /* Pulsirajuće plivajuće dugme profila */
-        @keyframes pulse-gold {
-            0%, 100% { transform: scale(1); box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.35); }
-            50% { transform: scale(1.03); box-shadow: 0 20px 35px -5px rgba(234, 88, 12, 0.45); }
-        }
-        .pulse-profile-btn {
-            animation: pulse-gold 3s ease-in-out infinite;
-        }
-
-        /* Glatke tranzicije za bočni meni i modal */
-        .drawer-backdrop {
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-        }
-        .drawer-content {
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .modal-content {
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @media (max-width: 640px) {
-            .mobile-touch-target {
-                min-height: 48px;
-            }
+            animation: pulse-red 1.3s infinite ease-in-out;
         }
     </style>
 </head>
-<body class="bg-gradient-to-b from-amber-50/40 via-slate-50 to-orange-50/30 text-slate-800 flex flex-col min-h-screen lg:h-screen lg:overflow-hidden select-none">
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen lg:h-screen lg:overflow-hidden select-none">
 
     <!-- ======================================================= -->
-    <!--  GLAVNO GORNJE ZAGLAVLJE SA MENIJEM U LEVOM UGLU        -->
+    <!--  GLAVNO GORNJE ZAGLAVLJE SA MENIJEM U GORNJEM LEVOM UGLU -->
     <!-- ======================================================= -->
-    <header class="bg-white/95 backdrop-blur-md text-slate-800 shadow-sm py-2.5 px-3 sm:px-6 shrink-0 border-b border-amber-200/50 sticky top-0 z-30">
+    <header class="bg-white/95 backdrop-blur-md text-slate-800 shadow-sm py-2.5 px-3 md:px-6 shrink-0 border-b border-amber-100/80 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto flex flex-row justify-between items-center">
             
-            <!-- LEVI UGAO: Uvećani taster menija i brend -->
-            <div class="flex items-center space-x-2.5">
-                <button onclick="toggleSideMenu(true)" class="w-13 h-13 sm:w-14 sm:h-14 p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white flex items-center justify-center border-2 border-amber-300 shadow-md shadow-orange-500/25 transition-all cursor-pointer active:scale-95" title="Glavni meni i podešavanja" aria-label="Otvori meni">
+            <!-- LEVI UGAO: KRUPNO DUGME GLAVNOG MENIJA (Zlatno-narandžasto) -->
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleSideMenu(true)" 
+                        class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-amber-500 via-amber-600 to-orange-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30 hover:scale-105 active:scale-95 transition-all cursor-pointer border-2 border-amber-300" 
+                        title="Otvori Glavni Meni i Podešavanja">
                     <i class="fa-solid fa-bars-staggered text-xl sm:text-2xl"></i>
                 </button>
-
-                <div class="flex items-center space-x-2.5 cursor-pointer" onclick="switchTab('welcome')">
-                    <!-- Dinamički logo sa rezervnim fallback-om ako slika ne postoji -->
-                    <div class="w-10 h-10 relative flex items-center justify-center">
-                        <img src="logo.png" alt="UMG Logo" onerror="this.classList.add('hidden'); document.getElementById('header-logo-fallback').classList.remove('hidden');" class="w-10 h-10 object-contain drop-shadow-sm">
-                        <div id="header-logo-fallback" class="hidden w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-white font-black text-sm flex items-center justify-center shadow-md">
-                            <i class="fa-solid fa-brain"></i>
-                        </div>
+                
+                <div class="cursor-pointer" onclick="switchTab('welcome')">
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-black text-base sm:text-lg tracking-tight leading-tight text-slate-900">Mentalna Gimnastika</span>
+                        <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 hidden sm:inline-block">2026/27</span>
                     </div>
-                    <div class="leading-none">
-                        <h1 class="font-black text-sm sm:text-base tracking-tight text-slate-900 flex items-center gap-1.5">
-                            Mentalna Gimnastika
-                        </h1>
-                        <p class="text-[10px] text-amber-600 font-bold uppercase tracking-wider mt-0.5">Terenski Asistent</p>
-                    </div>
+                    <p class="text-[10px] text-emerald-700 font-bold uppercase tracking-wider flex items-center gap-1">
+                        <i class="fa-solid fa-shield-halved text-[9px]"></i> <span id="header-active-instructor-name">Terenski Rad</span>
+                    </p>
                 </div>
             </div>
             
-            <!-- DESNI UGAO: Status sinhronizacije i brze akcije -->
+            <!-- DESNI UGAO: Status sinhronizacije i povratak na početnu -->
             <div class="flex items-center space-x-2">
-                <!-- Prečica do Programa dana -->
-                <a href="https://sites.google.com/view/umg-instruktori/naslovna?authuser=0" target="_blank" rel="noopener noreferrer" class="hidden sm:flex items-center gap-1.5 h-10 px-3.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold transition-all shadow-sm" title="Dnevni program za instruktore">
-                    <i class="fa-solid fa-book-open-reader text-emerald-600"></i>
-                    <span>Program dana</span>
-                </a>
-
-                <!-- Taster za prikaz QR Koda (Za kolege i prezentacije) -->
-                <button onclick="openQrModal(true)" class="h-10 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95" title="Prikaži QR kod za učitavanje aplikacije">
-                    <i class="fa-solid fa-qrcode text-base text-amber-600"></i>
-                    <span class="hidden md:inline">Podeli QR</span>
-                </button>
-
-                <!-- Indikator oblaka -->
+                <!-- Status oblaka -->
                 <div class="text-[10px] font-black px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all duration-300" id="sync-status">
                     <i class="fa-solid fa-cloud-slash text-slate-400"></i>
                     <span class="hidden sm:inline">Lokalno</span>
                 </div>
 
-                <!-- Taster za brzu odjavu / promenu profila -->
+                <!-- Taster za brzi povratak na početnu / odjavu -->
                 <button onclick="switchTab('welcome')" id="btn-logout" class="h-10 px-3.5 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-600 text-xs font-bold transition-all cursor-pointer border border-slate-200 hidden flex items-center gap-1.5" title="Nazad na početnu / Odjava">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
                     <span class="hidden md:inline">Početna</span>
@@ -163,402 +116,211 @@
     </header>
 
     <!-- ======================================================= -->
-    <!--  OFFCANVAS BOČNI MENI (PROŠIREN I ZNATNO VEĆI PODEŠAVAČ) -->
+    <!--  OFFCANVAS BOČNA FIOKA (GLAVNI PADIRAJUĆI / BOČNI MENI)  -->
     <!-- ======================================================= -->
-    <div id="side-menu-backdrop" onclick="toggleSideMenu(false)" class="drawer-backdrop fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 opacity-0 pointer-events-none">
-    </div>
+    <div id="side-menu-overlay" onclick="toggleSideMenu(false)" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden transition-opacity duration-300 opacity-0"></div>
 
-    <aside id="side-menu" class="drawer-content fixed top-0 left-0 h-full w-[94vw] sm:w-[460px] max-w-[500px] bg-white shadow-2xl z-50 transform -translate-x-full flex flex-col border-r border-amber-200/60">
-        <!-- Zaglavlje menija sa dugmadima Napred / Nazad -->
-        <div class="p-4 sm:p-5 border-b border-amber-100 flex items-center justify-between bg-gradient-to-r from-amber-50/90 to-orange-50/70">
+    <aside id="side-menu-drawer" class="fixed top-0 left-0 h-full w-[88vw] sm:w-[460px] max-w-[500px] bg-white z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between overflow-hidden">
+        
+        <!-- Zaglavlje menija -->
+        <div class="p-5 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center font-black text-xl shadow-md">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shadow-md">
                     <i class="fa-solid fa-brain"></i>
                 </div>
                 <div>
                     <h3 class="font-black text-lg text-slate-900 leading-tight">Glavni Meni</h3>
-                    <p class="text-xs text-amber-700 font-bold uppercase tracking-wider">Podešavanja i Navigacija</p>
+                    <p class="text-xs text-amber-700 font-bold uppercase tracking-wider">Podešavanja i navigacija</p>
                 </div>
             </div>
             
-            <div class="flex items-center space-x-1.5">
-                <button onclick="switchTab('welcome'); toggleSideMenu(false);" class="h-10 px-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 shadow-sm flex items-center gap-1.5 cursor-pointer" title="Idi na početnu">
+            <div class="flex items-center gap-2">
+                <button onclick="switchTab('welcome'); toggleSideMenu(false);" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-1 cursor-pointer">
                     <i class="fa-solid fa-arrow-left"></i> Nazad
                 </button>
-                <button onclick="toggleSideMenu(false)" class="w-10 h-10 rounded-xl bg-white hover:bg-slate-100 text-slate-500 flex items-center justify-center border border-slate-200 transition-all cursor-pointer shadow-sm">
+                <button onclick="toggleSideMenu(false)" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all cursor-pointer">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Telo menija sa uvećanim fontovima i krupnim podešavanjima -->
-        <div class="flex-grow overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar text-base">
+        <!-- Telo menija sa svim ključnim podešavanjima -->
+        <div class="p-5 space-y-6 overflow-y-auto custom-scrollbar flex-grow text-slate-800">
             
-            <!-- SEKCIJA 1: Aktivni vaspitač (Prikazan inicijalima radi zaštite) -->
-            <div class="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200/90 rounded-3xl p-5 space-y-3.5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-black uppercase tracking-wider text-amber-800 flex items-center gap-2">
-                        <i class="fa-solid fa-user-shield text-emerald-600 text-sm"></i> Zaštićeni profil instruktora
-                    </span>
-                    <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black uppercase">Aktivan</span>
+            <!-- SEKCIJA 1: Prijavljeni instruktor (Zaštićeni inicijali) -->
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="block text-[10px] font-black uppercase tracking-wider text-slate-400">Prijavljeni instruktor:</span>
+                    <span id="drawer-educator-display" class="text-base font-black text-slate-900 tracking-wide">B. G.</span>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white font-black flex items-center justify-center text-xl shadow-md shrink-0" id="menu-educator-initial">
-                        -
-                    </div>
-                    <div class="overflow-hidden">
-                        <h4 class="font-black text-xl text-slate-900 tracking-tight" id="menu-educator-name">--</h4>
-                        <p class="text-xs text-slate-500 font-medium">Inicijali instruktora u vrtiću</p>
-                    </div>
-                </div>
-                <button onclick="openProfileModal(true); toggleSideMenu(false);" class="w-full bg-white hover:bg-amber-50 border-2 border-amber-300 text-amber-900 font-bold py-3.5 rounded-2xl text-center transition-all cursor-pointer text-sm flex items-center justify-center gap-2 shadow-sm active:scale-98">
-                    <i class="fa-solid fa-user-pen text-emerald-600"></i> Promeni profil instruktora
+                <button onclick="toggleSideMenu(false); openProfileModal(true);" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-black px-3.5 py-2 rounded-xl text-xs transition-all border border-amber-300 flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-user-pen"></i> Promeni
                 </button>
             </div>
 
-            <!-- SEKCIJA 2: Direktna veza ka Dnevnom programu instruktora -->
-            <a href="https://sites.google.com/view/umg-instruktori/naslovna?authuser=0" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md hover:shadow-lg transition-all group">
-                <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm text-white flex items-center justify-center text-xl group-hover:scale-105 transition-transform">
-                        <i class="fa-solid fa-book-open-reader"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-black text-base text-white leading-tight">Dnevni Program Časa</h4>
-                        <p class="text-xs text-amber-100 mt-0.5">Pogledaj plan i vežbe za danas</p>
-                    </div>
-                </div>
-                <i class="fa-solid fa-arrow-up-right-from-square text-amber-200 text-base group-hover:translate-x-1 transition-transform"></i>
-            </a>
-
-            <!-- DUGME ZA QR KOD U BOČNOM MENIJU -->
-            <button onclick="openQrModal(true); toggleSideMenu(false);" class="w-full flex items-center justify-between p-4 rounded-3xl bg-slate-900 text-white shadow-md hover:bg-slate-800 transition-all cursor-pointer">
-                <div class="flex items-center space-x-3.5">
-                    <div class="w-11 h-11 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center text-xl font-black shadow-sm">
-                        <i class="fa-solid fa-qrcode"></i>
-                    </div>
-                    <div class="text-left">
-                        <h5 class="font-black text-sm text-white leading-tight">QR Kod za kolege i prezentaciju</h5>
-                        <p class="text-xs text-slate-400 mt-0.5">Skeniraj kamerom telefona i otvori</p>
-                    </div>
-                </div>
-                <i class="fa-solid fa-chevron-right text-xs text-slate-500"></i>
-            </button>
-
-            <!-- SEKCIJA 3: ZNATNO UVEĆANA I PREGLEDNIJA PODEŠAVANJA ČASA -->
-            <div class="bg-white border-2 border-slate-200/90 rounded-3xl p-5 space-y-4 shadow-sm">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <span class="text-sm font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-sliders text-emerald-600 text-base"></i> Podešavanje časa
-                    </span>
-                    <a href="https://sites.google.com/view/umg-instruktori/naslovna?authuser=0" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-xl flex items-center gap-1" title="Otvori UMG sajt sa programom">
-                        <i class="fa-solid fa-link text-[10px]"></i> Sajt programa
-                    </a>
-                </div>
+            <!-- SEKCIJA 2: Podešavanje časa (Krupno, pregledno i uvezano) -->
+            <div class="space-y-4">
+                <h4 class="text-xs font-black text-amber-800 uppercase tracking-widest flex items-center">
+                    <i class="fa-solid fa-sliders text-amber-600 mr-2 text-sm"></i> Podešavanje časa
+                </h4>
 
                 <!-- Datum -->
                 <div class="space-y-1.5">
                     <label class="block text-xs font-black text-slate-600 uppercase tracking-wider">
-                        <i class="fa-solid fa-calendar-day text-amber-600 mr-1"></i> Datum evidencije:
+                        <i class="fa-solid fa-calendar-day text-emerald-600 mr-1"></i> Datum rada:
                     </label>
-                    <input type="date" id="field-class-date" onchange="loadOrCreateDailyRecord(); updateSummaryBar();" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3.5 text-base font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-slate-800">
+                    <input type="date" id="field-class-date" onchange="loadOrCreateDailyRecord(); updateSummaryBar();" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-base font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-slate-800">
                 </div>
 
-                <!-- Grupa / Vrtić -->
+                <!-- Grupa / Vrtić sa namenskim dugmetom POTVRDI -->
                 <div class="space-y-1.5">
                     <label class="block text-xs font-black text-slate-600 uppercase tracking-wider">
                         <i class="fa-solid fa-school text-emerald-600 mr-1"></i> Aktivna grupa / Vrtić:
                     </label>
-                    <div class="relative">
-                        <select id="field-group-select" onchange="changeActiveGroup(); updateSummaryBar();" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3.5 text-base font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-slate-800 appearance-none pr-10">
-                            <!-- Popunjava se kroz JS -->
-                        </select>
-                        <i class="fa-solid fa-chevron-down absolute right-4 top-4.5 text-xs text-slate-400 pointer-events-none"></i>
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-grow">
+                            <select id="field-group-select" onchange="changeActiveGroup(); updateSummaryBar();" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-base font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-slate-800 appearance-none pr-10">
+                                <!-- Popunjava se dinamički -->
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-4 top-4 text-xs text-slate-400 pointer-events-none"></i>
+                        </div>
+                        <button type="button" onclick="confirmGroupSelectionAndOpenField()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black px-4 py-3 rounded-2xl text-sm transition-all shadow-md active:scale-95 cursor-pointer shrink-0 flex items-center gap-1.5" title="Potvrdi izbor grupe i odmah otvori evidenciju">
+                            <i class="fa-solid fa-check"></i>
+                            <span>Potvrdi</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Tema / Aktivnost i automatsko uvezivanje sa programom -->
-                <div class="space-y-2">
+                <!-- Nedeljni program i uvezane oblasti -->
+                <div class="space-y-2 pt-2 border-t border-slate-100">
                     <div class="flex items-center justify-between">
-                        <label class="block text-xs font-black text-slate-600 uppercase tracking-wider">
-                            <i class="fa-solid fa-pencil text-blue-600 mr-1"></i> Tema / Nedeljni program:
+                        <label class="block text-xs font-black text-slate-600 uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-book-bookmark text-emerald-600 mr-1.5"></i> Nedeljni program:
                         </label>
-                        <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
-                            Uvezano sa oblastima
-                        </span>
-                    </div>
-
-                    <!-- Brzi izbor nedeljnog programa UMG i taster za unos novih planova -->
-                    <div class="flex items-center gap-2">
-                        <div class="relative flex-grow">
-                            <select id="field-theme-preset" onchange="applyWeeklyPreset(this.value)" class="w-full bg-amber-50/70 border-2 border-amber-300 text-amber-950 font-bold rounded-2xl pl-3.5 pr-8 py-2.5 text-xs outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer appearance-none">
-                                <!-- Popunjava se dinamički kroz JS -->
-                            </select>
-                            <i class="fa-solid fa-chevron-down absolute right-3 top-3 text-[10px] text-amber-700 pointer-events-none"></i>
-                        </div>
-                        <button type="button" onclick="openPresetManagerModal(true)" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black px-3.5 py-2.5 rounded-2xl text-xs transition-all flex items-center gap-1.5 shrink-0 shadow-sm shadow-orange-500/20 active:scale-95 cursor-pointer" title="Dodaj novi nedeljni plan ili izmeni postojeće">
-                            <i class="fa-solid fa-calendar-plus text-sm"></i>
-                            <span class="hidden sm:inline">+ Novi plan</span>
+                        <button type="button" onclick="openNewPlanModal()" class="text-[11px] font-black text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-xl border border-amber-200 transition-all flex items-center gap-1 cursor-pointer">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Dodaj plan
                         </button>
                     </div>
 
                     <div class="relative">
-                        <input type="text" id="field-class-theme" placeholder="Npr. 02.-06.11: Izbaci uljeza, Saobraćaj..." onchange="updateClassTheme(this.value); updateSummaryBar();" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-slate-800">
+                        <select id="weekly-plan-select" onchange="applyWeeklyPreset(this.value)" class="w-full bg-amber-50/60 border-2 border-amber-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none text-slate-800 appearance-none pr-10">
+                            <!-- Popunjava se dinamički iz sistema -->
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-4 top-4 text-xs text-amber-600 pointer-events-none"></i>
                     </div>
 
-                    <!-- Birač ciljanih oblasti za današnji čas -->
+                    <!-- Direktno dugme za otvaranje Google Docs pripreme -->
+                    <div id="plan-doc-link-container" class="hidden">
+                        <a id="plan-doc-link-anchor" href="#" target="_blank" rel="noopener noreferrer" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl py-2 px-3 text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
+                            <i class="fa-solid fa-file-lines text-blue-600"></i>
+                            <span>Otvori detaljnu pripremu u Google Docs-u</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1"></i>
+                        </a>
+                    </div>
+
+                    <!-- Prikaz filtera oblasti koje se ocenjuju te nedelje -->
                     <div class="pt-1">
-                        <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">
-                                Aktivne oblasti za ovaj čas:
-                            </span>
-                            <button type="button" onclick="resetTargetAreasToAll()" class="text-[10px] font-bold text-blue-600 hover:underline cursor-pointer">
-                                Izaberi sve
+                        <div class="flex items-center justify-between text-[11px] text-slate-500 font-bold mb-1.5">
+                            <span>Aktivne oblasti za ovaj čas:</span>
+                            <button type="button" onclick="toggleAllAreasFilter()" id="btn-toggle-all-areas" class="text-emerald-700 hover:underline">
+                                Prikaži sve (11)
                             </button>
                         </div>
-                        <div id="target-areas-chips" class="flex flex-wrap gap-1.5">
-                            <!-- Popunjava se dinamički u JS sa krugovima u bojama -->
+                        <div id="active-areas-chips" class="flex flex-wrap gap-1.5">
+                            <!-- Dinamički bedževi aktivnih oblasti -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Promena vaspitača na terenu (Prikaz u inicijalima) -->
-                <div class="space-y-1.5">
+                <!-- Slobodan unos teme časa -->
+                <div class="space-y-1.5 pt-1">
                     <label class="block text-xs font-black text-slate-600 uppercase tracking-wider">
-                        <i class="fa-solid fa-user-clock text-purple-600 mr-1"></i> Instruktor na času (zamena):
+                        <i class="fa-solid fa-pen-fancy text-emerald-600 mr-1"></i> Naziv časa / Dodatna tema:
+                    </label>
+                    <input type="text" id="field-class-theme" placeholder="Npr. Apstraktna logika i poligon..." onchange="updateClassTheme(this.value); updateSummaryBar();" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-slate-800">
+                </div>
+
+                <!-- Selektor vaspitača na terenu (režim zamene) -->
+                <div class="space-y-1.5 pt-1">
+                    <label class="block text-xs font-black text-slate-600 uppercase tracking-wider">
+                        <i class="fa-solid fa-user-shield text-emerald-600 mr-1"></i> Instruktor na času (Zamena):
                     </label>
                     <div class="relative">
-                        <select id="field-educator-select" onchange="changeActiveEducator(); updateSummaryBar();" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3.5 text-base font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-slate-800 appearance-none pr-10">
-                            <!-- Popunjava se kroz JS sa inicijalima -->
+                        <select id="field-educator-select" onchange="changeActiveEducator(); updateSummaryBar();" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none text-slate-800 appearance-none pr-10">
+                            <!-- Popunjava se dinamički u formatu inicijala -->
                         </select>
-                        <i class="fa-solid fa-chevron-down absolute right-4 top-4.5 text-xs text-slate-400 pointer-events-none"></i>
+                        <i class="fa-solid fa-chevron-down absolute right-4 top-4 text-xs text-slate-400 pointer-events-none"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- SEKCIJA 4: Zaštićene pedagoške i administrativne sekcije -->
-            <div class="space-y-3">
-                <span class="block text-xs font-black uppercase tracking-wider text-slate-400 px-1">Zaštićene Sekcije</span>
+            <!-- SEKCIJA 3: Zaštićene sekcije & Poveznica ka programu -->
+            <div class="space-y-3 pt-3 border-t border-slate-200">
+                <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Zaštićene sekcije i Program</span>
                 
-                <a href="p_izvestaj.html" class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-200 text-slate-700 hover:text-purple-700 transition-all group">
-                    <div class="flex items-center space-x-3.5">
-                        <div class="w-11 h-11 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-lg font-bold group-hover:scale-105 transition-transform">
-                            <i class="fa-solid fa-graduation-cap"></i>
-                        </div>
+                <a href="https://sites.google.com/view/umg-instruktori/naslovna?authuser=0" target="_blank" rel="noopener noreferrer" class="w-full p-3.5 rounded-2xl bg-amber-50 hover:bg-amber-100 border border-amber-200 flex items-center justify-between text-amber-900 transition-all">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-book-open-reader text-lg text-amber-700"></i>
                         <div>
-                            <h5 class="font-bold text-sm text-slate-900 group-hover:text-purple-900 leading-tight">Pedagoški Izveštaj</h5>
-                            <p class="text-xs text-slate-400 mt-0.5">Analitika razvoja i grafikoni</p>
+                            <span class="block text-xs font-black leading-tight">Program za instruktore</span>
+                            <span class="text-[10px] text-amber-700/80">Google Sites priprema za nastavu</span>
                         </div>
                     </div>
-                    <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-sm">
-                        <i class="fa-solid fa-lock text-[10px]"></i> PIN
-                    </span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs text-amber-600"></i>
                 </a>
 
-                <a href="administracija.html" class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 text-slate-700 hover:text-blue-700 transition-all group">
-                    <div class="flex items-center space-x-3.5">
-                        <div class="w-11 h-11 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg font-bold group-hover:scale-105 transition-transform">
-                            <i class="fa-solid fa-sliders-h"></i>
-                        </div>
-                        <div>
-                            <h5 class="font-bold text-sm text-slate-900 group-hover:text-blue-900 leading-tight">Administracija</h5>
-                            <p class="text-xs text-slate-400 mt-0.5">Baza grupa, dece i instruktora</p>
-                        </div>
-                    </div>
-                    <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-sm">
-                        <i class="fa-solid fa-lock text-[10px]"></i> PIN
-                    </span>
-                </a>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <a href="p_izvestaj.html" class="p-3 rounded-2xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-200 flex items-center space-x-2.5 text-slate-700 hover:text-purple-700 transition-all">
+                        <i class="fa-solid fa-graduation-cap text-base text-purple-600"></i>
+                        <span class="text-xs font-black">P-Izveštaj</span>
+                    </a>
+                    <a href="administracija.html" class="p-3 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 flex items-center space-x-2.5 text-slate-700 hover:text-blue-700 transition-all">
+                        <i class="fa-solid fa-sliders-h text-base text-blue-600"></i>
+                        <span class="text-xs font-black">Administracija</span>
+                    </a>
+                </div>
             </div>
 
-            <!-- SEKCIJA 5: Brze komande rada i navigacija (Uklonjeno suvišno dugme Sačuvaj) -->
-            <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
-                <button onclick="switchTab('welcome'); toggleSideMenu(false);" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer text-sm">
-                    <i class="fa-solid fa-arrow-left"></i> Nazad na početnu
-                </button>
-                <button onclick="toggleSideMenu(false)" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer text-sm">
-                    <i class="fa-solid fa-check"></i> Nastavi rad
+            <!-- SEKCIJA 4: Podeli sa kolegom (QR Kod modal) -->
+            <div class="pt-2">
+                <button type="button" onclick="openQrModal()" class="w-full p-3.5 rounded-2xl bg-gradient-to-r from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 border border-teal-200 flex items-center justify-between text-teal-900 transition-all cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-qrcode text-xl text-teal-700"></i>
+                        <div class="text-left">
+                            <span class="block text-xs font-black leading-tight">Podeli aplikaciju sa kolegom</span>
+                            <span class="text-[10px] text-teal-700/80">Prikaži QR kod za brzo skeniranje telefonom</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs text-teal-600"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Podnožje menija sa licencom -->
-        <div class="p-3 bg-slate-50 border-t border-slate-100 text-center">
-            <p class="text-xs text-slate-400 font-semibold">UMG Terenski Asistent • v2.8</p>
+        <!-- Donja traka fioke: Navigacione komande -->
+        <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+            <button onclick="switchTab('welcome'); toggleSideMenu(false);" class="w-1/2 bg-white hover:bg-slate-100 text-slate-700 font-bold py-3.5 rounded-2xl border border-slate-200 transition-all flex items-center justify-center gap-2 cursor-pointer text-xs">
+                <i class="fa-solid fa-arrow-left"></i> Početna
+            </button>
+            <button onclick="switchTab('field'); toggleSideMenu(false);" class="w-1/2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black py-3.5 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer text-xs">
+                <i class="fa-solid fa-check"></i> Nastavi rad
+            </button>
         </div>
     </aside>
 
     <!-- ======================================================= -->
-    <!--  MODAL ZA IZBOR PROFILA (OTVARA SE NA KLIK DUGMETA)     -->
-    <!-- ======================================================= -->
-    <div id="profile-modal-backdrop" onclick="openProfileModal(false)" class="drawer-backdrop fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none flex items-center justify-center p-4">
-        <div class="modal-content bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-amber-200 transform scale-95 opacity-0 space-y-5" onclick="event.stopPropagation()">
-            <div class="text-center space-y-2">
-                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto text-2xl shadow-inner border border-emerald-100">
-                    <i class="fa-solid fa-chalkboard-user"></i>
-                </div>
-                <div>
-                    <h3 class="font-black text-lg text-slate-900">Izaberi svoj profil</h3>
-                    <p class="text-xs text-slate-400">Zaštićeni format inicijala instruktora</p>
-                </div>
-            </div>
-
-            <div class="space-y-2">
-                <div class="relative">
-                    <select id="welcome-educator-select" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-4 text-base font-bold focus:ring-2 focus:ring-amber-500 outline-none text-slate-800 shadow-inner appearance-none pr-10 cursor-pointer">
-                        <!-- Popunjava se dinamički u formatu npr. B. G. -->
-                    </select>
-                    <i class="fa-solid fa-chevron-down absolute right-4 top-5 text-xs text-slate-400 pointer-events-none"></i>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-2 pt-1">
-                <button onclick="openProfileModal(false)" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-2xl text-xs transition-all cursor-pointer text-center">
-                    Zatvori
-                </button>
-                <button onclick="loginAsEducator(); openProfileModal(false);" class="w-2/3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-3.5 rounded-2xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider">
-                    <i class="fa-solid fa-arrow-right-to-bracket text-sm"></i> Pristupi radu
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ======================================================= -->
-    <!--  MODAL ZA UNOS I UPRAVLJANJE NEDELJNIM PROGRAMIMA       -->
-    <!-- ======================================================= -->
-    <div id="preset-manager-modal" onclick="openPresetManagerModal(false)" class="drawer-backdrop fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-50 opacity-0 pointer-events-none flex items-center justify-center p-3 sm:p-4">
-        <div class="modal-content bg-white w-full max-w-lg rounded-3xl p-5 sm:p-6 shadow-2xl border border-amber-200 transform scale-95 opacity-0 space-y-4 max-h-[92vh] flex flex-col" onclick="event.stopPropagation()">
-            
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
-                <div class="flex items-center space-x-2.5">
-                    <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-lg font-bold shadow-sm">
-                        <i class="fa-solid fa-calendar-days"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-black text-base text-slate-900 leading-tight">Baza Nedeljnih Programa</h3>
-                        <p class="text-[11px] text-amber-700 font-bold uppercase tracking-wider">Unos plana i izbor ciljanih oblasti</p>
-                    </div>
-                </div>
-                <button onclick="openPresetManagerModal(false)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-all cursor-pointer">
-                    <i class="fa-solid fa-xmark text-sm"></i>
-                </button>
-            </div>
-
-            <!-- Telo dijaloga sa formom za novi plan i listom postojećih -->
-            <div class="overflow-y-auto space-y-4 flex-grow pr-1 custom-scrollbar text-xs">
-                
-                <!-- Objašnjenje i veza sa Google Sites sajtom -->
-                <div class="p-3 rounded-2xl bg-blue-50/70 border border-blue-200 text-blue-900 leading-relaxed flex items-start gap-2.5">
-                    <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 text-sm shrink-0"></i>
-                    <p class="text-[11px]">
-                        Google Sites instruktora je zaštićen i služi instruktorima za čitanje detaljnih opisa igara. <strong>Ovde u aplikaciji</strong> unosite naziv teme/nedelje i označavate koje se tačno oblasti boduju, čime se kartice dece automatski prilagođavaju.
-                    </p>
-                </div>
-
-                <!-- Forma za kreiranje novog nedeljnog programa -->
-                <div class="bg-amber-50/50 border-2 border-amber-200/90 rounded-2xl p-4 space-y-3">
-                    <span class="block text-xs font-black uppercase tracking-wider text-amber-950 flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus-circle text-amber-600"></i> Dodaj novi nedeljni plan
-                    </span>
-                    
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">
-                            Raspon datuma i tema (kako će pisati u meniju):
-                        </label>
-                        <input type="text" id="new-preset-title" placeholder="Npr. 09.–14.11.2026: Sedi Ćira, Skockalica, Zagonetke" class="w-full bg-white border-2 border-amber-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-amber-500">
-                    </div>
-
-                    <!-- Polje za direktan link ka Google Docs pripremi -->
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                            <i class="fa-brands fa-google-drive text-emerald-600"></i> Link ka Google Docs pripremi (opciono):
-                        </label>
-                        <input type="url" id="new-preset-doc-url" placeholder="https://docs.google.com/document/d/..." class="w-full bg-white border-2 border-amber-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-amber-500">
-                        <p class="text-[10px] text-slate-500 mt-1">U Google Docs kliknite „Deli” $\rightarrow$ „Svako ko ima vezu može da pregleda”.</p>
-                    </div>
-
-                    <div>
-                        <div class="flex items-center justify-between mb-1.5">
-                            <label class="block text-[11px] font-bold text-slate-700">
-                                Izaberi oblasti predviđene za tu nedelju:
-                            </label>
-                            <span class="text-[10px] text-slate-500">Dodirni ikonicu za (de)aktivaciju</span>
-                        </div>
-                        <div id="new-preset-area-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            <!-- Popunjava se dinamički u JS sa svim UMG oblastima -->
-                        </div>
-                    </div>
-
-                    <button type="button" onclick="saveNewWeeklyPreset()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
-                        <i class="fa-solid fa-floppy-disk text-sm"></i> Sačuvaj i dodaj u meni
-                    </button>
-                </div>
-
-                <!-- Lista postojećih programa sa mogućnošću brisanja -->
-                <div class="space-y-2">
-                    <span class="block text-xs font-black uppercase tracking-wider text-slate-500 px-1">
-                        Postojeći sačuvani planovi u aplikaciji:
-                    </span>
-                    <div id="preset-saved-list" class="space-y-2">
-                        <!-- Popunjava se dinamički -->
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="pt-2 border-t border-slate-100 flex justify-end shrink-0">
-                <button onclick="openPresetManagerModal(false)" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all cursor-pointer">
-                    Zatvori
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ======================================================= -->
-    <!--  MODAL ZA BRZI QR KOD (SKENIRANJE I PREZENTACIJA)       -->
-    <!-- ======================================================= -->
-    <div id="qr-modal-backdrop" onclick="openQrModal(false)" class="drawer-backdrop fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 opacity-0 pointer-events-none flex items-center justify-center p-4">
-        <div class="modal-content bg-white w-full max-w-sm rounded-[2.5rem] p-6 sm:p-7 shadow-2xl border-2 border-amber-300 transform scale-95 opacity-0 space-y-5 text-center" onclick="event.stopPropagation()">
-            
-            <div class="space-y-1">
-                <div class="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-md">
-                    <i class="fa-solid fa-qrcode"></i>
-                </div>
-                <h3 class="font-black text-xl text-slate-900 tracking-tight pt-1">Skeniraj za pristup</h3>
-                <p class="text-xs text-slate-500 font-medium">Učitaj aplikaciju kamerom bilo kog telefona</p>
-            </div>
-
-            <!-- Kontejner sa dinamičkim QR kodom -->
-            <div class="p-4 bg-white rounded-3xl border-2 border-amber-100 shadow-inner flex flex-col items-center justify-center">
-                <img id="qr-code-image" src="" alt="UMG QR Kod" class="w-56 h-56 object-contain rounded-2xl shadow-sm">
-                <span class="text-[10px] font-bold text-slate-400 mt-2 tracking-wider uppercase">Direktan link ka ovoj aplikaciji</span>
-            </div>
-
-            <!-- Tasteri za kopiranje i deljenje -->
-            <div class="space-y-2">
-                <button onclick="copyCurrentAppUrl()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-black py-3.5 rounded-2xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer border border-slate-300 active:scale-98">
-                    <i class="fa-solid fa-copy text-sm text-amber-600"></i> Kopiraj link aplikacije
-                </button>
-                <button onclick="openQrModal(false)" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-black py-3.5 rounded-2xl text-xs transition-all shadow-md flex items-center justify-center cursor-pointer uppercase tracking-wider">
-                    Zatvori
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ======================================================= -->
-    <!--  OSNOVNI RADNI PROSTOR                                  -->
+    <!--  GLAVNI RADNI PROSTOR (DVA TAB-A: WELCOME I FIELD)        -->
     <!-- ======================================================= -->
     <main class="max-w-7xl w-full mx-auto p-3 sm:p-4 flex-grow flex flex-col lg:overflow-hidden">
 
         <!-- ======================================================= -->
-        <!--  TAB 0: MODERNIZOVANI OSLOBOĐENI PORTAL                  -->
+        <!--  TAB 0: MODERNIZOVANI RASTEREĆENI POČETNI EKRAN          -->
         <!-- ======================================================= -->
-        <section id="tab-welcome" class="lg:h-full lg:overflow-y-auto custom-scrollbar flex flex-col justify-between items-center py-6 sm:py-8 flex-grow">
+        <section id="tab-welcome" class="lg:h-full lg:overflow-y-auto custom-scrollbar flex flex-col justify-around items-center py-8 sm:py-12 flex-grow">
             
             <!-- BRENDIRANO ZAGLAVLJE SA PRECIZNO CENTRIRANIM BEDŽOM GODINE -->
-            <div class="text-center max-w-md space-y-3 px-4 my-auto">
+            <div class="text-center max-w-md space-y-3 px-4">
                 
-                <!-- Logo sa rezervnim prikazom ako slika ne postoji -->
+                <!-- Logo sa rezervnim prikazom ako slika ne postoji lokalno -->
                 <div class="flex flex-col items-center justify-center space-y-3">
                     <div class="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center">
                         <img src="logo.png" alt="UMG Logo" onerror="this.classList.add('hidden'); document.getElementById('welcome-logo-fallback').classList.remove('hidden');" class="w-full h-full object-contain drop-shadow-md">
@@ -575,138 +337,133 @@
                     </div>
                 </div>
 
-                <div class="space-y-1">
-                    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+                <div class="pt-1">
+                    <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
                         Mentalna Gimnastika
                     </h2>
-                    <p class="text-xs text-amber-700/80 font-bold uppercase tracking-wider">
-                        Sistem za praćenje i analizu razvoja dece
-                    </p>
                 </div>
             </div>
 
-            <!-- CENTRALNO PLIVAJUĆE DUGME ZA IZBOR PROFILA (OSLOBOĐEN PROSTOR) -->
-            <div class="my-auto flex flex-col items-center justify-center space-y-4 px-4 w-full max-w-md">
-                
-                <!-- Plivajuće dugme -->
-                <button onclick="openProfileModal(true)" class="pulse-profile-btn group bg-white border-2 border-amber-300 hover:border-amber-400 p-6 sm:p-7 rounded-[2.5rem] shadow-xl hover:shadow-2xl transition-all cursor-pointer flex flex-col items-center justify-center text-center max-w-xs w-full active:scale-95">
+            <!-- CENTRALNO PLIVAJUĆE DUGME ZA IZBOR PROFILA (POTPUNO SLOBODAN PROSTOR / LUFT) -->
+            <div class="flex flex-col items-center justify-center px-4 w-full max-w-md my-6">
+                <button onclick="openProfileModal(true)" class="pulse-profile-btn group bg-white border-2 border-amber-300 hover:border-amber-400 p-6 sm:p-8 rounded-[2.5rem] shadow-xl hover:shadow-2xl transition-all cursor-pointer flex flex-col items-center justify-center text-center max-w-xs w-full active:scale-95">
                     <div class="w-20 h-20 bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-600 rounded-3xl flex items-center justify-center text-3xl shadow-inner border border-emerald-200/80 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-chalkboard-user"></i>
                     </div>
                     <div class="mt-4 space-y-0.5">
-                        <span class="block text-sm font-black text-slate-900 uppercase tracking-wider group-hover:text-amber-700 transition-colors">
+                        <span class="block text-base font-black text-slate-900 uppercase tracking-wider group-hover:text-amber-700 transition-colors">
                             Izaberi svoj profil
                         </span>
                         <span class="block text-xs font-semibold text-slate-400" id="welcome-selected-name-preview">
-                            Dodirni za promenu ili izbor
+                            Dodirni za izbor instruktora
                         </span>
                     </div>
-                    <span class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-[11px] font-bold border border-amber-200">
-                        <i class="fa-solid fa-arrow-pointer text-[10px]"></i> Klikni za izbor
+                    <span class="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200">
+                        <i class="fa-solid fa-arrow-pointer text-[10px]"></i> Klikni za promenu
                     </span>
                 </button>
-
-                <!-- DIREKTAN LINK ZA DNEVNI PROGRAM NA PRVOM MENIJU -->
-                <a href="https://sites.google.com/view/umg-instruktori/naslovna?authuser=0" target="_blank" rel="noopener noreferrer" class="w-full max-w-xs bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black py-3.5 px-5 rounded-2xl text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider group">
-                    <i class="fa-solid fa-book-open-reader text-sm group-hover:scale-110 transition-transform"></i>
-                    <span>Dnevni program za danas</span>
-                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-80"></i>
-                </a>
             </div>
 
-            <!-- DONJA NAVIGACIJA: DUGMIĆI NAPRED / NAZAD -->
-            <div class="w-full max-w-xs pt-4 flex flex-col items-center space-y-2.5">
-                <div class="grid grid-cols-2 gap-2.5 w-full">
-                    <button onclick="switchTab('welcome')" class="bg-white hover:bg-slate-100 text-slate-700 font-bold py-3 rounded-2xl text-xs border border-slate-200 shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+            <!-- DONJA NAVIGACIJA: DUGMIĆI NAZAD / NAPRED -->
+            <div class="w-full max-w-xs flex flex-col items-center space-y-2">
+                <div class="grid grid-cols-2 gap-3 w-full">
+                    <button onclick="switchTab('welcome')" class="bg-white hover:bg-slate-100 text-slate-700 font-bold py-3.5 rounded-2xl text-xs border border-slate-200 shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                         <i class="fa-solid fa-arrow-left text-[11px]"></i> Nazad
                     </button>
-                    <button onclick="loginAsEducator()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-2xl text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                    <button onclick="loginAsEducator()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-3.5 rounded-2xl text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                         <span>Napred</span> <i class="fa-solid fa-arrow-right text-[11px]"></i>
                     </button>
                 </div>
-                
-                <!-- Dugme za QR Kod na početnom ekranu -->
-                <button onclick="openQrModal(true)" class="w-full py-2.5 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm">
-                    <i class="fa-solid fa-qrcode text-amber-600"></i>
-                    <span>Prikaži QR kod za kolegu / prezentaciju</span>
-                </button>
 
-                <p class="text-[10px] text-slate-400 font-medium">Sve ostale funkcije nalaze se u meniju gore levo</p>
+                <p class="text-[10px] text-slate-400 font-medium pt-1">Sva podešavanja i funkcije nalaze se u meniju gore levo</p>
             </div>
         </section>
 
         <!-- ======================================================= -->
         <!--  TAB 1: TERENSKI RAD VASPITAČA (DNEVNI UNOS)             -->
         <!-- ======================================================= -->
-        <section id="tab-field" class="space-y-3 sm:space-y-4 lg:h-full lg:overflow-y-auto custom-scrollbar pb-8 hidden">
+        <section id="tab-field" class="space-y-3.5 lg:h-full lg:overflow-y-auto custom-scrollbar pb-8 hidden">
             
-            <!-- RASTEREĆENA, MODERNA TRAKA ČASA SA STATISTIKOM, DUGMADIMA NAPRED/NAZAD I MENIJEM -->
-            <div class="bg-white border border-amber-200/60 rounded-2xl p-2.5 sm:p-3 shadow-sm flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sticky top-0 z-20">
+            <!-- PROSTRANO, PREGLEDNO I KRUPNO ZAGLAVLJE GRUPE ZA MOBILNI TELEFON -->
+            <div class="bg-white border border-slate-200/90 rounded-3xl p-3.5 sm:p-4 shadow-sm space-y-3">
                 
-                <!-- Leva strana sažetka: Dugme Nazad, Datum, Grupa i Prisustvo -->
-                <div class="flex items-center justify-between sm:justify-start space-x-2 text-xs font-bold text-slate-700 flex-grow" id="summary-left-container">
-                    
-                    <!-- Dugme Nazad na terenskoj strani -->
-                    <button onclick="switchTab('welcome')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-1.5 font-bold cursor-pointer transition-all active:scale-95 text-xs border border-slate-200 shadow-sm" title="Vrati se na početnu stranu">
-                        <i class="fa-solid fa-arrow-left text-[11px]"></i>
-                        <span class="hidden sm:inline">Nazad</span>
+                <!-- GORNJI RED: NAZAD TASTER, KRUPNO IME GRUPE I DUGME PODESI -->
+                <div class="flex items-center justify-between gap-2.5">
+                    <!-- Dugme Nazad -->
+                    <button onclick="switchTab('welcome')" class="h-11 px-3 sm:px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-black flex items-center gap-1.5 border border-slate-200/80 transition-all cursor-pointer shrink-0 active:scale-95" title="Povratak na početni ekran">
+                        <i class="fa-solid fa-arrow-left text-xs"></i>
+                        <span>Nazad</span>
                     </button>
 
-                    <button onclick="toggleSideMenu(true)" class="bg-gradient-to-r from-amber-50 to-orange-50 text-amber-900 hover:from-amber-100 hover:to-orange-100 px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-amber-300/70 font-black cursor-pointer transition-all active:scale-95 text-xs" title="Otvori detalje časa" id="summary-date">
-                        <i class="fa-solid fa-calendar-day text-amber-600"></i> Danas
-                    </button>
-                    
-                    <span class="text-slate-300">|</span>
-                    
-                    <button onclick="toggleSideMenu(true)" class="truncate text-slate-700 flex items-center gap-1.5 hover:text-amber-700 text-left cursor-pointer font-bold max-w-[140px] sm:max-w-xs" id="summary-info" title="Klikni za promenu grupe ili teme">
-                        Učitavanje...
-                    </button>
+                    <!-- KRUPNO, JASNO I ČITLJIVO IME GRUPE I VRTIĆA -->
+                    <div class="flex-grow text-center px-1 overflow-hidden cursor-pointer" onclick="toggleSideMenu(true)" title="Kliknite da promenite grupu ili podesite čas">
+                        <h3 id="field-header-group-name" class="font-black text-base sm:text-xl text-slate-900 truncate leading-tight tracking-tight">
+                            Učitavanje grupe...
+                        </h3>
+                        <p class="text-[10px] sm:text-xs text-amber-700 font-bold uppercase tracking-wider truncate mt-0.5">
+                            <span id="field-header-theme-preview">UMG Radionica</span>
+                        </p>
+                    </div>
 
-                    <!-- Direktno dugme za otvaranje Google Docs pripreme kada postoji -->
-                    <a id="btn-open-doc-link" href="#" target="_blank" rel="noopener noreferrer" class="hidden bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-1 rounded-xl text-xs font-bold items-center gap-1 transition-all shrink-0" title="Otvori pripremu za ovu nedelju u Google Docs">
-                        <i class="fa-brands fa-google-drive text-emerald-600"></i>
-                        <span class="hidden md:inline">Priprema (Docs)</span>
-                    </a>
+                    <!-- DESNI KONTROLNI TASTERI: PRETRAGA I PODESI -->
+                    <div class="flex items-center space-x-2 shrink-0">
+                        <button onclick="toggleInlineSearch(true)" id="btn-toggle-search" class="w-11 h-11 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center border border-slate-200/80 cursor-pointer transition-all active:scale-95" title="Pretraži decu">
+                            <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                        </button>
+                        <button onclick="toggleSideMenu(true)" class="h-11 px-3.5 sm:px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs sm:text-sm transition-all cursor-pointer flex items-center gap-1.5 shadow-md shadow-amber-500/20 active:scale-95" title="Otvori meni za promenu grupe i podešavanje">
+                            <i class="fa-solid fa-sliders text-xs"></i>
+                            <span>Podesi</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- POLJE ZA BRZU PRETRAGU DECE (SKRIVENO DOK SE NE KLIKNE LUPA) -->
+                <div class="hidden items-center relative" id="inline-search-container">
+                    <input type="text" id="global-child-search" oninput="handleGlobalSearch()" placeholder="Pretraži dete po imenu..." class="w-full bg-slate-50 text-slate-900 placeholder-slate-400 rounded-2xl pl-10 pr-9 py-2.5 text-sm outline-none border-2 border-amber-300 focus:border-amber-500 transition-all shadow-inner">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-amber-600 text-sm"></i>
+                    <button onclick="toggleInlineSearch(false)" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+
+                <!-- DONJI RED: DATUM, ZAŠTIĆENI INSTRUKTOR, DOCS LINK I KRUPNA STATISTIKA PRISUSTVA -->
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs font-bold text-slate-600">
                     
-                    <span class="text-slate-300">|</span>
-                    
-                    <!-- Brojači prisustva -->
-                    <div class="flex items-center space-x-1.5 text-[10px] shrink-0">
-                        <span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-xl flex items-center gap-1 font-bold" title="Prisutno dece">
-                            P: <span id="header-stat-present" class="font-black">0</span>
+                    <div class="flex items-center flex-wrap gap-2">
+                        <!-- Datum u krupnom bedžu -->
+                        <span class="bg-amber-50 text-amber-900 border border-amber-200 px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 shadow-sm" id="summary-date">
+                            <i class="fa-solid fa-calendar-day text-amber-600"></i> Danas
                         </span>
-                        <span class="bg-rose-100 text-rose-800 px-2 py-1 rounded-xl flex items-center gap-1 font-bold" title="Odsutno dece">
-                            O: <span id="header-stat-absent" class="font-black">0</span>
+
+                        <!-- Zaštićeni instruktor -->
+                        <span class="bg-slate-100 text-slate-700 px-2.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 border border-slate-200" id="summary-instructor-badge">
+                            👤 B. G.
+                        </span>
+
+                        <!-- Dugme za Google Docs pripremu (ako postoji u nedeljnom planu) -->
+                        <a id="btn-open-doc-link" href="#" target="_blank" rel="noopener noreferrer" class="hidden shrink-0 bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-xl font-black border border-blue-200 text-xs items-center gap-1.5 transition-all shadow-sm" title="Otvori detaljnu pripremu">
+                            <i class="fa-solid fa-file-lines text-blue-600"></i>
+                            <span>Priprema (Docs)</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Krupni i jasni bedževi za prisustvo (P) i odsutnost (O) -->
+                    <div class="flex items-center space-x-2 shrink-0 ml-auto">
+                        <span class="bg-emerald-50 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-xl flex items-center gap-1.5 text-xs font-black shadow-sm" title="Broj prisutne dece">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Prisutno: <span id="header-stat-present" class="text-sm">0</span>
+                        </span>
+                        <span class="bg-rose-50 text-rose-800 border border-rose-200 px-3 py-1 rounded-xl flex items-center gap-1.5 text-xs font-black shadow-sm" title="Broj odsutne dece">
+                            <span class="w-2 h-2 rounded-full bg-rose-500"></span> Odsutno: <span id="header-stat-absent" class="text-sm">0</span>
                         </span>
                     </div>
                 </div>
 
-                <!-- Brza pretraga po imenu deteta -->
-                <div class="hidden flex-grow items-center relative" id="inline-search-container">
-                    <input type="text" id="global-child-search" oninput="handleGlobalSearch()" placeholder="Pretraži dete po imenu..." class="w-full bg-slate-50 text-slate-800 placeholder-slate-400 rounded-xl pl-9 pr-8 py-2 text-xs outline-none border border-amber-200 focus:border-amber-500 transition-all shadow-inner">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-                    <button onclick="toggleInlineSearch(false)" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer">
-                        <i class="fa-solid fa-xmark text-xs"></i>
-                    </button>
-                </div>
-
-                <!-- Desne brze komande na traci -->
-                <div class="flex items-center space-x-2 shrink-0 justify-end">
-                    <button onclick="toggleInlineSearch(true)" id="btn-toggle-search" class="bg-slate-100 hover:bg-slate-200 text-slate-700 w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 cursor-pointer transition-all" title="Pretraži decu">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    </button>
-                    
-                    <!-- Brzi taster koji otvara meni sa podešavanjima -->
-                    <button onclick="toggleSideMenu(true)" class="bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold px-3 py-1.5 h-9 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-amber-200">
-                        <i class="fa-solid fa-sliders text-amber-600"></i>
-                        <span class="hidden sm:inline">Podešavanja</span>
-                    </button>
-                </div>
             </div>
 
-            <!-- Traka upozorenja o zameni vaspitača -->
-            <div id="substitute-alert-bar" class="hidden p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium leading-relaxed flex items-center space-x-2.5">
-                <i class="fa-solid fa-circle-exclamation text-base shrink-0 text-amber-600"></i>
+            <!-- Obaveštenje o zameni na času ako vaspitač menja kolegu -->
+            <div id="substitute-alert-bar" class="hidden p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium leading-relaxed flex items-center space-x-2.5">
+                <i class="fa-solid fa-circle-exclamation text-base shrink-0 text-amber-600 animate-bounce"></i>
                 <span id="substitute-alert-text">Učitavanje režima zamene...</span>
             </div>
 
@@ -729,14 +486,10 @@
                 <textarea id="group-general-note" rows="2" onchange="updateGroupGeneralNote(this.value)" placeholder="Unesite zapažanje koje se odnosi na celu grupu tokom današnjeg časa..." class="w-full border border-slate-200 rounded-2xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 text-slate-800 placeholder-slate-400 shadow-inner"></textarea>
             </div>
 
-            <!-- NAVIGACIJA NAPRED-NAZAD, QR KOD I SAČUVAJ DUGMAD -->
-            <div class="pt-2 pb-6 grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <!-- NAVIGACIJA NAPRED-NAZAD I SAČUVAJ DUGMAD -->
+            <div class="pt-2 pb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button onclick="switchTab('welcome')" class="bg-white hover:bg-slate-100 text-slate-700 font-bold py-4 px-4 rounded-2xl border-2 border-slate-200 shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer text-xs uppercase tracking-wider active:scale-98">
                     <i class="fa-solid fa-arrow-left text-sm"></i> Početna
-                </button>
-                
-                <button onclick="openQrModal(true)" class="bg-amber-50 hover:bg-amber-100 text-amber-900 border-2 border-amber-300 font-bold py-4 px-4 rounded-2xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer text-xs uppercase tracking-wider active:scale-98" title="Prikaži QR kod za učitavanje aplikacije">
-                    <i class="fa-solid fa-qrcode text-base text-amber-600"></i> Podeli QR
                 </button>
 
                 <button onclick="saveDailyRecord(true)" class="sm:col-span-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.99] text-white font-black py-4 px-6 rounded-2xl shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center cursor-pointer text-xs uppercase tracking-wider">
@@ -747,14 +500,128 @@
 
     </main>
 
-    <!-- TOAST OBAVEŠTENJE -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 flex items-center space-x-2.5 z-50 pointer-events-none border border-slate-800">
+    <!-- ======================================================= -->
+    <!--  MODALNI DIJALOG 1: IZBOR PROFILA (POPUP SA WELCOME)     -->
+    <!-- ======================================================= -->
+    <div id="profile-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border border-slate-200 max-w-sm w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                        <i class="fa-solid fa-user-check text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-slate-900 leading-tight">Izaberi svoj profil</h4>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Identifikacija instruktora</p>
+                    </div>
+                </div>
+                <button onclick="openProfileModal(false)" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-black text-slate-600 uppercase tracking-wider">Instruktor:</label>
+                <div class="relative">
+                    <select id="welcome-educator-select" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3.5 text-base font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 appearance-none pr-10">
+                        <!-- Popunjava se dinamički u formatu inicijala -->
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-4 top-4.5 text-xs text-slate-400 pointer-events-none"></i>
+                </div>
+            </div>
+
+            <button onclick="confirmProfileModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-4 rounded-2xl text-xs transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center cursor-pointer tracking-wider uppercase active:scale-98">
+                <i class="fa-solid fa-arrow-right-to-bracket mr-2 text-sm"></i> Pristupi radu
+            </button>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!--  MODALNI DIJALOG 2: NOVI NEDELJNI PLAN SA GOOGLE DOCS-OM -->
+    <!-- ======================================================= -->
+    <div id="new-plan-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border border-slate-200 max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center">
+                        <i class="fa-solid fa-calendar-plus text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-slate-900 leading-tight">Novi nedeljni plan</h4>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Unos teme i oblasti</p>
+                    </div>
+                </div>
+                <button onclick="closeNewPlanModal()" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-black text-slate-600 uppercase tracking-wider mb-1">Naziv plana / Raspon datuma:</label>
+                    <input type="text" id="new-plan-title" placeholder="Npr. 09.–14.11.2026: Skockalica, Poligon..." class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold outline-none focus:border-amber-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-600 uppercase tracking-wider mb-1">Link ka Google Docs pripremi (opcionalno):</label>
+                    <input type="url" id="new-plan-doc-url" placeholder="https://docs.google.com/document/d/..." class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium outline-none focus:border-amber-500">
+                    <p class="text-[10px] text-slate-400 mt-1">U dokumentu kliknite na "Podeli / Share" i izaberite "Svako sa vezom / Anyone with link".</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-600 uppercase tracking-wider mb-1.5">Izaberite oblasti koje se ocenjuju te nedelje:</label>
+                    <div id="new-plan-areas-checkboxes" class="grid grid-cols-2 gap-2 text-xs">
+                        <!-- Popunjava se dinamički -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                <button onclick="closeNewPlanModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50">
+                    Odustani
+                </button>
+                <button onclick="saveNewPlanPreset()" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-black shadow-md">
+                    Sačuvaj i dodaj u meni
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!--  MODALNI DIJALOG 3: QR KOD ZA PREZENTACIJU I KOLEGE      -->
+    <!-- ======================================================= -->
+    <div id="qr-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border border-slate-200 max-w-sm w-full p-6 shadow-2xl text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-qrcode text-amber-600 text-xl"></i>
+                    <h4 class="font-black text-slate-900 text-base">Podeli aplikaciju</h4>
+                </div>
+                <button onclick="closeQrModal()" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-500">Uperite kameru telefona u ovaj QR kod za brzo otvaranje aplikacije na drugom uređaju:</p>
+            
+            <div class="flex justify-center p-3 bg-white rounded-2xl border-2 border-slate-100 shadow-inner">
+                <div id="qrcode-container"></div>
+            </div>
+
+            <button onclick="copyAppUrlToClipboard()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-copy"></i> Kopiraj link aplikacije
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast obaveštenja -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2.5 z-50 pointer-events-none">
         <i class="fa-solid fa-circle-check text-emerald-400 text-sm" id="toast-icon"></i>
         <span id="toast-text" class="text-xs font-bold tracking-wide">Učitavanje...</span>
     </div>
 
     <!-- ======================================================= -->
-    <!--  JAVASCRIPT LOGIKA SISTEMA                              -->
+    <!--  JAVASCRIPT LOGIKA PORTALA I TERENSKOG RADA              -->
     <!-- ======================================================= -->
     <script>
         const LICENSE_CONFIG = {
@@ -763,305 +630,191 @@
             supportContact: "podrska@mentalgimnastika.rs"
         };
 
-        // ZVANIČNE UMG OBLASTI I IKONICE USKLAĐENE SA FOTOGRAFIJAMA PROGRAMA
+        // DEFINICIJA UMG OBLASTI SA PROSVETLJENIM, VEDRIM BOJAMA IKONICA
         const areas = [
-            // KOGNITIVNI RAZVOJ I LOGIKA
             { 
                 id: 4, 
-                name: "Apstraktno razmišljanje i logika", 
+                name: "Apstraktno razmišljanje i brzina pronalaženja rešenja", 
                 short: "f(x) Logika", 
-                desc: "Rešavanje logičkih zadataka, izbaci uljeza.", 
+                desc: "Sposobnost rešavanja mentalnih zagonetki i apstraktnih pravila.", 
                 default: 75, 
-                // Plavi krug sa f(x)
-                iconType: "text",
-                iconText: "f(x)",
-                bgColor: "#2563eb",
                 category: "cognitive",
-                inactiveClass: "bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100",
-                activeClass: "bg-blue-600 text-white border-blue-700 shadow-lg shadow-blue-500/40 ring-4 ring-blue-200"
+                customType: "fx",
+                circleBg: "bg-sky-500"
             },
             { 
                 id: 10, 
                 name: "Serijacija i Klasifikacija", 
                 short: "Serijacija", 
-                desc: "Piramida tačaka, grupisanje i ređanje po nizu.", 
+                desc: "Grupisanje po osobinama i raspoređivanje u nizu.", 
                 default: 75, 
-                // Plavi krug sa piramidom od 6 tačaka
-                iconType: "pyramid",
-                bgColor: "#2563eb",
                 category: "cognitive",
-                inactiveClass: "bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100",
-                activeClass: "bg-blue-600 text-white border-blue-700 shadow-lg shadow-blue-500/40 ring-4 ring-blue-200"
-            },
-            { 
-                id: 1, 
-                name: "Memorija (Radna, Dugotrajna, Kratkotrajna)", 
-                short: "Memorija", 
-                desc: "Sposobnost skladištenja i pronalaženja informacija.", 
-                default: 75, 
-                iconType: "fa",
-                icon: "fa-brain", 
-                bgColor: "#4f46e5",
-                category: "cognitive",
-                inactiveClass: "bg-indigo-50 text-indigo-700 border-indigo-300 hover:bg-indigo-100",
-                activeClass: "bg-indigo-600 text-white border-indigo-700 shadow-lg shadow-indigo-500/40 ring-4 ring-indigo-200"
-            },
-            { 
-                id: 12, 
-                name: "Dedukcija i Redukcija", 
-                short: "Dedukcija", 
-                desc: "Povezivanje delova u celinu (Puzle).", 
-                default: 75, 
-                // Žuti krug sa puzlama
-                iconType: "fa",
-                icon: "fa-puzzle-piece", 
-                bgColor: "#eab308",
-                category: "cognitive",
-                inactiveClass: "bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100",
-                activeClass: "bg-amber-500 text-slate-950 border-amber-600 shadow-lg shadow-amber-400/50 ring-4 ring-amber-200 font-black"
-            },
-
-            // FOKUS, PAŽNJA I MOTORIKA
-            { 
-                id: 3, 
-                name: "Pažnja i Koncentracija", 
-                short: "Pažnja / Oko", 
-                desc: "Vizuelna pažnja, detalji i fokus.", 
-                default: 75, 
-                // Zeleni krug sa belim okom
-                iconType: "fa",
-                icon: "fa-eye", 
-                bgColor: "#16a34a",
-                category: "motor",
-                inactiveClass: "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100",
-                activeClass: "bg-emerald-600 text-white border-emerald-700 shadow-lg shadow-emerald-500/40 ring-4 ring-emerald-200"
+                customType: "pyramid",
+                circleBg: "bg-indigo-500"
             },
             { 
                 id: 8, 
-                name: "Propriocepcija (Usklađenost tela)", 
+                name: "Propriocepcija (usklađenost pokreta tela)", 
                 short: "Propriocepcija", 
-                desc: "Lagano hodanje, orijentacija i poligon (Dete sa podignutim rukama).", 
+                desc: "Orijentacija u prostoru, motorička kontrola i koordinacija nogu/ruku na poligonu.", 
                 default: 75, 
-                // Plavi krug sa detetom sa podignutim rukama
-                iconType: "fa",
-                icon: "fa-child-reaching", 
-                bgColor: "#0284c7",
                 category: "motor",
-                inactiveClass: "bg-sky-50 text-sky-700 border-sky-300 hover:bg-sky-100",
-                activeClass: "bg-sky-600 text-white border-sky-700 shadow-lg shadow-sky-500/40 ring-4 ring-sky-200"
+                icon: "fa-child-reaching",
+                circleBg: "bg-teal-500"
             },
-            { 
-                id: 2, 
-                name: "Grafo-motorika i koordinacija", 
-                short: "Grafo-motorika", 
-                desc: "Kontrola olovke i preciznost pokreta ruke.", 
-                default: 75, 
-                iconType: "fa",
-                icon: "fa-pen-clip", 
-                bgColor: "#059669",
-                category: "motor",
-                inactiveClass: "bg-teal-50 text-teal-700 border-teal-300 hover:bg-teal-100",
-                activeClass: "bg-teal-600 text-white border-teal-700 shadow-lg shadow-teal-500/40 ring-4 ring-teal-200"
-            },
-
-            // SOCIJALNI, GOVORNI I KREATIVNI
             { 
                 id: 7, 
                 name: "Socijalno i emotivno sazrevanje", 
                 short: "Socijalno / Srce", 
-                desc: "Razgovor o opštim temama, radost, empatija (Srce u kvadratu).", 
+                desc: "Igra u grupi, nošenje sa pobedom i porazom, empatija prema drugarima.", 
                 default: 75, 
-                // Crveni krug sa belim srcem u zaobljenom kvadratu
-                iconType: "heart-box",
-                bgColor: "#dc2626",
                 category: "social",
-                inactiveClass: "bg-rose-50 text-rose-700 border-rose-300 hover:bg-rose-100",
-                activeClass: "bg-rose-600 text-white border-rose-700 shadow-lg shadow-rose-500/40 ring-4 ring-rose-200"
+                customType: "heart-box",
+                circleBg: "bg-rose-500"
             },
             { 
                 id: 5, 
-                name: "Uočavanje odnosa i asocijativnost", 
+                name: "Uočavanje odnosa (asocijativnost i zagonetke)", 
                 short: "Asocijacije", 
-                desc: "Zagonetke, povezivanje i zaključivanje (Mrežni čvorovi).", 
+                desc: "Povezivanje pojmova, rešavanje zagonetki i asocijacija.", 
                 default: 75, 
-                // Crveni krug sa mrežom čvorova
-                iconType: "fa",
-                icon: "fa-diagram-project", 
-                bgColor: "#dc2626",
-                category: "social",
-                inactiveClass: "bg-rose-50 text-rose-700 border-rose-300 hover:bg-rose-100",
-                activeClass: "bg-rose-600 text-white border-rose-700 shadow-lg shadow-rose-500/40 ring-4 ring-rose-200"
+                category: "cognitive",
+                icon: "fa-diagram-project",
+                circleBg: "bg-amber-500"
             },
             { 
                 id: 6, 
-                name: "Verbalno izražavanje i govor", 
-                short: "Govor", 
-                desc: "Verbalna komunikacija (Oblačić sa tačkicama).", 
+                name: "Razumevanje složenih pojmova i verbalna komunikacija", 
+                short: "Verbalni pojmovi", 
+                desc: "Bogatstvo rečnika i izražavanje ideja govorom.", 
                 default: 75, 
-                // Crveni krug sa oblačićem
-                iconType: "fa",
-                icon: "fa-comment-dots", 
-                bgColor: "#dc2626",
                 category: "social",
-                inactiveClass: "bg-rose-50 text-rose-700 border-rose-300 hover:bg-rose-100",
-                activeClass: "bg-rose-600 text-white border-rose-700 shadow-lg shadow-rose-500/40 ring-4 ring-rose-200"
+                icon: "fa-comment-dots",
+                circleBg: "bg-purple-500"
+            },
+            { 
+                id: 3, 
+                name: "Pažnja i Koncentracija", 
+                short: "Pažnja / Oko", 
+                desc: "Dužina zadržavanja fokusa na zadatku bez ometanja.", 
+                default: 75, 
+                category: "motor",
+                icon: "fa-eye",
+                circleBg: "bg-emerald-500"
+            },
+            { 
+                id: 2, 
+                name: "Grafo-motorika i koordinacija oko-ruka", 
+                short: "Grafo-motorika", 
+                desc: "Preciznost držanja olovke i flomastera na papiru i magnetnoj tabli.", 
+                default: 75, 
+                category: "motor",
+                icon: "fa-pen-clip",
+                circleBg: "bg-emerald-600"
+            },
+            { 
+                id: 12, 
+                name: "Dedukcija i Redukcija (Puzle i zaključivanje)", 
+                short: "Dedukcija", 
+                desc: "Sposobnost slaganja delova u celinu i logičko zaključivanje.", 
+                default: 75, 
+                category: "cognitive",
+                icon: "fa-puzzle-piece",
+                circleBg: "bg-amber-400"
             },
             { 
                 id: 13, 
-                name: "Slušanje i Prepričavanje", 
+                name: "Slušanje i Prepričavanje (Igra u krugu)", 
                 short: "Slušanje", 
-                desc: "Aktivno slušanje, mikrofon i uvo.", 
+                desc: "Aktivno slušanje pravila i sposobnost ponavljanja priče.", 
                 default: 75, 
-                // Žuti krug sa mikrofonom i uvom
-                iconType: "fa",
-                icon: "fa-microphone", 
-                bgColor: "#eab308",
                 category: "social",
-                inactiveClass: "bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100",
-                activeClass: "bg-amber-500 text-slate-950 border-amber-600 shadow-lg shadow-amber-400/50 ring-4 ring-amber-200 font-black"
+                icon: "fa-microphone-lines",
+                circleBg: "bg-yellow-500"
             },
             { 
                 id: 11, 
                 name: "Kreativnost i originalnost rešenja", 
                 short: "Kreativnost", 
-                desc: "Igra radosti, frizbi, kreativne ideje.", 
+                desc: "Inovativan pristup igrama i sloboda u stvaranju rešenja.", 
                 default: 75, 
-                iconType: "fa",
-                icon: "fa-palette", 
-                bgColor: "#ec4899",
                 category: "social",
-                inactiveClass: "bg-pink-50 text-pink-700 border-pink-300 hover:bg-pink-100",
-                activeClass: "bg-pink-600 text-white border-pink-700 shadow-lg shadow-pink-500/40 ring-4 ring-pink-200"
+                icon: "fa-palette",
+                circleBg: "bg-fuchsia-500"
+            },
+            { 
+                id: 1, 
+                name: "Memorija (Radna, Dugotrajna, Kratkotrajna)", 
+                short: "Memorija", 
+                desc: "Sposobnost pamćenja pravila, reči i rasporeda na tabli.", 
+                default: 75, 
+                category: "cognitive",
+                icon: "fa-brain",
+                circleBg: "bg-blue-600"
             }
         ];
 
-        // PRESETI NEDELJNOG PROGRAMA (Uključuje i plan sa korisnikove slike 09.-14.11.2026)
-        const defaultWeeklyPresets = {
-            "preset_02_06_11": {
-                theme: "01/02.–06.11.2026",
-                targetAreaIds: [7, 8, 4, 10, 3, 5, 11],
-                docUrl: "https://sites.google.com/view/umg-instruktori/naslovna?authuser=0"
+        // Fabrički predefinisani planovi rada (Uključujući fotografije sa vašeg Google Docs-a)
+        const defaultWeeklyPresets = [
+            {
+                id: "plan-nov-02",
+                name: "02.–06.11.2026: Izbaci uljeza, Saobraćaj, Zagonetke, Frizbi",
+                docUrl: "https://docs.google.com/document/d/1jiABIKvH0XozqSNHC30wL5M",
+                theme: "Izbaci uljeza / Saobraćaj / Zagonetke / Zimski frizbi",
+                activeAreaIds: [4, 10, 8, 7, 5, 3, 11] // f(x), Serijacija, Propriocepcija, Srce, Asocijacije, Pažnja, Kreativnost
             },
-            "preset_09_14_11": {
-                theme: "02/ 09.–14.11.2026",
-                // Oblasti sa slike: Socijalno (7), Propriocepcija (8), Grafo-motorika (2), Logika f(x) (4), Serijacija (10), Asocijacije (5), Pažnja (3)
-                targetAreaIds: [7, 8, 2, 4, 10, 5, 3],
-                docUrl: "https://sites.google.com/view/umg-instruktori/naslovna?authuser=0"
+            {
+                id: "plan-nov-09",
+                name: "02/ 09.–14.11.2026: Sedi Ćira, Skockalica, Poligon, Zagonetke",
+                docUrl: "https://docs.google.com/document/d/1jiABIKvH0XozqSNHC30wL5M",
+                theme: "Sedi Ćira na vrh slame / Skockalica / Poligon kvadrat / Zagonetke",
+                activeAreaIds: [4, 10, 8, 7, 5, 2, 3] // f(x), Serijacija, Propriocepcija, Socijalno, Asocijacije, Grafo-motorika, Pažnja
             }
-        };
+        ];
 
-        const categories = {
-            cognitive: { 
-                name: "Kognitivni razvoj i Logika", 
-                headerBadge: "bg-blue-100/90 text-blue-900 border-blue-200",
-                containerClass: "bg-blue-50/40 border-blue-200/80" 
-            },
-            motor: { 
-                name: "Fokus, Pažnja i Motorika", 
-                headerBadge: "bg-emerald-100/90 text-emerald-900 border-emerald-200",
-                containerClass: "bg-emerald-50/40 border-emerald-200/80" 
-            },
-            social: { 
-                name: "Socijalni, Govorni i Kreativni", 
-                headerBadge: "bg-rose-100/90 text-rose-900 border-rose-200",
-                containerClass: "bg-rose-50/40 border-rose-200/80" 
-            }
-        };
-
-        // KROFNASTI I JASNI TASTERI PROCENE SA ČASA
         const ratingLevels = [
-            { 
-                val: 120, 
-                label: "Iznad oček.", 
-                title: "120 - Iznad očekivanog (darovitost)", 
-                activeColor: "bg-gradient-to-br from-purple-600 to-indigo-700 text-white shadow-purple-600/40 ring-purple-300",
-                inactiveColor: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
-            },
-            { 
-                val: 100, 
-                label: "Odlično", 
-                title: "100 - Odlično postignuće", 
-                activeColor: "bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-emerald-600/40 ring-emerald-300",
-                inactiveColor: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-            },
-            { 
-                val: 90, 
-                label: "Uobičajeno", 
-                title: "90 - Uobičajeni nivo", 
-                activeColor: "bg-gradient-to-br from-sky-600 to-blue-700 text-white shadow-blue-600/40 ring-blue-300",
-                inactiveColor: "bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100"
-            },
-            { 
-                val: 75, 
-                label: "Dobro", 
-                title: "75 - Dobro u skladu sa uzrastom", 
-                activeColor: "bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-amber-500/40 ring-amber-300",
-                inactiveColor: "bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100"
-            },
-            { 
-                val: 50, 
-                label: "Podrška", 
-                title: "50 - Potrebna dodatna podrška", 
-                activeColor: "bg-gradient-to-br from-rose-600 to-red-700 text-white shadow-rose-600/40 ring-rose-300",
-                inactiveColor: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
-            }
+            { val: 120, label: "Iznad oček.", title: "120 - Iznad očekivanog (darovitost)", color: "from-purple-600 via-indigo-600 to-cyan-500", activeBg: "bg-gradient-to-r from-purple-600 to-indigo-600 text-white ring-4 ring-purple-200" },
+            { val: 100, label: "Odlično", title: "100 - Odlično postignuće", color: "from-indigo-500 to-purple-600", activeBg: "bg-gradient-to-r from-indigo-500 to-purple-600 text-white ring-4 ring-indigo-200" },
+            { val: 90, label: "Uobičajeno", title: "90 - Uobičajeni nivo", color: "from-emerald-500 to-teal-500", activeBg: "bg-gradient-to-r from-emerald-500 to-teal-500 text-white ring-4 ring-emerald-200" },
+            { val: 75, label: "Dobro", title: "75 - Dobro u skladu sa uzrastom", color: "from-blue-500 to-cyan-500", activeBg: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white ring-4 ring-blue-200" },
+            { val: 50, label: "Podrška", title: "50 - Potrebna dodatna podrška", color: "from-rose-500 to-red-500", activeBg: "bg-gradient-to-r from-rose-500 to-red-500 text-white ring-4 ring-rose-200" }
         ];
 
         let appState = {
             groups: [],
             dailyRecords: {}, 
-            educators: [],
-            weeklyPresets: {}
+            educators: [
+                "Goran Brzak",
+                "Maja Vučković",
+                "Ana Jovanović",
+                "Marko Petrović"
+            ],
+            weeklyPresets: []
         };
 
-        let newPresetSelectedAreas = new Set([7, 8, 4, 10, 3, 5, 11]);
         let activeGroupId = "";
         let activeEducator = "";
+        let activeFilterAreaIds = []; // Ako je prazno, prikazuju se sve
+        let showAllAreasOverride = false;
         let activeRecognition = null;
         let expandedChildIds = new Set();
-        let showAllAreasOverride = false; // Dozvoljava vaspitaču da privremeno otvori sve oblasti
+        let qrCodeInstance = null;
         
         let db = null;
         let auth = null;
         let useCloud = false;
 
-        // Generator tačnih UMG ikonica (HTML/SVG)
-        function renderAreaIconContent(area) {
-            if (area.iconType === "text") {
-                return `<span class="font-black italic text-lg sm:text-xl font-serif tracking-tighter">${area.iconText}</span>`;
-            }
-            if (area.iconType === "pyramid") {
-                // Piramida od 6 tačkica (1 na vrhu, 2 u sredini, 3 na dnu) kao na slici Serijacija
-                return `
-                    <svg class="w-7 h-7 sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="currentColor">
-                        <circle cx="12" cy="5" r="2.2" />
-                        <circle cx="8" cy="11.5" r="2.2" />
-                        <circle cx="16" cy="11.5" r="2.2" />
-                        <circle cx="4.5" cy="18" r="2.2" />
-                        <circle cx="12" cy="18" r="2.2" />
-                        <circle cx="19.5" cy="18" r="2.2" />
-                    </svg>
-                `;
-            }
-            if (area.iconType === "heart-box") {
-                // Srce unutar zaobljenog kvadrata kao na slici Socijalno-emotivno
-                return `
-                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/90 text-rose-600 flex items-center justify-center text-sm shadow-sm">
-                        <i class="fa-solid fa-heart"></i>
-                    </div>
-                `;
-            }
-            return `<i class="fa-solid ${area.icon}"></i>`;
-        }
-
-        // Pomoćna funkcija za zaštitu identiteta instruktora (npr. Goran Brzak -> B. G.)
+        // POMOĆNA FUNKCIJA ZA ZAŠTITU IDENTITETA VASPITAČA:
+        // Pretvara "Goran Brzak" u "B. G." (prvo slovo prezimena, pa prvo slovo imena)
         function formatEducatorInitials(fullName) {
-            if (!fullName) return "";
+            if (!fullName) return "N. N.";
             const parts = fullName.trim().split(/\s+/);
-            if (parts.length === 1) return parts[0].charAt(0).toUpperCase() + ".";
-            const firstInit = parts[0].charAt(0).toUpperCase();
-            const lastInit = parts[parts.length - 1].charAt(0).toUpperCase();
-            return `${lastInit}. ${firstInit}.`;
+            if (parts.length === 1) {
+                return `${parts[0].charAt(0).toUpperCase()}.`;
+            }
+            const firstName = parts[0];
+            const lastName = parts[parts.length - 1];
+            return `${lastName.charAt(0).toUpperCase()}. ${firstName.charAt(0).toUpperCase()}.`;
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1076,7 +829,7 @@
                 dateInput.value = new Date().toISOString().split('T')[0];
             }
 
-            // Učitavanje lokalnih podataka
+            // Učitavanje iz localStorage
             const savedGroups = localStorage.getItem('umg_field_groups');
             if (savedGroups) appState.groups = JSON.parse(savedGroups);
 
@@ -1086,12 +839,12 @@
             const savedRecords = localStorage.getItem('umg_field_records');
             if (savedRecords) appState.dailyRecords = JSON.parse(savedRecords);
 
-            // Učitavanje baze nedeljnih planova iz lokalne memorije
             const savedPresets = localStorage.getItem('umg_weekly_presets');
             if (savedPresets) {
                 appState.weeklyPresets = JSON.parse(savedPresets);
             } else {
-                appState.weeklyPresets = { ...defaultWeeklyPresets };
+                appState.weeklyPresets = defaultWeeklyPresets;
+                localStorage.setItem('umg_weekly_presets', JSON.stringify(appState.weeklyPresets));
             }
 
             const savedSelectedEducator = localStorage.getItem('umg_active_educator');
@@ -1104,29 +857,15 @@
             populateEducatorSelects();
             populateGroupSelects(); 
             populateWeeklyPresetsSelect();
-            loadOrCreateDailyRecord();
-            
-            initFirebaseCloudSync();
-            setupPWAAndServiceWorker();
-        });
 
-        // Kontrola bočnog menija
-        function toggleSideMenu(open) {
-            const drawer = document.getElementById('side-menu');
-            const backdrop = document.getElementById('side-menu-backdrop');
-            
-            if (open) {
-                backdrop.classList.remove('opacity-0', 'pointer-events-none');
-                backdrop.classList.add('opacity-100', 'pointer-events-auto');
-                drawer.classList.remove('-translate-x-full');
-                drawer.classList.add('translate-x-0');
-            } else {
-                backdrop.classList.remove('opacity-100', 'pointer-events-auto');
-                backdrop.classList.add('opacity-0', 'pointer-events-none');
-                drawer.classList.remove('translate-x-0');
-                drawer.classList.add('-translate-x-full');
+            // Primeni podrazumevani nedeljni plan ako postoji
+            if (appState.weeklyPresets.length > 0) {
+                applyWeeklyPreset(appState.weeklyPresets[0].id);
             }
-        }
+
+            loadOrCreateDailyRecord();
+            initFirebaseCloudSync();
+        });
 
         function checkLicenseExpired() {
             const today = new Date();
@@ -1143,24 +882,13 @@
                     </div>
                     <div class="space-y-2">
                         <h2 class="text-xl font-black text-rose-400">Licenca za korišćenje je istekla</h2>
-                        <p class="text-xs text-slate-400 leading-relaxed">Pristup aplikaciji UMG Asistent za ustanovu <strong class="text-slate-200">${LICENSE_CONFIG.clientName}</strong> je onemogućen jer je probni ili ugovorni period završen.</p>
+                        <p class="text-xs text-slate-400 leading-relaxed">Pristup aplikaciji UMG Asistent za ustanovu <strong class="text-slate-200">${LICENSE_CONFIG.clientName}</strong> je onemogućen jer je ugovorni period završen.</p>
                     </div>
-                    <a href="mailto:${LICENSE_CONFIG.supportContact}" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl text-xs transition-all shadow-lg flex items-center justify-center cursor-pointer">
+                    <a href="mailto:${LICENSE_CONFIG.supportContact}" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-2xl text-xs transition-all shadow-lg flex items-center justify-center cursor-pointer">
                         <i class="fa-solid fa-envelope mr-2"></i> Kontaktiraj tehničku podršku
                     </a>
                 </div>
             `;
-        }
-
-        function setupPWAAndServiceWorker() {
-            try {
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('pwa_service_worker (1).js')
-                    .catch(err => console.log("SW registracija nije pokrenuta:", err));
-                }
-            } catch (e) {
-                console.warn("PWA registracija nije dostupna u ovom okruženju.", e);
-            }
         }
 
         function initFirebaseCloudSync() {
@@ -1184,25 +912,19 @@
                 
                 auth.signInAnonymously().then(() => {
                     updateSyncStatusUI(true);
-                    
+
+                    // Sinhronizacija vaspitača
                     db.collection("system").doc("config").onSnapshot((doc) => {
                         if (doc.exists) {
                             const data = doc.data();
-                            if (data.pedagogPin) appState.pedagogPin = data.pedagogPin;
-                            if (data.adminPin) appState.adminPin = data.adminPin;
-                            if (data.educators) {
+                            if (data.educators && data.educators.length > 0) {
                                 appState.educators = data.educators;
                                 populateEducatorSelects();
                             }
-                            // Sinhronizacija nedeljnih planova kroz Firebase
-                            if (data.weeklyPresets) {
-                                appState.weeklyPresets = { ...defaultWeeklyPresets, ...data.weeklyPresets };
-                                localStorage.setItem('umg_weekly_presets', JSON.stringify(appState.weeklyPresets));
-                                populateWeeklyPresetsSelect();
-                            }
                         }
-                    }, (err) => console.error("Greška pri sinhronizaciji konfiguracije:", err));
+                    }, err => console.log("Config sync info", err));
 
+                    // Sinhronizacija grupa
                     db.collection("groups").onSnapshot((snapshot) => {
                         let tempGroups = [];
                         snapshot.forEach(doc => tempGroups.push(doc.data()));
@@ -1210,34 +932,32 @@
                             appState.groups = tempGroups;
                             localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
                             populateGroupSelects();
+                            loadOrCreateDailyRecord();
                         }
-                    }, (err) => console.error("Greška pri sinhronizaciji grupa:", err));
+                    }, err => console.log("Groups sync info", err));
 
+                    // Sinhronizacija evidencija
                     db.collection("dailyRecords").onSnapshot((snapshot) => {
                         let tempRecords = {};
-                        snapshot.forEach(doc => {
-                            tempRecords[doc.id] = doc.data();
-                        });
+                        snapshot.forEach(doc => tempRecords[doc.id] = doc.data());
                         if (Object.keys(tempRecords).length > 0) {
                             appState.dailyRecords = tempRecords;
                             localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
                             
                             const activeEl = document.activeElement;
                             const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
-                            
                             if (!isTyping && !activeRecognition) {
                                 loadOrCreateDailyRecord();
                             }
                         }
-                    }, (err) => console.error("Greška pri sinhronizaciji dnevnika:", err));
+                    }, err => console.log("Records sync info", err));
 
                 }).catch(err => {
-                    console.error("Greška pri autentifikaciji:", err);
+                    console.log("Offline rad ili ograničena veza:", err);
                     updateSyncStatusUI(false);
                 });
-                
             } catch (e) {
-                console.log("Sistem radi u lokalnom offline režimu.", e);
+                console.log("Rad u lokalnom režimu.", e);
                 updateSyncStatusUI(false);
             }
         }
@@ -1247,7 +967,7 @@
             if (!el) return;
 
             if (isOnline) {
-                el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-emerald-600"></i> <span class="hidden sm:inline">Oblak</span>`;
+                el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-emerald-600 animate-pulse"></i> <span class="hidden sm:inline">Sinhronizovano</span>`;
                 el.className = "text-[10px] font-black px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-sm";
             } else {
                 el.innerHTML = `<i class="fa-solid fa-cloud-slash text-slate-400"></i> <span class="hidden sm:inline">Lokalno</span>`;
@@ -1258,126 +978,88 @@
         function updateCloudDailyRecord(key, record) {
             if (useCloud && db) {
                 db.collection("dailyRecords").doc(key).set(record, { merge: true })
-                  .catch(err => console.error("Greška pri upisu dnevnika na server:", err));
+                  .catch(err => console.error("Greška pri upisu dnevnika na cloud:", err));
             }
         }
 
-        function populateGroupSelects() {
-            const fieldSelect = document.getElementById('field-group-select');
-            if (!fieldSelect) return;
-
-            fieldSelect.innerHTML = '';
-            const filteredGroups = appState.groups.filter(g => g.educator === activeEducator);
-
-            filteredGroups.forEach(group => {
-                const opt = document.createElement('option');
-                opt.value = group.id;
-                opt.innerText = group.name;
-                fieldSelect.appendChild(opt);
-            });
-
-            if (filteredGroups.length === 0) {
-                const opt = document.createElement('option');
-                opt.value = "";
-                opt.innerText = "-- Nema dodeljenih grupa --";
-                fieldSelect.appendChild(opt);
-                activeGroupId = "";
-            } else {
-                activeGroupId = filteredGroups[0].id;
-                fieldSelect.value = activeGroupId;
-            }
-        }
-
+        // ==========================================
+        // POPUNJAVANJE SELECT POLJA I INICIJALI
+        // ==========================================
         function populateEducatorSelects() {
-            const fieldEducatorSelect = document.getElementById('field-educator-select');
-            const welcomeEducatorSelect = document.getElementById('welcome-educator-select');
+            const fieldSelect = document.getElementById('field-educator-select');
+            const welcomeSelect = document.getElementById('welcome-educator-select');
 
-            const populateList = (selectElement, selectValue) => {
-                if (!selectElement) return;
-                selectElement.innerHTML = '';
+            const populate = (selectEl) => {
+                if (!selectEl) return;
+                selectEl.innerHTML = '';
                 appState.educators.forEach(ed => {
                     const opt = document.createElement('option');
-                    opt.value = ed; // Zadržava originalni ključ za sinhronizaciju i bazu
-                    opt.innerText = formatEducatorInitials(ed); // Prikazuje samo zaštićene inicijale npr. B. G.
-                    opt.selected = (ed === selectValue);
-                    selectElement.appendChild(opt);
+                    opt.value = ed;
+                    // PRIKAZUJE SAMO ZAŠTIĆENE INICIJALE: npr. B. G.
+                    opt.innerText = formatEducatorInitials(ed);
+                    if (ed === activeEducator) opt.selected = true;
+                    selectEl.appendChild(opt);
                 });
             };
 
-            populateList(fieldEducatorSelect, activeEducator);
-            populateList(welcomeEducatorSelect, activeEducator);
-            updateSideMenuEducatorProfile();
-            updateWelcomeProfilePreview();
+            populate(fieldSelect);
+            populate(welcomeSelect);
+
+            updateEducatorBadgeUI();
         }
 
-        function updateWelcomeProfilePreview() {
-            const previewEl = document.getElementById('welcome-selected-name-preview');
-            if (previewEl) {
-                if (activeEducator) {
-                    previewEl.innerHTML = `Profil: <strong class="text-slate-800 text-sm font-black">${formatEducatorInitials(activeEducator)}</strong>`;
-                } else {
-                    previewEl.innerText = "Dodirni za promenu ili izbor";
-                }
+        function updateEducatorBadgeUI() {
+            const initials = formatEducatorInitials(activeEducator);
+            const drawerDisplay = document.getElementById('drawer-educator-display');
+            if (drawerDisplay) drawerDisplay.innerText = initials;
+
+            const welcomePreview = document.getElementById('welcome-selected-name-preview');
+            if (welcomePreview) welcomePreview.innerText = `Prijavljen profil: ${initials}`;
+
+            const headerInstructorName = document.getElementById('header-active-instructor-name');
+            if (headerInstructorName) headerInstructorName.innerText = `Instruktor: ${initials}`;
+        }
+
+        function populateGroupSelects() {
+            const select = document.getElementById('field-group-select');
+            if (!select) return;
+
+            select.innerHTML = '';
+            
+            // Prikazujemo grupe vaspitača ili sve ako nijedna nije strogo dodeljena
+            let filtered = appState.groups.filter(g => g.educator === activeEducator);
+            if (filtered.length === 0 && appState.groups.length > 0) {
+                filtered = appState.groups;
             }
-        }
 
-        function openProfileModal(open) {
-            const modalBackdrop = document.getElementById('profile-modal-backdrop');
-            if (!modalBackdrop) return;
-            const content = modalBackdrop.querySelector('.modal-content');
+            filtered.forEach(group => {
+                const opt = document.createElement('option');
+                opt.value = group.id;
+                opt.innerText = group.name;
+                select.appendChild(opt);
+            });
 
-            if (open) {
-                modalBackdrop.classList.remove('opacity-0', 'pointer-events-none');
-                modalBackdrop.classList.add('opacity-100', 'pointer-events-auto');
-                if (content) {
-                    content.classList.remove('scale-95', 'opacity-0');
-                    content.classList.add('scale-100', 'opacity-100');
-                }
+            if (filtered.length === 0) {
+                // Ako nema definisanih grupa u bazi, kreiramo primer radne grupe
+                const defaultGroup = {
+                    id: "demo-group-1",
+                    name: "Najstarija grupa (Vrtić Zvončić)",
+                    educator: activeEducator,
+                    children: [
+                        { id: "c1", name: "Petar Stefanović" },
+                        { id: "c2", name: "Dunja Milić" },
+                        { id: "c3", name: "Luka Jovanović" },
+                        { id: "c4", name: "Sofija Nikolić" }
+                    ]
+                };
+                appState.groups.push(defaultGroup);
+                const opt = document.createElement('option');
+                opt.value = defaultGroup.id;
+                opt.innerText = defaultGroup.name;
+                select.appendChild(opt);
+                activeGroupId = defaultGroup.id;
             } else {
-                modalBackdrop.classList.remove('opacity-100', 'pointer-events-auto');
-                modalBackdrop.classList.add('opacity-0', 'pointer-events-none');
-                if (content) {
-                    content.classList.remove('scale-100', 'opacity-100');
-                    content.classList.add('scale-95', 'opacity-0');
-                }
-            }
-        }
-
-        function updateSideMenuEducatorProfile() {
-            const initialEl = document.getElementById('menu-educator-initial');
-            const nameEl = document.getElementById('menu-educator-name');
-            if (activeEducator) {
-                const formatted = formatEducatorInitials(activeEducator);
-                if (initialEl) initialEl.innerText = formatted.replace(/\s+/g, '');
-                if (nameEl) nameEl.innerText = formatted;
-            } else {
-                if (initialEl) initialEl.innerText = '?';
-                if (nameEl) nameEl.innerText = 'Izaberi profil';
-            }
-        }
-
-        function loginAsEducator() {
-            const select = document.getElementById('welcome-educator-select');
-            if (select && select.value) {
-                activeEducator = select.value;
-                localStorage.setItem('umg_active_educator', activeEducator);
-                
-                const fieldSelect = document.getElementById('field-educator-select');
-                if (fieldSelect) fieldSelect.value = activeEducator;
-
-                const logoutBtn = document.getElementById('btn-logout');
-                if (logoutBtn) logoutBtn.classList.remove('hidden');
-
-                updateSideMenuEducatorProfile();
-                updateWelcomeProfilePreview();
-                populateGroupSelects();
-                loadOrCreateDailyRecord();
-                switchTab('field');
-                showToast(`Prijavljeni profil: ${formatEducatorInitials(activeEducator)}`);
-            } else if (activeEducator) {
-                switchTab('field');
-            } else {
-                openProfileModal(true);
+                activeGroupId = filtered[0].id;
             }
         }
 
@@ -1386,9 +1068,7 @@
             if (select) {
                 activeEducator = select.value;
                 localStorage.setItem('umg_active_educator', activeEducator);
-                
-                updateSideMenuEducatorProfile();
-                updateWelcomeProfilePreview();
+                updateEducatorBadgeUI();
                 populateGroupSelects();
                 loadOrCreateDailyRecord();
             }
@@ -1402,6 +1082,191 @@
             }
         }
 
+        // TASTER POTVRDI U MENIJU ZA IZBOR GRUPE:
+        // Odmah postavlja grupu, zatvara meni i vodi u radni prostor dece
+        function confirmGroupSelectionAndOpenField() {
+            const select = document.getElementById('field-group-select');
+            if (select && select.value) {
+                activeGroupId = select.value;
+            }
+            loadOrCreateDailyRecord();
+            updateSummaryBar();
+            switchTab('field');
+            toggleSideMenu(false);
+            showToast("Aktivna grupa potvrđena!");
+        }
+
+        // ==========================================
+        // RAD SA NEDELJNIM PLANOVIMA I UVEZIVANJE
+        // ==========================================
+        function populateWeeklyPresetsSelect() {
+            const select = document.getElementById('weekly-plan-select');
+            if (!select) return;
+
+            select.innerHTML = '';
+            
+            const blankOpt = document.createElement('option');
+            blankOpt.value = "";
+            blankOpt.innerText = "-- Izaberi nedeljni plan iz programa --";
+            select.appendChild(blankOpt);
+
+            appState.weeklyPresets.forEach(preset => {
+                const opt = document.createElement('option');
+                opt.value = preset.id;
+                opt.innerText = preset.name;
+                select.appendChild(opt);
+            });
+
+            const allOpt = document.createElement('option');
+            allOpt.value = "__ALL__";
+            allOpt.innerText = "Prikaži sve oblasti (Bez filtriranja)";
+            select.appendChild(allOpt);
+        }
+
+        function applyWeeklyPreset(presetId) {
+            const themeInput = document.getElementById('field-class-theme');
+            const docContainer = document.getElementById('plan-doc-link-container');
+            const docAnchor = document.getElementById('plan-doc-link-anchor');
+            const headerDocBtn = document.getElementById('btn-open-doc-link');
+
+            if (!presetId || presetId === "__ALL__") {
+                activeFilterAreaIds = [];
+                showAllAreasOverride = true;
+                if (docContainer) docContainer.classList.add('hidden');
+                if (headerDocBtn) headerDocBtn.classList.add('hidden');
+                renderActiveAreasChips();
+                renderChildrenTrackingList();
+                return;
+            }
+
+            const preset = appState.weeklyPresets.find(p => p.id === presetId);
+            if (!preset) return;
+
+            showAllAreasOverride = false;
+            activeFilterAreaIds = preset.activeAreaIds || [];
+            
+            if (themeInput && !themeInput.value) {
+                themeInput.value = preset.theme || preset.name;
+                updateClassTheme(themeInput.value);
+            }
+
+            // Google Docs priprema povezivanje
+            if (preset.docUrl && preset.docUrl.trim()) {
+                if (docContainer && docAnchor) {
+                    docAnchor.href = preset.docUrl;
+                    docContainer.classList.remove('hidden');
+                }
+                if (headerDocBtn) {
+                    headerDocBtn.href = preset.docUrl;
+                    headerDocBtn.classList.remove('hidden');
+                    headerDocBtn.classList.add('flex');
+                }
+            } else {
+                if (docContainer) docContainer.classList.add('hidden');
+                if (headerDocBtn) headerDocBtn.classList.add('hidden');
+            }
+
+            renderActiveAreasChips();
+            renderChildrenTrackingList();
+            updateSummaryBar();
+            showToast(`Uvezan plan: ${preset.name.split(':')[0]}`);
+        }
+
+        function renderActiveAreasChips() {
+            const container = document.getElementById('active-areas-chips');
+            const toggleBtn = document.getElementById('btn-toggle-all-areas');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            if (showAllAreasOverride || activeFilterAreaIds.length === 0) {
+                if (toggleBtn) toggleBtn.innerText = "Filtriraj po planu";
+                container.innerHTML = `<span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-bold">Prikazano svih 11 razvojnih oblasti</span>`;
+                return;
+            }
+
+            if (toggleBtn) toggleBtn.innerText = "Prikaži sve (11)";
+
+            areas.forEach(area => {
+                const isActive = activeFilterAreaIds.includes(area.id);
+                const chip = document.createElement('span');
+                chip.className = `px-2 py-0.5 rounded-lg text-[10px] font-black flex items-center gap-1 ${
+                    isActive ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400 line-through opacity-50'
+                }`;
+                chip.innerHTML = `${area.short} ${isActive ? '<i class="fa-solid fa-check text-[8px] text-emerald-400"></i>' : ''}`;
+                container.appendChild(chip);
+            });
+        }
+
+        function toggleAllAreasFilter() {
+            showAllAreasOverride = !showAllAreasOverride;
+            renderActiveAreasChips();
+            renderChildrenTrackingList();
+        }
+
+        // ==========================================
+        // MODAL ZA UNOS NOVOG PLANA I GOOGLE DOCS-A
+        // ==========================================
+        function openNewPlanModal() {
+            const modal = document.getElementById('new-plan-modal');
+            const checkboxesContainer = document.getElementById('new-plan-areas-checkboxes');
+            if (!modal || !checkboxesContainer) return;
+
+            checkboxesContainer.innerHTML = '';
+            areas.forEach(area => {
+                const label = document.createElement('label');
+                label.className = "flex items-center space-x-2 bg-slate-50 p-2 rounded-xl border border-slate-200 cursor-pointer hover:bg-amber-50";
+                label.innerHTML = `
+                    <input type="checkbox" value="${area.id}" class="new-plan-area-cb rounded text-amber-600 focus:ring-amber-500 w-4 h-4">
+                    <span class="font-bold text-slate-800 text-[11px] truncate">${area.short}</span>
+                `;
+                checkboxesContainer.appendChild(label);
+            });
+
+            document.getElementById('new-plan-title').value = '';
+            document.getElementById('new-plan-doc-url').value = '';
+            modal.classList.remove('hidden');
+        }
+
+        function closeNewPlanModal() {
+            const modal = document.getElementById('new-plan-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function saveNewPlanPreset() {
+            const titleInput = document.getElementById('new-plan-title');
+            const docUrlInput = document.getElementById('new-plan-doc-url');
+            if (!titleInput || !titleInput.value.trim()) {
+                showToast("Unesite naziv nedeljnog plana!", "warning");
+                return;
+            }
+
+            const selectedCbs = document.querySelectorAll('.new-plan-area-cb:checked');
+            const selectedIds = Array.from(selectedCbs).map(cb => parseInt(cb.value));
+
+            const newPreset = {
+                id: 'plan-' + Date.now(),
+                name: titleInput.value.trim(),
+                docUrl: docUrlInput ? docUrlInput.value.trim() : "",
+                theme: titleInput.value.trim(),
+                activeAreaIds: selectedIds.length > 0 ? selectedIds : areas.map(a => a.id)
+            };
+
+            appState.weeklyPresets.push(newPreset);
+            localStorage.setItem('umg_weekly_presets', JSON.stringify(appState.weeklyPresets));
+
+            populateWeeklyPresetsSelect();
+            const select = document.getElementById('weekly-plan-select');
+            if (select) select.value = newPreset.id;
+            applyWeeklyPreset(newPreset.id);
+
+            closeNewPlanModal();
+            showToast("Novi plan uspešno dodat i aktiviran!");
+        }
+
+        // ==========================================
+        // RAD SA DNEVNIKOM I EVIDENCIJOM
+        // ==========================================
         function getRecordKey() {
             const dateInput = document.getElementById('field-class-date');
             const date = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
@@ -1413,37 +1278,26 @@
                 const container = document.getElementById('children-field-list');
                 if (container) {
                     container.innerHTML = `
-                        <div class="text-center py-10 bg-white rounded-3xl border border-dashed border-slate-200 p-6 space-y-2">
-                            <i class="fa-solid fa-folder-open text-slate-300 text-4xl mb-1"></i>
-                            <p class="text-xs text-slate-700 font-bold">Nemate dodeljenih grupa u bazi podataka.</p>
-                            <p class="text-[11px] text-slate-400">Uprava kroz Administraciju dodeljuje grupe vaspitaču.</p>
-                            <button onclick="toggleSideMenu(true)" class="mt-3 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-200">
-                                Otvori meni podešavanja
-                            </button>
+                        <div class="text-center py-10 bg-white rounded-3xl border border-dashed border-slate-300 p-6">
+                            <i class="fa-solid fa-folder-open text-amber-500 text-4xl mb-2"></i>
+                            <p class="text-sm text-slate-700 font-black">Nema dodeljene grupe.</p>
+                            <p class="text-xs text-slate-400 mt-1">Otvorite meni gore levo i potvrdite aktivnu grupu.</p>
                         </div>
                     `;
                 }
-                const hPres = document.getElementById('header-stat-present');
-                const hAbs = document.getElementById('header-stat-absent');
-                if (hPres) hPres.innerText = "0";
-                if (hAbs) hAbs.innerText = "0";
-                
-                const alertBar = document.getElementById('substitute-alert-bar');
-                if (alertBar) alertBar.classList.add('hidden');
                 return;
             }
 
             const key = getRecordKey();
             const activeGroup = appState.groups.find(g => g.id === activeGroupId);
-            
             if (!activeGroup) return;
 
+            // Prikaz režima zamene ako instruktor radi sa drugom grupom
             const alertBar = document.getElementById('substitute-alert-bar');
             const alertText = document.getElementById('substitute-alert-text');
-            
             if (activeGroup.educator && activeGroup.educator !== activeEducator) {
                 if (alertBar && alertText) {
-                    alertText.innerHTML = `Zabeleženo kao <strong>ZAMENA na času</strong>. Prijavljeni ste kao <strong>${formatEducatorInitials(activeEducator)}</strong>, a radite sa grupom kolege <strong>${formatEducatorInitials(activeGroup.educator)}</strong>.`;
+                    alertText.innerHTML = `Zabeleženo kao <strong>ZAMENA na času</strong>. Prijavljeni ste kao <strong>${formatEducatorInitials(activeEducator)}</strong>, a stalni instruktor grupe je <strong>${formatEducatorInitials(activeGroup.educator)}</strong>. Svi unosi biće potpisani Vašim nalogom.`;
                     alertBar.classList.remove('hidden');
                 }
             } else {
@@ -1452,7 +1306,7 @@
 
             if (!appState.dailyRecords[key]) {
                 const childTracking = {};
-                (activeGroup.children || []).forEach(child => {
+                activeGroup.children.forEach(child => {
                     childTracking[child.id] = {
                         present: true,          
                         score: null,            
@@ -1461,463 +1315,179 @@
                     };
                 });
 
-                // Podrazumevano uvezujemo prvi dostupni plan
-                const firstPresetKey = Object.keys(appState.weeklyPresets)[0];
-                const activePreset = appState.weeklyPresets[firstPresetKey] || defaultWeeklyPresets["preset_02_06_11"];
-
                 appState.dailyRecords[key] = {
                     date: document.getElementById('field-class-date').value,
                     groupId: activeGroupId,
                     groupName: activeGroup.name,
                     educator: activeGroup.educator || activeEducator, 
                     writer: activeEducator, 
-                    theme: activePreset ? activePreset.theme : "",
-                    targetAreas: activePreset ? [...activePreset.targetAreaIds] : areas.map(a => a.id),
+                    theme: "",
                     generalNote: "",
                     children: childTracking
                 };
             } else {
                 appState.dailyRecords[key].writer = activeEducator;
-                if (!appState.dailyRecords[key].targetAreas) {
-                    appState.dailyRecords[key].targetAreas = areas.map(a => a.id);
-                }
             }
 
             const record = appState.dailyRecords[key];
             const themeInput = document.getElementById('field-class-theme');
-            const noteInput = document.getElementById('group-general-note');
-            
+            const generalNoteInput = document.getElementById('group-general-note');
             if (themeInput) themeInput.value = record.theme || "";
-            if (noteInput) noteInput.value = record.generalNote || "";
+            if (generalNoteInput) generalNoteInput.value = record.generalNote || "";
 
-            renderTargetAreasChips();
             updateSummaryBar();
             renderChildrenTrackingList();
         }
 
-        // Renderovanje bedževa aktivnih oblasti u podešavanjima
-        function renderTargetAreasChips() {
-            const container = document.getElementById('target-areas-chips');
-            if (!container) return;
-
-            const key = getRecordKey();
-            const record = appState.dailyRecords[key];
-            const activeList = (record && record.targetAreas) ? record.targetAreas : areas.map(a => a.id);
-
-            container.innerHTML = '';
-            areas.forEach(area => {
-                const isSelected = activeList.includes(area.id);
-                const chip = document.createElement('button');
-                chip.type = "button";
-                chip.onclick = () => toggleTargetAreaSetting(area.id);
-                chip.className = `px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 cursor-pointer ${
-                    isSelected 
-                    ? 'bg-slate-900 text-white border-slate-900 shadow-sm' 
-                    : 'bg-slate-100 text-slate-400 border-slate-200 line-through opacity-60'
-                }`;
-                chip.innerHTML = `<span>${area.short}</span> <i class="fa-solid ${isSelected ? 'fa-check text-[10px] text-emerald-400' : 'fa-xmark text-[10px]'}"></i>`;
-                container.appendChild(chip);
-            });
-        }
-
-        function toggleTargetAreaSetting(areaId) {
-            const key = getRecordKey();
-            if (!appState.dailyRecords[key]) return;
-
-            let list = appState.dailyRecords[key].targetAreas || [];
-            if (list.includes(areaId)) {
-                list = list.filter(id => id !== areaId);
-            } else {
-                list.push(areaId);
-            }
-            appState.dailyRecords[key].targetAreas = list;
-            saveDailyRecord(false);
-            renderTargetAreasChips();
-            renderChildrenTrackingList();
-        }
-
-        function resetTargetAreasToAll() {
-            const key = getRecordKey();
-            if (!appState.dailyRecords[key]) return;
-
-            appState.dailyRecords[key].targetAreas = areas.map(a => a.id);
-            saveDailyRecord(false);
-            renderTargetAreasChips();
-            renderChildrenTrackingList();
-            showToast("Aktivirane sve oblasti.");
-        }
-
-        // Popunjavanje dropdown liste nedeljnih planova
-        function populateWeeklyPresetsSelect() {
-            const select = document.getElementById('field-theme-preset');
-            if (!select) return;
-
-            select.innerHTML = '<option value="">-- Izaberi nedeljni plan iz programa --</option>';
-            
-            Object.keys(appState.weeklyPresets).forEach(key => {
-                const item = appState.weeklyPresets[key];
-                const opt = document.createElement('option');
-                opt.value = key;
-                opt.innerText = item.theme;
-                select.appendChild(opt);
-            });
-
-            const optAll = document.createElement('option');
-            optAll.value = "preset_all";
-            optAll.innerText = "⭐ Prikaži sve oblasti (Bez filtriranja)";
-            select.appendChild(optAll);
-        }
-
-        function applyWeeklyPreset(presetKey) {
-            const key = getRecordKey();
-            if (!appState.dailyRecords[key]) return;
-
-            if (presetKey === "preset_all") {
-                resetTargetAreasToAll();
-                return;
-            }
-
-            const preset = appState.weeklyPresets[presetKey];
-            if (preset) {
-                appState.dailyRecords[key].theme = preset.theme;
-                appState.dailyRecords[key].targetAreas = [...preset.targetAreaIds];
-                appState.dailyRecords[key].docUrl = preset.docUrl || "";
-                
-                const themeInput = document.getElementById('field-class-theme');
-                if (themeInput) themeInput.value = preset.theme;
-
-                saveDailyRecord(false);
-                renderTargetAreasChips();
-                updateSummaryBar();
-                renderChildrenTrackingList();
-                showToast("Uvezen plan časa i aktivirane ciljane oblasti!");
-            }
-        }
-
-        // =======================================================
-        //  UPRAVLJANJE BAZOM NEDELJNIH PLANOVA (DODAVANJE / BRISANJE)
-        // =======================================================
-        function openPresetManagerModal(open) {
-            const modal = document.getElementById('preset-manager-modal');
-            if (!modal) return;
-            const content = modal.querySelector('.modal-content');
-
-            if (open) {
-                renderNewPresetAreaSelectors();
-                renderPresetManagerList();
-                modal.classList.remove('opacity-0', 'pointer-events-none');
-                modal.classList.add('opacity-100', 'pointer-events-auto');
-                if (content) {
-                    content.classList.remove('scale-95', 'opacity-0');
-                    content.classList.add('scale-100', 'opacity-100');
-                }
-            } else {
-                modal.classList.remove('opacity-100', 'pointer-events-auto');
-                modal.classList.add('opacity-0', 'pointer-events-none');
-                if (content) {
-                    content.classList.remove('scale-100', 'opacity-100');
-                    content.classList.add('scale-95', 'opacity-0');
-                }
-            }
-        }
-
-        function renderNewPresetAreaSelectors() {
-            const container = document.getElementById('new-preset-area-grid');
-            if (!container) return;
-
-            container.innerHTML = '';
-            areas.forEach(area => {
-                const isChecked = newPresetSelectedAreas.has(area.id);
-                const btn = document.createElement('button');
-                btn.type = "button";
-                btn.onclick = () => {
-                    if (newPresetSelectedAreas.has(area.id)) {
-                        newPresetSelectedAreas.delete(area.id);
-                    } else {
-                        newPresetSelectedAreas.add(area.id);
-                    }
-                    renderNewPresetAreaSelectors();
-                };
-                btn.className = `p-2 rounded-xl border flex items-center gap-2 transition-all cursor-pointer text-left ${
-                    isChecked 
-                    ? 'bg-amber-100 border-amber-400 text-amber-950 font-bold shadow-sm' 
-                    : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'
-                }`;
-                btn.innerHTML = `
-                    <div class="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${isChecked ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-400'}">
-                        <i class="fa-solid ${isChecked ? 'fa-check' : 'fa-plus'} text-[10px]"></i>
-                    </div>
-                    <span class="truncate text-[11px]">${area.short}</span>
-                `;
-                container.appendChild(btn);
-            });
-        }
-
-        function renderPresetManagerList() {
-            const listContainer = document.getElementById('preset-saved-list');
-            if (!listContainer) return;
-
-            listContainer.innerHTML = '';
-            const keys = Object.keys(appState.weeklyPresets);
-
-            if (keys.length === 0) {
-                listContainer.innerHTML = '<p class="text-[11px] text-slate-400 p-3 bg-slate-50 rounded-xl text-center">Nema unetih planova.</p>';
-                return;
-            }
-
-            keys.forEach(k => {
-                const item = appState.weeklyPresets[k];
-                const div = document.createElement('div');
-                div.className = "bg-white border border-slate-200 rounded-xl p-2.5 flex items-center justify-between shadow-sm gap-2";
-                
-                let docBtn = '';
-                if (item.docUrl) {
-                    docBtn = `<a href="${item.docUrl}" target="_blank" rel="noopener noreferrer" class="text-emerald-700 hover:text-emerald-800 text-[10px] font-bold underline flex items-center gap-1" title="Otvori Google Docs"><i class="fa-brands fa-google-drive"></i> Docs</a>`;
-                }
-
-                div.innerHTML = `
-                    <div class="overflow-hidden">
-                        <h5 class="font-bold text-xs text-slate-900 truncate">${item.theme}</h5>
-                        <div class="flex items-center gap-2 mt-0.5">
-                            <span class="text-[10px] text-slate-400">Oblasti: ${item.targetAreaIds.length} definisano</span>
-                            ${docBtn}
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <button onclick="applyWeeklyPreset('${k}'); openPresetManagerModal(false);" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer">
-                            Aktiviraj
-                        </button>
-                        <button onclick="deleteWeeklyPreset('${k}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center cursor-pointer transition-colors" title="Obriši plan">
-                            <i class="fa-solid fa-trash-can text-xs"></i>
-                        </button>
-                    </div>
-                `;
-                listContainer.appendChild(div);
-            });
-        }
-
-        function saveNewWeeklyPreset() {
-            const titleInput = document.getElementById('new-preset-title');
-            const docUrlInput = document.getElementById('new-preset-doc-url');
-            const title = titleInput ? titleInput.value.trim() : '';
-            const docUrl = docUrlInput ? docUrlInput.value.trim() : '';
-
-            if (!title) {
-                showToast("Unesite naziv nedelje / aktivnosti.", "warning");
-                return;
-            }
-            if (newPresetSelectedAreas.size === 0) {
-                showToast("Izaberite bar jednu oblast za ocenjivanje.", "warning");
-                return;
-            }
-
-            const newKey = "preset_" + Date.now();
-            appState.weeklyPresets[newKey] = {
-                theme: title,
-                targetAreaIds: Array.from(newPresetSelectedAreas),
-                docUrl: docUrl
-            };
-
-            // Čuvanje u localStorage
-            localStorage.setItem('umg_weekly_presets', JSON.stringify(appState.weeklyPresets));
-
-            // Sinhronizacija u Firebase pod system/config
-            if (useCloud && db) {
-                db.collection("system").doc("config").set({
-                    weeklyPresets: appState.weeklyPresets
-                }, { merge: true }).catch(err => console.error("Firebase presets save error:", err));
-            }
-
-            if (titleInput) titleInput.value = '';
-            if (docUrlInput) docUrlInput.value = '';
-            populateWeeklyPresetsSelect();
-            applyWeeklyPreset(newKey);
-            openPresetManagerModal(false);
-            showToast("Novi nedeljni plan je uspešno sačuvan!");
-        }
-
-        function deleteWeeklyPreset(key) {
-            delete appState.weeklyPresets[key];
-            localStorage.setItem('umg_weekly_presets', JSON.stringify(appState.weeklyPresets));
-            
-            if (useCloud && db) {
-                db.collection("system").doc("config").set({
-                    weeklyPresets: appState.weeklyPresets
-                }, { merge: true });
-            }
-
-            populateWeeklyPresetsSelect();
-            renderPresetManagerList();
-            showToast("Plan je uklonjen.");
-        }
-
-        function toggleShowAllAreasOverride() {
-            showAllAreasOverride = !showAllAreasOverride;
-            renderChildrenTrackingList();
-        }
-
+        // ==========================================
+        // ISCRTAVANJE KARTICA DECE (VELIKE IKONICE I DUGME POTVRDI)
+        // ==========================================
         function renderChildrenTrackingList() {
             const key = getRecordKey();
             const record = appState.dailyRecords[key];
             const activeGroup = appState.groups.find(g => g.id === activeGroupId);
-
             const container = document.getElementById('children-field-list');
+
             if (!container || !activeGroup || !record) return;
 
             container.innerHTML = '';
-
             let presentCount = 0;
             let absentCount = 0;
 
-            // Filtrirane oblasti na osnovu teme časa
-            const targetIds = (record.targetAreas && record.targetAreas.length > 0) ? record.targetAreas : areas.map(a => a.id);
-            const displayedAreas = showAllAreasOverride ? areas : areas.filter(a => targetIds.includes(a.id));
+            // Filtrirane oblasti za tekući čas
+            const visibleAreas = (showAllAreasOverride || activeFilterAreaIds.length === 0)
+                ? areas
+                : areas.filter(a => activeFilterAreaIds.includes(a.id));
 
-            (activeGroup.children || []).forEach(child => {
-                const tr = (record.children && record.children[child.id]) || { present: true, score: null, highlightAreas: [], note: "" };
-                
+            activeGroup.children.forEach(child => {
+                const tr = record.children[child.id] || { present: true, score: null, highlightAreas: [], note: "" };
                 if (tr.present) presentCount++; else absentCount++;
 
                 const card = document.createElement('div');
                 card.id = `child-card-${child.id}`;
-                
+
                 if (tr.present) {
                     const isExpanded = expandedChildIds.has(child.id);
-                    card.className = "bg-white rounded-3xl border border-slate-200 shadow-sm transition-all duration-300 overflow-hidden";
-                    
-                    // GRUPISANJE SAMO CILJANIH OBLASTI ZA DANAŠNJI ČAS
-                    const groupedAreas = { cognitive: [], motor: [], social: [] };
-                    displayedAreas.forEach(area => groupedAreas[area.category].push(area));
+                    card.className = "bg-white rounded-3xl border border-slate-200/90 shadow-sm transition-all duration-200 overflow-hidden";
 
-                    let categoriesHTML = '<div class="space-y-3 mt-2">';
-                    
-                    Object.keys(groupedAreas).forEach(catKey => {
-                        const catList = groupedAreas[catKey];
-                        if (catList.length === 0) return; // Ako u ovoj kategoriji nema zadatih oblasti za danas, ne prikazuj praznu kutiju
-
-                        const cat = categories[catKey];
-                        let iconsHTML = '<div class="grid grid-cols-3 sm:flex sm:flex-wrap gap-2.5 sm:gap-3">';
-                        
-                        catList.forEach(area => {
-                            const isSelected = (tr.highlightAreas || []).includes(area.id);
-                            iconsHTML += `
-                                <div class="flex flex-col items-center">
-                                    <button type="button" 
-                                            onclick="toggleAreaHighlight('${child.id}', ${area.id})" 
-                                            class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 flex items-center justify-center transition-all transform cursor-pointer text-2xl sm:text-3xl active:scale-90 ${
-                                                isSelected 
-                                                ? area.activeClass + ' scale-105' 
-                                                : area.inactiveClass
-                                            }" title="${area.name}">
-                                        ${renderAreaIconContent(area)}
-                                    </button>
-                                    <span class="text-[10px] sm:text-xs font-bold mt-1 text-slate-700 text-center truncate max-w-[70px]">
-                                        ${area.short}
-                                    </span>
-                                </div>
-                            `;
-                        });
-                        iconsHTML += '</div>';
-
-                        categoriesHTML += `
-                            <div class="p-3 sm:p-3.5 rounded-2xl border ${cat.containerClass}">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border ${cat.headerBadge}">
-                                        ${cat.name}
-                                    </span>
-                                </div>
-                                ${iconsHTML}
-                            </div>
-                        `;
-                    });
-
-                    categoriesHTML += '</div>';
-
-                    // UMG PROCENA ČASA
+                    // 1. DUGMAD ZA OCENE (120, 100, 90, 75, 50)
                     let ratingButtonsHTML = '<div class="grid grid-cols-5 gap-2 sm:gap-3 py-1">';
                     ratingLevels.forEach(level => {
                         const isActive = (tr.score === level.val);
                         ratingButtonsHTML += `
                             <div class="flex flex-col items-center">
-                                <button type="button"
-                                        onclick="setQuickScore('${child.id}', ${level.val})" 
-                                        class="w-full h-14 sm:h-16 rounded-2xl border-2 flex items-center justify-center font-black text-base sm:text-xl transition-all transform cursor-pointer active:scale-95 ${
+                                <button type="button" onclick="setQuickScore('${child.id}', ${level.val})" 
+                                        class="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl border-2 flex items-center justify-center font-black text-sm sm:text-base transition-all transform active:scale-90 cursor-pointer shadow-sm ${
                                             isActive 
-                                            ? level.activeColor + ' scale-105 shadow-lg ring-4 border-transparent' 
-                                            : level.inactiveColor
+                                            ? level.activeBg + ' scale-105 border-transparent shadow-md' 
+                                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
                                         }" title="${level.title}">
                                     ${level.val}
                                 </button>
-                                <span class="text-[9px] sm:text-[10px] font-black mt-1 text-slate-500 uppercase tracking-tight text-center">
-                                    ${level.label}
-                                </span>
+                                <span class="text-[9px] sm:text-[10px] font-bold mt-1 text-slate-500 uppercase tracking-tight text-center leading-tight">${level.label}</span>
                             </div>
                         `;
                     });
                     ratingButtonsHTML += '</div>';
 
-                    // STATUS BEDŽ ZA BRZI PREGLED NA ZAGLAVLJU
-                    let quickScoreBadge = '';
-                    if (tr.score) {
-                        quickScoreBadge = `<span class="px-2.5 py-1 rounded-xl bg-amber-500 text-white font-black text-xs shadow-sm">${tr.score}</span>`;
-                    }
-                    if (tr.highlightAreas && tr.highlightAreas.length > 0) {
-                        quickScoreBadge += `<span class="px-2 py-1 rounded-xl bg-emerald-100 text-emerald-800 font-black text-xs flex items-center gap-1"><i class="fa-solid fa-star text-[10px]"></i> ${tr.highlightAreas.length}</span>`;
-                    }
+                    // 2. KRUPNE ORIGINALNE UMG IKONICE SA SVEŽOM POZITIVNOM ZELENOM/TIRKIZNOM SELEKCIJOM
+                    let areasGridHTML = '<div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5 sm:gap-3 py-1">';
+                    visibleAreas.forEach(area => {
+                        const isSelected = tr.highlightAreas.includes(area.id);
+                        
+                        // Generisanje unutrašnjeg sadržaja ikonica prema dostavljenim UMG slikama
+                        let iconInnerContent = '';
+                        if (area.customType === 'fx') {
+                            iconInnerContent = `<span class="font-black italic text-lg sm:text-xl font-serif text-white">f(x)</span>`;
+                        } else if (area.customType === 'pyramid') {
+                            iconInnerContent = `
+                                <div class="flex flex-col items-center justify-center gap-[3px] leading-none">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-white block"></span>
+                                    <div class="flex gap-[3px]"><span class="w-1.5 h-1.5 rounded-full bg-white block"></span><span class="w-1.5 h-1.5 rounded-full bg-white block"></span></div>
+                                    <div class="flex gap-[3px]"><span class="w-1.5 h-1.5 rounded-full bg-white block"></span><span class="w-1.5 h-1.5 rounded-full bg-white block"></span><span class="w-1.5 h-1.5 rounded-full bg-white block"></span></div>
+                                </div>
+                            `;
+                        } else if (area.customType === 'heart-box') {
+                            iconInnerContent = `
+                                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                                    <i class="fa-solid fa-heart text-white text-base"></i>
+                                </div>
+                            `;
+                        } else {
+                            iconInnerContent = `<i class="fa-solid ${area.icon} text-xl sm:text-2xl text-white"></i>`;
+                        }
+
+                        // SVEŽA I POZITIVNA ZELENO-TIRKIZNA SELEKCIJA SA KVAČICOM (BEZ CRVENILA)
+                        areasGridHTML += `
+                            <button type="button" onclick="toggleAreaHighlight('${child.id}', ${area.id})"
+                                    class="relative flex flex-col items-center justify-center p-2 rounded-2xl border-2 transition-all active:scale-95 cursor-pointer ${
+                                        isSelected 
+                                        ? 'bg-emerald-50/95 border-emerald-500 text-emerald-950 ring-2 ring-emerald-400/40 shadow-md scale-[1.02]' 
+                                        : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                                    }" title="${area.name}">
+                                
+                                ${isSelected ? '<span class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[10px] shadow-sm"><i class="fa-solid fa-check"></i></span>' : ''}
+
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full ${area.circleBg} flex items-center justify-center shadow-sm">
+                                    ${iconInnerContent}
+                                </div>
+
+                                <span class="text-[10px] sm:text-[11px] font-black mt-1.5 text-center leading-tight truncate w-full ${isSelected ? 'text-emerald-900 font-extrabold' : 'text-slate-800'}">
+                                    ${area.short}
+                                </span>
+                            </button>
+                        `;
+                    });
+                    areasGridHTML += '</div>';
+
+                    // Bedž statusa ocene u zaglavlju
+                    let scoreBadge = tr.score 
+                        ? `<span class="bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-sm">Ocena: ${tr.score}</span>`
+                        : `<span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-lg">Nije ocenjen</span>`;
 
                     card.innerHTML = `
-                        <!-- ZAGLAVLJE KARTICE DETETA -->
-                        <div class="flex items-center justify-between p-3.5 relative">
+                        <!-- UVEK VIDLJIVO ZAGLAVLJE KARTICE DETETA -->
+                        <div class="flex items-center justify-between p-3 sm:p-4 relative bg-white">
                             <div class="absolute inset-0 z-0 cursor-pointer" onclick="toggleChildCollapse('${child.id}', event)"></div>
                             
                             <div class="flex items-center space-x-3 relative z-10">
-                                <button type="button" onclick="togglePresence('${child.id}', event)" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-50 text-emerald-700 border-2 border-emerald-300 font-black flex items-center justify-center text-lg sm:text-xl shadow-sm transition-all cursor-pointer hover:bg-emerald-100 focus:outline-none" title="Dodirni za promenu prisustva">
+                                <button type="button" onclick="togglePresence('${child.id}', event)" class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 border-2 border-emerald-300 font-black flex items-center justify-center text-lg shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer" title="Dodirni da označiš dete kao odsutno">
                                     ${child.name.charAt(0)}
                                 </button>
-                                <div class="pointer-events-none">
-                                    <h4 class="font-black text-lg sm:text-2xl text-slate-900 leading-none">
-                                        ${child.name}
-                                    </h4>
-                                    <p class="text-[11px] text-slate-400 font-semibold mt-1">
-                                        ${tr.score ? 'Procena: <strong class="text-emerald-700 font-black">' + tr.score + '</strong> • ' + (tr.highlightAreas.length) + ' snaga' : 'Dodirni za brzu ocenu i snage'}
-                                    </p>
+                                <div>
+                                    <h4 class="font-black text-lg sm:text-xl text-slate-900 tracking-tight leading-none">${child.name}</h4>
+                                    <p class="text-[10px] text-slate-400 font-semibold mt-1">Dodirni krug za odsutnost • Klikni za unos</p>
                                 </div>
                             </div>
                             
                             <div class="flex items-center space-x-2 relative z-10 pointer-events-none">
-                                ${quickScoreBadge}
-                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">Prisutan</span>
+                                ${scoreBadge}
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 transition-transform duration-300" id="chevron-child-${child.id}" style="transform: ${isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'}">
                                     <i class="fa-solid fa-chevron-down text-xs"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- SKLOPIVI PANEL ZA RAD (FILTRIRANE OBLASTI ZA DANAŠNJI ČAS) -->
-                        <div id="details-child-${child.id}" class="${isExpanded ? '' : 'hidden'} border-t border-slate-100 p-3.5 sm:p-5 bg-slate-50/50 space-y-4">
+                        <!-- SKLOPIVI DETALJNI PANEL ZA BRZI RAD VASPITAČA -->
+                        <div id="details-child-${child.id}" class="${isExpanded ? '' : 'hidden'} border-t border-slate-100 p-3 sm:p-4 bg-slate-50/50 space-y-4">
                             
-                            <!-- 1. PROCENA SA ČASA -->
-                            <div class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="block text-xs font-black uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                                        <i class="fa-solid fa-trophy text-amber-500"></i> UMG Procena časa
-                                    </span>
-                                    <span class="text-[10px] font-bold text-slate-400">Izaberi nivo</span>
-                                </div>
+                            <!-- 1. PROCENA ČASA -->
+                            <div>
+                                <span class="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1.5 flex items-center">
+                                    <i class="fa-solid fa-star text-amber-500 mr-1.5"></i> UMG Procena časa:
+                                </span>
                                 ${ratingButtonsHTML}
                             </div>
 
-                            <!-- 2. IZRAŽENE OBLASTI I SNAGE ZA DANAŠNJI PLAN -->
-                            <div class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm">
-                                <div class="flex items-center justify-between mb-1">
-                                    <span class="block text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                                        <i class="fa-solid fa-wand-magic-sparkles text-emerald-600"></i> Oblasti predviđene planom (${displayedAreas.length})
+                            <!-- 2. IZDVOJENE OBLASTI DANAS -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="block text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center">
+                                        <i class="fa-solid fa-shapes text-emerald-500 mr-1.5"></i> Izražene oblasti danas:
                                     </span>
-                                    <button type="button" onclick="toggleShowAllAreasOverride()" class="text-[11px] font-bold text-blue-600 hover:text-blue-800 underline cursor-pointer">
-                                        ${showAllAreasOverride ? 'Samo plan časa' : 'Prikaži sve (11)'}
-                                    </button>
+                                    <span class="text-[10px] font-bold text-slate-400">Izabrano: ${tr.highlightAreas.length}</span>
                                 </div>
-                                ${categoriesHTML}
+                                ${areasGridHTML}
                             </div>
 
                             <!-- 3. GLASOVNA I TEKSTUALNA OPASKA -->
@@ -1927,26 +1497,36 @@
                                        placeholder="Diktirajte ili upišite opasku za ${child.name.split(' ')[0]}..." 
                                        class="w-full pr-14 pl-3 py-2 text-xs sm:text-sm bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 font-medium">
                                 <button type="button" onclick="startVoiceInput('note-child-${child.id}', '${child.id}')" 
-                                        class="absolute right-2 bg-slate-100 hover:bg-emerald-600 hover:text-white text-slate-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-sm border border-slate-200 transition-all cursor-pointer" title="Diktiraj glasom (Govor u tekst)">
+                                       class="absolute right-2 bg-slate-100 hover:bg-emerald-600 hover:text-white text-slate-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-sm border border-slate-200 transition-all cursor-pointer" title="Diktiraj glasom (Govor u tekst)">
                                     <i class="fa-solid fa-microphone text-sm" id="mic-note-child-${child.id}"></i>
+                                </button>
+                            </div>
+
+                            <!-- 4. DUGME ZA POTVRDU I SKLAPANJE KARTICE DETETA -->
+                            <div class="pt-1">
+                                <button type="button" 
+                                        onclick="confirmAndCloseChild('${child.id}')" 
+                                        class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black py-3 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 active:scale-98 cursor-pointer">
+                                    <i class="fa-solid fa-check text-emerald-400"></i>
+                                    <span>Potvrdi i zatvori dete</span>
                                 </button>
                             </div>
                         </div>
                     `;
                 } else {
-                    card.className = "bg-slate-100/80 rounded-2xl shadow-sm border border-slate-200/60 opacity-60 transition-all duration-300";
+                    card.className = "bg-slate-100 rounded-2xl shadow-sm border border-slate-200/80 opacity-60 transition-all duration-200";
                     card.innerHTML = `
-                        <div class="flex justify-between items-center relative p-3 sm:p-3.5">
-                            <button type="button" onclick="togglePresence('${child.id}', event)" class="flex items-center space-x-3 cursor-pointer text-left w-full relative z-10 outline-none hover:opacity-80 transition-all">
-                                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-slate-300 text-slate-600 font-black flex items-center justify-center text-base sm:text-lg shadow-inner">
+                        <div class="flex justify-between items-center p-3 sm:p-4">
+                            <button type="button" onclick="togglePresence('${child.id}', event)" class="flex items-center space-x-3 cursor-pointer text-left w-full outline-none">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-300 text-slate-600 font-bold flex items-center justify-center text-lg shadow-inner">
                                     ${child.name.charAt(0)}
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-base sm:text-lg text-slate-500 line-through leading-none">${child.name}</h4>
-                                    <p class="text-[10px] text-slate-400 mt-1">Dete je odsutno (dodirni za povratak na čas)</p>
+                                    <p class="text-[10px] text-slate-400 mt-1">Dete je odsutno (dodirni za povratak)</p>
                                 </div>
                             </button>
-                            <span class="bg-rose-100 text-rose-800 border border-rose-200 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase shrink-0 ml-2 relative z-10 pointer-events-none">Odsutan</span>
+                            <span class="bg-rose-100 text-rose-800 border border-rose-200 text-[10px] font-black px-2.5 py-1 rounded-full uppercase shrink-0">Odsutan</span>
                         </div>
                     `;
                 }
@@ -1961,6 +1541,7 @@
         }
 
         function toggleChildCollapse(childId, event) {
+            if (event) event.stopPropagation();
             const details = document.getElementById(`details-child-${childId}`);
             const chevron = document.getElementById(`chevron-child-${childId}`);
             
@@ -1978,26 +1559,15 @@
             }
         }
 
-        function handleGlobalSearch() {
-            const query = document.getElementById('global-child-search').value.toLowerCase().trim();
-            const activeGroup = appState.groups.find(g => g.id === activeGroupId);
-            if (!activeGroup || !activeGroup.children) return;
-
-            activeGroup.children.forEach(child => {
-                const card = document.getElementById(`child-card-${child.id}`);
-                if (card) {
-                    if (!query || child.name.toLowerCase().includes(query)) {
-                        card.classList.remove('hidden');
-                    } else {
-                        card.classList.add('hidden');
-                    }
-                }
-            });
+        // TASTER POTVRDI I ZATVORI DETE
+        function confirmAndCloseChild(childId) {
+            saveDailyRecord(false);
+            toggleChildCollapse(childId);
+            showToast("Podaci za dete uspešno sačuvani!");
         }
 
         function togglePresence(childId, event) {
             if (event) event.stopPropagation(); 
-            
             const key = getRecordKey();
             if (appState.dailyRecords[key] && appState.dailyRecords[key].children[childId]) {
                 const current = appState.dailyRecords[key].children[childId].present;
@@ -2069,7 +1639,7 @@
                 localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
                 updateCloudDailyRecord(key, appState.dailyRecords[key]);
                 if (showNotification) {
-                    showToast("Čas je uspešno sačuvan!");
+                    showToast("Čas uspešno ažuriran i sačuvan!");
                 }
             }
         }
@@ -2082,9 +1652,7 @@
             let dateVal = '';
             if (dateInput && dateInput.value) {
                 const parts = dateInput.value.split('-');
-                if (parts.length === 3) {
-                    dateVal = `${parts[2]}.${parts[1]}.`;
-                }
+                if (parts.length === 3) dateVal = `${parts[2]}.${parts[1]}.`;
             }
             
             let groupVal = '';
@@ -2094,93 +1662,61 @@
             
             const themeVal = themeInput ? themeInput.value.trim() : '';
 
+            // AŽURIRANJE NOVOG PROSTRANOG ZAGLAVLJA
+            const groupNameEl = document.getElementById('field-header-group-name');
+            const themePreviewEl = document.getElementById('field-header-theme-preview');
             const summaryDate = document.getElementById('summary-date');
-            const summaryInfo = document.getElementById('summary-info');
-            const docBtn = document.getElementById('btn-open-doc-link');
+            const instructorBadge = document.getElementById('summary-instructor-badge');
 
-            if (summaryDate) summaryDate.innerHTML = `<i class="fa-solid fa-calendar-day mr-1 text-amber-600"></i> ${dateVal || 'Danas'}`;
-            if (summaryInfo) {
-                const initials = formatEducatorInitials(activeEducator);
-                summaryInfo.innerHTML = `<span class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded-lg text-[10px] font-black">${initials || 'V'}</span> <i class="fa-solid fa-school text-emerald-600 text-xs ml-1"></i> <span class="font-bold">${groupVal || 'Izaberi grupu'}</span> ${themeVal ? '<span class="text-slate-400 font-normal truncate">• ' + themeVal + '</span>' : ''}`;
+            if (groupNameEl) groupNameEl.innerText = groupVal || 'Izaberite grupu';
+            if (themePreviewEl) themePreviewEl.innerText = themeVal ? `Tema: ${themeVal}` : 'UMG Radionica';
+
+            if (summaryDate) {
+                summaryDate.innerHTML = `<i class="fa-solid fa-calendar-day text-amber-600"></i> ${dateVal || 'Danas'}`;
             }
-
-            // Provera da li tekući zapis ima unet link ka Google Docs pripremi
-            const key = getRecordKey();
-            const currentRec = appState.dailyRecords[key];
-            if (docBtn) {
-                if (currentRec && currentRec.docUrl) {
-                    docBtn.href = currentRec.docUrl;
-                    docBtn.classList.remove('hidden');
-                    docBtn.classList.add('flex');
-                } else {
-                    docBtn.classList.add('hidden');
-                    docBtn.classList.remove('flex');
-                }
+            if (instructorBadge) {
+                instructorBadge.innerText = `👤 ${formatEducatorInitials(activeEducator)}`;
             }
         }
 
-        // =======================================================
-        //  UPRAVLJANJE QR KODOM ZA PREZENTACIJE I DELJENJE
-        // =======================================================
-        function openQrModal(open) {
-            const modal = document.getElementById('qr-modal-backdrop');
-            if (!modal) return;
-            const content = modal.querySelector('.modal-content');
-            const qrImg = document.getElementById('qr-code-image');
+        // ==========================================
+        // BRZA PRETRAGA I MENI DRAWER
+        // ==========================================
+        function handleGlobalSearch() {
+            const query = document.getElementById('global-child-search').value.toLowerCase().trim();
+            const activeGroup = appState.groups.find(g => g.id === activeGroupId);
+            if (!activeGroup) return;
 
-            if (open) {
-                // Generisanje dinamičkog QR koda na osnovu trenutne adrese
-                const currentUrl = window.location.href;
-                const qrServiceUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(currentUrl)}&color=0f172a&bgcolor=ffffff&margin=1`;
-                if (qrImg) qrImg.src = qrServiceUrl;
-
-                modal.classList.remove('opacity-0', 'pointer-events-none');
-                modal.classList.add('opacity-100', 'pointer-events-auto');
-                if (content) {
-                    content.classList.remove('scale-95', 'opacity-0');
-                    content.classList.add('scale-100', 'opacity-100');
+            activeGroup.children.forEach(child => {
+                const card = document.getElementById(`child-card-${child.id}`);
+                if (card) {
+                    if (!query || child.name.toLowerCase().includes(query)) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
                 }
-            } else {
-                modal.classList.remove('opacity-100', 'pointer-events-auto');
-                modal.classList.add('opacity-0', 'pointer-events-none');
-                if (content) {
-                    content.classList.remove('scale-100', 'opacity-100');
-                    content.classList.add('scale-95', 'opacity-0');
-                }
-            }
-        }
-
-        function copyCurrentAppUrl() {
-            const url = window.location.href;
-            
-            // Kompatibilno kopiranje putem pomoćnog elementa (radi u iFrame i na telefonima)
-            const tempInput = document.createElement("input");
-            tempInput.value = url;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand("copy");
-            document.body.removeChild(tempInput);
-
-            showToast("Link aplikacije je kopiran u međumemoriju!");
+            });
         }
 
         function toggleInlineSearch(show) {
-            const summaryLeft = document.getElementById('summary-left-container');
             const inlineSearch = document.getElementById('inline-search-container');
             const searchBtn = document.getElementById('btn-toggle-search');
             const searchInput = document.getElementById('global-child-search');
 
             if (show) {
-                summaryLeft.classList.add('hidden');
-                inlineSearch.classList.remove('hidden');
-                inlineSearch.classList.add('flex');
-                searchBtn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                if (inlineSearch) {
+                    inlineSearch.classList.remove('hidden');
+                    inlineSearch.classList.add('flex');
+                }
+                if (searchBtn) searchBtn.classList.add('bg-amber-100', 'text-amber-800');
                 if (searchInput) searchInput.focus();
             } else {
-                summaryLeft.classList.remove('hidden');
-                inlineSearch.classList.add('hidden');
-                inlineSearch.classList.remove('flex');
-                searchBtn.className = "bg-slate-100 hover:bg-slate-200 text-slate-700 w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 cursor-pointer transition-all";
+                if (inlineSearch) {
+                    inlineSearch.classList.add('hidden');
+                    inlineSearch.classList.remove('flex');
+                }
+                if (searchBtn) searchBtn.classList.remove('bg-amber-100', 'text-amber-800');
                 if (searchInput) {
                     searchInput.value = '';
                     handleGlobalSearch(); 
@@ -2188,138 +1724,106 @@
             }
         }
 
-        // =======================================================
-        //  ROBUSNI GLASOVNI UNOS (Govor u tekst sa proverom i feedbackom)
-        // =======================================================
+        function toggleSideMenu(open) {
+            const drawer = document.getElementById('side-menu-drawer');
+            const overlay = document.getElementById('side-menu-overlay');
+
+            if (open) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+                drawer.classList.remove('-translate-x-full');
+            } else {
+                overlay.classList.add('opacity-0');
+                drawer.classList.add('-translate-x-full');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        // ==========================================
+        // GLASOVNI UNOS (Govor u tekst)
+        // ==========================================
         function startVoiceInput(elementId, childId = null) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            
+            const SpeechRecognition = window.SpeechRecognition || window.webkitRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                showToast("Pregledač ne podržava glasovni unos. Koristite Google Chrome ili noviji pregledač.", "warning");
+                showToast("Pregledač ne podržava glasovni unos.", "warning");
                 return;
             }
 
             const micIcon = document.getElementById(`mic-${elementId}`);
             const inputField = document.getElementById(elementId);
-            const parentContainer = inputField ? inputField.parentElement : null;
 
-            // Ako je prepoznavanje već aktivno, zaustavi ga na ponovni klik
             if (activeRecognition) {
-                try {
-                    activeRecognition.stop();
-                } catch (e) {
-                    console.log("Zaustavljanje mikrofona:", e);
-                }
+                activeRecognition.stop();
                 activeRecognition = null;
                 resetMicIcons();
-                showToast("Snimanje glasa je prekinuto.");
                 return;
             }
 
-            try {
-                const recognition = new SpeechRecognition();
-                // Pokušaj sa srpskim jezikom
-                recognition.lang = 'sr-RS';
-                recognition.continuous = false; // False omogućava brže i pouzdanije prepoznavanje rečenica na telefonima
-                recognition.interimResults = true;
-                recognition.maxAlternatives = 1;
+            // Taktilni signal na mobilnom telefonu
+            if (navigator.vibrate) navigator.vibrate(50);
 
-                const originalVal = inputField ? inputField.value : "";
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'sr-RS';
+            recognition.continuous = true; 
+            recognition.interimResults = false;
 
-                recognition.onstart = () => {
-                    activeRecognition = recognition;
-                    if (micIcon && micIcon.parentElement) {
-                        micIcon.className = "fa-solid fa-microphone-lines text-white text-base";
-                        micIcon.parentElement.classList.add('mic-active');
+            const originalVal = inputField ? inputField.value : "";
+
+            recognition.onstart = () => {
+                activeRecognition = recognition;
+                if (micIcon) {
+                    micIcon.className = "fa-solid fa-microphone-lines text-rose-500 animate-pulse";
+                    micIcon.parentElement.classList.add('mic-active', 'border-rose-400');
+                }
+                showToast("Slušam glas... Dodirnite mikrofon za kraj.", "loading");
+            };
+
+            recognition.onresult = (event) => {
+                let transcript = "";
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        transcript += event.results[i][0].transcript + " ";
                     }
-                    if (parentContainer) {
-                        parentContainer.classList.add('ring-2', 'ring-rose-400', 'border-rose-400');
-                    }
-                    if (navigator.vibrate) {
-                        navigator.vibrate(50); // Taktilni feedback na mobilnom
-                    }
-                    showToast("🎙️ Slušam govor... Govorite jasno.", "loading");
-                };
+                }
+                if (transcript && inputField) {
+                    inputField.value = (originalVal ? originalVal.trim() + " " : "") + transcript.trim();
+                }
+            };
 
-                recognition.onresult = (event) => {
-                    let interimTranscript = '';
-                    let finalTranscript = '';
-
-                    for (let i = event.resultIndex; i < event.results.length; ++i) {
-                        if (event.results[i].isFinal) {
-                            finalTranscript += event.results[i][0].transcript;
-                        } else {
-                            interimTranscript += event.results[i][0].transcript;
-                        }
-                    }
-
-                    if (inputField) {
-                        const recognizedText = finalTranscript || interimTranscript;
-                        if (recognizedText) {
-                            const prefix = originalVal.trim() ? originalVal.trim() + " " : "";
-                            inputField.value = prefix + recognizedText.trim();
-                        }
-                    }
-                };
-
-                recognition.onerror = (event) => {
-                    console.warn("Speech recognition error:", event.error);
-                    resetMicIcons();
-                    activeRecognition = null;
-
-                    if (event.error === 'not-allowed') {
-                        showToast("Pristup mikrofonu je odbijen. Dozvolite mikrofon u podešavanjima pregledača.", "warning");
-                    } else if (event.error === 'network') {
-                        showToast("Mrežna greška. Za glasovni unos je potrebna internet veza.", "warning");
-                    } else if (event.error === 'no-speech') {
-                        showToast("Govor nije detektovan. Pokušajte ponovo.", "warning");
+            recognition.onerror = (e) => { 
+                console.log("Speech error:", e);
+                resetMicIcons(); 
+            };
+            
+            recognition.onend = () => {
+                if (inputField) {
+                    if (childId) {
+                        updateChildNote(childId, inputField.value);
                     } else {
-                        showToast("Glasovni unos nije uspeo: " + event.error, "warning");
+                        updateGroupGeneralNote(inputField.value);
                     }
-                };
-                
-                recognition.onend = () => {
-                    if (inputField) {
-                        // Sačuvaj tekst u bazu
-                        if (childId) {
-                            updateChildNote(childId, inputField.value);
-                        } else {
-                            updateGroupGeneralNote(inputField.value);
-                        }
-                        saveDailyRecord(false);
-                    }
-                    
-                    if (parentContainer) {
-                        parentContainer.classList.remove('ring-2', 'ring-rose-400', 'border-rose-400');
-                    }
-
-                    activeRecognition = null;
-                    resetMicIcons();
-                    showToast("Glasovni unos je uspešno zabeležen.");
-                };
-
-                recognition.start();
-
-            } catch (err) {
-                console.error("Nemoguće pokrenuti prepoznavanje govora:", err);
-                resetMicIcons();
+                    saveDailyRecord(false);
+                }
                 activeRecognition = null;
-                showToast("Greška pri pokretanju mikrofona. Proverite HTTPS ili dozvole.", "warning");
-            }
+                resetMicIcons();
+                showToast("Govor zabeležen i sačuvan!");
+            };
+
+            recognition.start();
         }
 
         function resetMicIcons() {
             const activeMics = document.querySelectorAll('.mic-active');
             activeMics.forEach(m => {
-                m.classList.remove('mic-active');
+                m.classList.remove('mic-active', 'border-rose-400');
                 const icon = m.querySelector('i');
-                if (icon) icon.className = "fa-solid fa-microphone text-sm";
-            });
-            document.querySelectorAll('[id^="note-container-"]').forEach(c => {
-                c.classList.remove('ring-2', 'ring-rose-400', 'border-rose-400');
+                if (icon) icon.className = "fa-solid fa-microphone text-slate-500";
             });
         }
 
+        // ==========================================
+        // NAVIGACIJA IZMEĐU TABOVA I DIJALOZI
+        // ==========================================
         function switchTab(tabId) {
             document.getElementById('tab-welcome').classList.add('hidden');
             document.getElementById('tab-field').classList.add('hidden');
@@ -2327,38 +1831,108 @@
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
 
             const logoutBtn = document.getElementById('btn-logout');
-
             if (tabId === 'welcome') {
                 if (logoutBtn) logoutBtn.classList.add('hidden');
-            } else if (tabId === 'field') {
+            } else {
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
             }
         }
 
+        function openProfileModal(show) {
+            const modal = document.getElementById('profile-modal');
+            if (modal) {
+                if (show) modal.classList.remove('hidden');
+                else modal.classList.add('hidden');
+            }
+        }
+
+        function confirmProfileModal() {
+            const select = document.getElementById('welcome-educator-select');
+            if (select) {
+                activeEducator = select.value;
+                localStorage.setItem('umg_active_educator', activeEducator);
+                
+                const fieldSelect = document.getElementById('field-educator-select');
+                if (fieldSelect) fieldSelect.value = activeEducator;
+
+                updateEducatorBadgeUI();
+                populateGroupSelects();
+                loadOrCreateDailyRecord();
+                openProfileModal(false);
+                switchTab('field');
+                showToast(`Prijavljeni ste: ${formatEducatorInitials(activeEducator)}`);
+            }
+        }
+
+        function loginAsEducator() {
+            switchTab('field');
+            showToast(`Dobrodošli: ${formatEducatorInitials(activeEducator)}`);
+        }
+
+        // ==========================================
+        // QR KOD GENERISANJE ZA PREZENTACIJU
+        // ==========================================
+        function openQrModal() {
+            const modal = document.getElementById('qr-modal');
+            const container = document.getElementById('qrcode-container');
+            if (!modal || !container) return;
+
+            toggleSideMenu(false);
+            container.innerHTML = '';
+
+            const currentUrl = window.location.href;
+            qrCodeInstance = new QRCode(container, {
+                text: currentUrl,
+                width: 200,
+                height: 200,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeQrModal() {
+            const modal = document.getElementById('qr-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function copyAppUrlToClipboard() {
+            const dummy = document.createElement('textarea');
+            dummy.value = window.location.href;
+            document.body.appendChild(dummy);
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+            showToast("Link aplikacije uspešno kopiran!");
+        }
+
+        // ==========================================
+        // TOAST OBAVEŠTENJA
+        // ==========================================
         function showToast(text, type = 'success') {
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toast-icon');
             const textEl = document.getElementById('toast-text');
-            
             if (!toast || !icon || !textEl) return;
 
             textEl.innerText = text;
-            
             if (type === 'success') {
                 icon.className = "fa-solid fa-circle-check text-emerald-400 text-sm";
             } else if (type === 'warning') {
-                icon.className = "fa-solid fa-circle-exclamation text-rose-500 text-sm";
+                icon.className = "fa-solid fa-circle-exclamation text-amber-400 text-sm";
             } else {
                 icon.className = "fa-solid fa-circle-notch text-purple-400 text-sm animate-spin";
             }
             
-            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.remove('translate-y-20', 'opacity-0');
             toast.classList.add('translate-y-0', 'opacity-100');
             
             if (type !== 'loading') {
                 setTimeout(() => {
                     toast.classList.remove('translate-y-0', 'opacity-100');
-                    toast.classList.add('translate-y-24', 'opacity-0');
+                    toast.classList.add('translate-y-20', 'opacity-0');
                 }, 2800);
             }
         }
