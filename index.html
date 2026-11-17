@@ -1340,65 +1340,65 @@
                     const isExpanded = expandedChildIds.has(child.id);
                     card.className = "bg-white rounded-3xl border border-slate-200/90 shadow-sm transition-all duration-200 overflow-hidden";
 
-                    let ratingButtonsHTML = '<div class="grid grid-cols-5 gap-2 sm:gap-3 py-1">';
+                    let ratingButtonsHTML = '<div class="grid grid-cols-5 gap-1.5 sm:gap-3 py-1">';
                     ratingLevels.forEach(level => {
                         const isActive = (tr.score === level.val);
                         ratingButtonsHTML += `
                             <div class="flex flex-col items-center">
                                 <button type="button" onclick="setQuickScore('${child.id}', ${level.val})" 
-                                        class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl border-2 flex items-center justify-center font-black text-sm sm:text-base transition-all transform active:scale-90 cursor-pointer shadow-sm ${
+                                        class="w-full aspect-square max-w-[64px] rounded-2xl border-2 flex items-center justify-center font-black text-base sm:text-lg transition-all transform active:scale-90 cursor-pointer shadow-sm ${
                                             isActive 
                                             ? level.activeBg + ' scale-105 border-transparent shadow-md' 
                                             : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
                                         }" title="${level.title}">
                                     ${level.val}
                                 </button>
-                                <span class="text-[10px] sm:text-xs font-bold mt-1 text-slate-500 uppercase tracking-tight text-center leading-tight">${level.label}</span>
+                                <span class="text-[11px] sm:text-xs font-bold mt-1.5 text-slate-600 tracking-tight text-center leading-tight">${level.label}</span>
                             </div>
                         `;
                     });
                     ratingButtonsHTML += '</div>';
 
-                    let areasGridHTML = '<div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5 sm:gap-3 py-1">';
+                    let areasGridHTML = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 py-1">';
                     visibleAreas.forEach(area => {
                         const isSelected = tr.highlightAreas.includes(area.id);
                         
                         let iconInnerContent = '';
                         if (area.customType === 'fx') {
-                            iconInnerContent = `<span class="font-black italic text-lg sm:text-xl font-serif text-white">f(x)</span>`;
+                            iconInnerContent = `<span class="font-black italic text-2xl font-serif text-white">f(x)</span>`;
                         } else if (area.customType === 'pyramid') {
                             iconInnerContent = `
-                                <div class="flex flex-col items-center justify-center gap-[3px] leading-none">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-white block"></span>
-                                    <div class="flex gap-[3px]"><span class="w-1.5 h-1.5 rounded-full bg-white block"></span><span class="w-1.5 h-1.5 rounded-full bg-white block"></span></div>
-                                    <div class="flex gap-[3px]"><span class="w-1.5 h-1.5 rounded-full bg-white block"></span><span class="w-1.5 h-1.5 rounded-full bg-white block"></span><span class="w-1.5 h-1.5 rounded-full bg-white block"></span></div>
+                                <div class="flex flex-col items-center justify-center gap-1 leading-none">
+                                    <span class="w-2 h-2 rounded-full bg-white block"></span>
+                                    <div class="flex gap-1"><span class="w-2 h-2 rounded-full bg-white block"></span><span class="w-2 h-2 rounded-full bg-white block"></span></div>
+                                    <div class="flex gap-1"><span class="w-2 h-2 rounded-full bg-white block"></span><span class="w-2 h-2 rounded-full bg-white block"></span><span class="w-2 h-2 rounded-full bg-white block"></span></div>
                                 </div>
                             `;
                         } else if (area.customType === 'heart-box') {
                             iconInnerContent = `
-                                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                                    <i class="fa-solid fa-heart text-white text-base"></i>
+                                <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <i class="fa-solid fa-heart text-white text-xl"></i>
                                 </div>
                             `;
                         } else {
-                            iconInnerContent = `<i class="fa-solid ${area.icon} text-xl sm:text-2xl text-white"></i>`;
+                            iconInnerContent = `<i class="fa-solid ${area.icon} text-2xl sm:text-3xl text-white"></i>`;
                         }
 
                         areasGridHTML += `
                             <button type="button" onclick="toggleAreaHighlight('${child.id}', ${area.id})"
-                                    class="relative flex flex-col items-center justify-center p-2 rounded-2xl border-2 transition-all active:scale-95 cursor-pointer ${
+                                    class="relative flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all active:scale-95 cursor-pointer min-h-[112px] ${
                                         isSelected 
                                         ? 'bg-emerald-50/95 border-emerald-500 text-emerald-950 ring-2 ring-emerald-400/40 shadow-md scale-[1.02]' 
                                         : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                                     }" title="${area.name}">
                                 
-                                ${isSelected ? '<span class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[10px] shadow-sm"><i class="fa-solid fa-check"></i></span>' : ''}
+                                ${isSelected ? '<span class="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-check"></i></span>' : ''}
 
-                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full ${area.circleBg} flex items-center justify-center shadow-sm">
+                                <div class="w-16 h-16 rounded-full ${area.circleBg} flex items-center justify-center shadow-sm shrink-0">
                                     ${iconInnerContent}
                                 </div>
 
-                                <span class="text-[11px] sm:text-xs font-black mt-1.5 text-center leading-tight truncate w-full ${isSelected ? 'text-emerald-900 font-extrabold' : 'text-slate-800'}">
+                                <span class="text-xs sm:text-sm font-black mt-2 text-center leading-snug line-clamp-2 w-full ${isSelected ? 'text-emerald-900 font-extrabold' : 'text-slate-800'}">
                                     ${area.short}
                                 </span>
                             </button>
@@ -1407,20 +1407,20 @@
                     areasGridHTML += '</div>';
 
                     let scoreBadge = tr.score 
-                        ? `<span class="bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-sm">Ocena: ${tr.score}</span>`
+                        ? `<span class="bg-amber-100 text-amber-900 border border-amber-300 text-xs sm:text-sm font-black px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm">Ocena: ${tr.score}</span>`
                         : `<span class="bg-slate-100 text-slate-500 text-xs font-bold px-2.5 py-1 rounded-lg">Nije ocenjen</span>`;
 
                     card.innerHTML = `
-                        <div class="flex items-center justify-between p-3 sm:p-4 relative bg-white">
+                        <div class="flex items-center justify-between p-3.5 sm:p-4 relative bg-white">
                             <div class="absolute inset-0 z-0 cursor-pointer" onclick="toggleChildCollapse('${child.id}', event)"></div>
                             
-                            <div class="flex items-center space-x-3 relative z-10">
-                                <button type="button" onclick="togglePresence('${child.id}', event)" class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 border-2 border-emerald-300 font-black flex items-center justify-center text-lg shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer" title="Dodirni da označiš dete kao odsutno">
+                            <div class="flex items-center space-x-3.5 relative z-10 min-w-0 pr-2">
+                                <button type="button" onclick="togglePresence('${child.id}', event)" class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-700 border-2 border-emerald-300 font-black flex items-center justify-center text-xl shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0" title="Dodirni da označiš dete kao odsutno">
                                     ${child.name.charAt(0)}
                                 </button>
-                                <div>
-                                    <h4 class="font-black text-lg sm:text-xl text-slate-900 tracking-tight leading-none">${child.name}</h4>
-                                    <p class="text-xs text-slate-400 font-semibold mt-1">Dodirni krug za odsutnost • Klikni za unos</p>
+                                <div class="min-w-0">
+                                    <h4 class="font-black text-xl sm:text-2xl text-slate-900 tracking-tight leading-snug truncate">${child.name}</h4>
+                                    <p class="text-xs text-slate-400 font-semibold mt-0.5 truncate">Dodirni krug za odsutnost • Klikni za unos</p>
                                 </div>
                             </div>
                             
@@ -1472,19 +1472,19 @@
                         </div>
                     `;
                 } else {
-                    card.className = "bg-slate-100 rounded-2xl shadow-sm border border-slate-200/80 opacity-60 transition-all duration-200";
+                    card.className = "bg-slate-100 rounded-2xl shadow-sm border border-slate-200/80 opacity-65 transition-all duration-200";
                     card.innerHTML = `
-                        <div class="flex justify-between items-center p-3 sm:p-4">
-                            <button type="button" onclick="togglePresence('${child.id}', event)" class="flex items-center space-x-3 cursor-pointer text-left w-full outline-none">
-                                <div class="w-12 h-12 rounded-2xl bg-slate-300 text-slate-600 font-bold flex items-center justify-center text-lg shadow-inner">
+                        <div class="flex justify-between items-center p-3.5 sm:p-4 gap-2">
+                            <button type="button" onclick="togglePresence('${child.id}', event)" class="flex items-center space-x-3.5 cursor-pointer text-left flex-1 min-w-0 outline-none">
+                                <div class="w-14 h-14 rounded-2xl bg-slate-300 text-slate-600 font-black flex items-center justify-center text-xl shadow-inner shrink-0">
                                     ${child.name.charAt(0)}
                                 </div>
-                                <div>
-                                    <h4 class="font-bold text-base sm:text-lg text-slate-500 line-through leading-none">${child.name}</h4>
-                                    <p class="text-xs text-slate-400 mt-1">Dete je odsutno (dodirni za povratak)</p>
+                                <div class="min-w-0">
+                                    <h4 class="font-black text-xl sm:text-2xl text-slate-500 line-through leading-snug truncate">${child.name}</h4>
+                                    <p class="text-xs text-slate-400 mt-0.5 truncate">Dete je odsutno (dodirni za povratak)</p>
                                 </div>
                             </button>
-                            <span class="bg-rose-100 text-rose-800 border border-rose-200 text-xs font-black px-2.5 py-1 rounded-full uppercase shrink-0">Odsutan</span>
+                            <span class="bg-rose-100 text-rose-800 border border-rose-200 text-xs font-black px-3 py-1.5 rounded-full uppercase shrink-0">Odsutan</span>
                         </div>
                     `;
                 }
