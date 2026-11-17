@@ -34,12 +34,25 @@
         .arrow-rotate { transition: transform 0.3s ease; }
         .open .arrow-rotate { transform: rotate(180deg); }
 
+        #admin-paste-zone:empty:before {
+            content: attr(data-placeholder);
+            color: #94a3b8;
+            pointer-events: none;
+            display: block;
+        }
+        #admin-paste-zone img {
+            max-height: 26px;
+            display: inline-block;
+            margin: 2px;
+            border-radius: 50%;
+        }
+
         /* Mobilna optimizacija */
         @media (max-width: 768px) {
-            .text-\\[8px\\] { font-size: 11px !important; }
-            .text-\\[9px\\] { font-size: 13px !important; }
-            .text-\\[10px\\] { font-size: 14px !important; }
-            .text-\\[11px\\] { font-size: 15px !important; }
+            .text-\[8px\] { font-size: 11px !important; }
+            .text-\[9px\] { font-size: 13px !important; }
+            .text-\[10px\] { font-size: 14px !important; }
+            .text-\[11px\] { font-size: 15px !important; }
             
             .text-xs { font-size: 16px !important; line-height: 1.4 !important; }
             .text-sm { font-size: 18px !important; line-height: 1.5 !important; }
@@ -49,7 +62,7 @@
             .w-12.h-12 { width: 4rem !important; height: 4rem !important; }
             
             .space-y-1 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.5rem !important; }
-            .space-y-1\\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem !important; }
+            .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem !important; }
         }
     </style>
 </head>
@@ -311,6 +324,95 @@
         </section>
 
         <section class="lg:col-span-5 space-y-6 lg:h-full lg:overflow-y-auto custom-scrollbar pb-8">
+            
+            <!-- ========================================================================= -->
+            <!--  NOVI MODUL: UPRAVLJANJE NEDELJNIM PROGRAMIMA (52 NEDELJE + BRISANJE)     -->
+            <!-- ========================================================================= -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div onclick="toggleAccordion('accordion-weekly-plans')" class="flex justify-between items-center p-5 cursor-pointer hover:bg-slate-50/80 transition-all open">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-lg shadow-inner">
+                            <i class="fa-solid fa-calendar-week"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">Nedeljni programi (Godišnji plan)</h3>
+                            <p class="text-[10px] text-slate-400">Unos preko klipborda, zakazivanje i brisanje.</p>
+                        </div>
+                    </div>
+                    <i id="arrow-accordion-weekly-plans" class="fa-solid fa-chevron-down text-slate-400 text-xs arrow-rotate"></i>
+                </div>
+
+                <div id="accordion-weekly-plans" class="accordion-content open px-5 pb-5 space-y-4 border-t border-slate-100 pt-4">
+                    
+                    <!-- Forma za unos novog nedeljnog programa -->
+                    <div class="space-y-3 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80">
+                        <div class="p-3 rounded-xl bg-blue-50/80 border-2 border-blue-200 space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-[11px] font-black text-blue-950 uppercase tracking-wider">
+                                    1. Nalepi tabelu iz Google Docs-a:
+                                </label>
+                                <button type="button" onclick="adminClearPasteZone()" class="text-[10px] font-bold text-blue-700 hover:underline cursor-pointer">
+                                    Očisti
+                                </button>
+                            </div>
+                            <div id="admin-paste-zone" 
+                                 contenteditable="true" 
+                                 onpaste="adminHandleProgramPaste(event)"
+                                 data-placeholder="Kliknite ovde i pritisnite Ctrl+V nakon što kopirate tabelu sa sličicama..."
+                                 class="w-full min-h-[68px] max-h-[110px] overflow-y-auto bg-white border-2 border-dashed border-blue-300 focus:border-blue-500 rounded-xl p-2.5 text-xs outline-none text-slate-700"></div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">2. Naziv nedeljnog programa:</label>
+                            <input type="text" id="admin-plan-title" placeholder="Npr. 03/ 16.–20.11.2026: Slaganje boja i poligon" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-amber-500 text-slate-800">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Važi od datuma:</label>
+                                <input type="date" id="admin-plan-valid-from" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-amber-500 text-slate-800">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Važi do (posle se zamrzava):</label>
+                                <input type="date" id="admin-plan-valid-to" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-amber-500 text-slate-800">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Link ka Google Sites / Docs pripremi:</label>
+                            <input type="url" id="admin-plan-doc-url" placeholder="https://docs.google.com/document/d/..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium outline-none focus:ring-2 focus:ring-amber-500 text-slate-800">
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-[11px] font-bold text-slate-600">3. Oblasti koje se ocenjuju:</label>
+                                <span id="admin-plan-selected-count" class="text-[10px] font-black text-amber-700">Izabrano: 0 / 13</span>
+                            </div>
+                            <div id="admin-plan-areas-checkboxes" class="grid grid-cols-2 gap-1.5 text-xs">
+                                <!-- Popunjava se kroz JS -->
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="adminSaveNewPlan()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-floppy-disk"></i> Sačuvaj program i objavi instruktorima
+                        </button>
+                    </div>
+
+                    <!-- Lista unetih programa sa brisanjem -->
+                    <div class="space-y-2 pt-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-black text-slate-700 uppercase tracking-wider">Uneti programi u bazi</span>
+                            <span id="admin-plans-counter" class="text-[10px] font-bold text-slate-500">Ukupno: 0</span>
+                        </div>
+                        <div id="admin-plans-list" class="space-y-2 max-h-72 overflow-y-auto custom-scrollbar pr-1">
+                            <!-- Popunjava se dinamički -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- KONTROLNI CENTAR I BEZBEDNOST -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
                 <div onclick="toggleAccordion('accordion-admin-panel')" class="flex justify-between items-center p-5 cursor-pointer hover:bg-slate-50/80 transition-all">
                     <div class="flex items-center space-x-3">
@@ -389,11 +491,28 @@
     </div>
 
 <script>
+const adminUmgAreas = [
+    { id: 4, short: "f(x) Logika", circleBg: "bg-blue-600", keywords: ["apstrakt", "logik", "f(x)", "brzin", "rešenj", "resenj", "pravil"] },
+    { id: 5, short: "Asocijativnost", circleBg: "bg-red-600", keywords: ["asocijacij", "asocijativn", "zagonetk", "odnos", "povezivanj"] },
+    { id: 12, short: "Dedukcija", circleBg: "bg-amber-400", keywords: ["dedukcij", "redukcij", "puzl", "slagalic", "zaključivanj", "skockalic"] },
+    { id: 14, short: "Funkc. znanja", circleBg: "bg-red-600", keywords: ["funkcionaln", "znanj", "primen", "praktičn", "alat", "ključ"] },
+    { id: 2, short: "Grafo-motorika", circleBg: "bg-green-600", keywords: ["grafo", "motorik", "šaka", "saka", "ruk", "olovk", "flomaster", "crtanj"] },
+    { id: 11, short: "Kreativnost", circleBg: "bg-blue-600", keywords: ["kreativn", "idej", "sijalic", "originaln", "mašt", "stvaranj"] },
+    { id: 1, short: "Memorija", circleBg: "bg-green-600", keywords: ["memorij", "pamćenj", "pamcenj", "sećanj", "zapamti", "memo"] },
+    { id: 3, short: "Pažnja / Oko", circleBg: "bg-green-600", keywords: ["pažnj", "paznj", "koncentracij", "fokus", "opažanj", "uočavanj", "oko"] },
+    { id: 8, short: "Propriocepcija", circleBg: "bg-blue-600", keywords: ["propriocepcij", "poligon", "pokret", "ravnotež", "tel", "orijentacij"] },
+    { id: 10, short: "Serijacija", circleBg: "bg-blue-600", keywords: ["serij", "klasifikacij", "niz", "grupisanj", "razvrstav", "redosled"] },
+    { id: 13, short: "Slušanje", circleBg: "bg-amber-400", keywords: ["slušanj", "slusanj", "prepričavanj", "prič", "krug", "bajk"] },
+    { id: 7, short: "Socijalno / Srce", circleBg: "bg-red-600", keywords: ["socijaln", "emotivn", "emocij", "empatij", "saradnj", "tim", "srce"] },
+    { id: 6, short: "Verbalno", circleBg: "bg-red-600", keywords: ["verbaln", "izražavanj", "govor", "rečnik", "pojm", "komunikacij"] }
+];
+
 let appState = {
     kindergartens: [], 
     groups: [],
     dailyRecords: {}, 
     educators: [],
+    weeklyPresets: [],
     pedagogPin: "UMG123",
     adminPin: "UMG123admin",
     savedReports: {}
@@ -420,6 +539,7 @@ window.addEventListener('DOMContentLoaded', () => {
     populateKindergartenSelects(); 
     populateEducatorSelects();
     renderSettingsEducatorList();
+    initAdminPlansUI();
     initFirebaseCloudSync();
 });
 
@@ -429,6 +549,7 @@ function loadLocalDataToState() {
         kindergartens: localStorage.getItem('umg_field_kindergartens'),
         groups: localStorage.getItem('umg_field_groups'),
         educators: localStorage.getItem('umg_field_educators'),
+        presets: localStorage.getItem('umg_weekly_presets'),
         records: localStorage.getItem('umg_field_records'),
         reports: localStorage.getItem('umg_field_reports_archive'),
         pinPed: localStorage.getItem('umg_pedagog_pin'),
@@ -438,6 +559,7 @@ function loadLocalDataToState() {
     if (stored.kindergartens) appState.kindergartens = JSON.parse(stored.kindergartens);
     if (stored.groups) appState.groups = JSON.parse(stored.groups);
     if (stored.educators) appState.educators = JSON.parse(stored.educators);
+    if (stored.presets) appState.weeklyPresets = JSON.parse(stored.presets);
     if (stored.records) appState.dailyRecords = JSON.parse(stored.records);
     if (stored.reports) appState.savedReports = JSON.parse(stored.reports);
 
@@ -449,10 +571,237 @@ function saveStateToLocalStorage() {
     localStorage.setItem('umg_field_kindergartens', JSON.stringify(appState.kindergartens));
     localStorage.setItem('umg_field_groups', JSON.stringify(appState.groups));
     localStorage.setItem('umg_field_educators', JSON.stringify(appState.educators));
+    localStorage.setItem('umg_weekly_presets', JSON.stringify(appState.weeklyPresets));
     localStorage.setItem('umg_field_records', JSON.stringify(appState.dailyRecords));
     localStorage.setItem('umg_field_reports_archive', JSON.stringify(appState.savedReports));
     localStorage.setItem('umg_pedagog_pin', appState.pedagogPin);
     localStorage.setItem('umg_admin_pin', appState.adminPin);
+}
+
+// =========================================================================
+// NEDELJNI PROGRAMI (UNOS PREKO KLIPBORDA, ZAKAZIVANJE I BRISANJE)
+// =========================================================================
+function initAdminPlansUI() {
+    const cbContainer = document.getElementById('admin-plan-areas-checkboxes');
+    if (cbContainer) {
+        cbContainer.innerHTML = '';
+        adminUmgAreas.forEach(area => {
+            const label = document.createElement('label');
+            label.id = `admin-area-label-${area.id}`;
+            label.className = "flex items-center space-x-2 bg-white p-2 rounded-xl border border-slate-200 cursor-pointer hover:bg-amber-50 transition-all";
+            label.innerHTML = `
+                <input type="checkbox" value="${area.id}" onchange="adminUpdateSelectedCount()" class="admin-plan-cb rounded text-amber-600 w-4 h-4 cursor-pointer">
+                <span class="w-2.5 h-2.5 rounded-full ${area.circleBg} shrink-0"></span>
+                <span class="font-bold text-slate-800 text-[11px] truncate">${area.short}</span>
+            `;
+            cbContainer.appendChild(label);
+        });
+    }
+
+    // Podrazumevani raspon datuma: ponedeljak - nedelja tekuće sedmice
+    const today = new Date();
+    const day = today.getDay() || 7;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - day + 1);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    const fromEl = document.getElementById('admin-plan-valid-from');
+    const toEl = document.getElementById('admin-plan-valid-to');
+    if (fromEl && !fromEl.value) fromEl.value = monday.toISOString().split('T')[0];
+    if (toEl && !toEl.value) toEl.value = sunday.toISOString().split('T')[0];
+
+    adminRenderPlansList();
+}
+
+function adminClearPasteZone() {
+    const pz = document.getElementById('admin-paste-zone');
+    if (pz) pz.innerHTML = '';
+}
+
+function adminHandleProgramPaste(event) {
+    setTimeout(() => {
+        const pasteZone = document.getElementById('admin-paste-zone');
+        if (!pasteZone) return;
+
+        let tokens = [];
+        const images = pasteZone.querySelectorAll('img');
+        images.forEach(img => {
+            if (img.alt) tokens.push(img.alt.trim());
+            if (img.title) tokens.push(img.title.trim());
+            if (img.getAttribute('aria-label')) tokens.push(img.getAttribute('aria-label').trim());
+        });
+
+        const plainText = pasteZone.innerText || "";
+        const searchStr = (tokens.join(' ') + ' ' + plainText).toLowerCase();
+
+        const titleInput = document.getElementById('admin-plan-title');
+        if (titleInput && !titleInput.value.trim() && plainText.trim()) {
+            const firstLine = plainText.split('\n').map(l => l.trim()).find(l => l.length > 3);
+            if (firstLine) titleInput.value = firstLine.substring(0, 70);
+        }
+
+        const matchedIds = new Set();
+        adminUmgAreas.forEach(area => {
+            if (area.keywords.some(kw => searchStr.includes(kw.toLowerCase()))) {
+                matchedIds.add(area.id);
+            }
+        });
+
+        document.querySelectorAll('.admin-plan-cb').forEach(cb => {
+            cb.checked = matchedIds.has(parseInt(cb.value));
+        });
+        adminUpdateSelectedCount();
+
+        if (matchedIds.size > 0) {
+            showToast(`Prepoznato ${matchedIds.size} oblasti iz nalepljenog programa!`);
+        } else {
+            showToast("Nisu prepoznate sličice, označite oblasti ručno ispod.", "warning");
+        }
+    }, 80);
+}
+
+function adminUpdateSelectedCount() {
+    const countEl = document.getElementById('admin-plan-selected-count');
+    let count = 0;
+    document.querySelectorAll('.admin-plan-cb').forEach(cb => {
+        const lbl = document.getElementById(`admin-area-label-${cb.value}`);
+        if (cb.checked) {
+            count++;
+            if (lbl) lbl.classList.add('bg-emerald-50', 'border-emerald-400');
+        } else {
+            if (lbl) lbl.classList.remove('bg-emerald-50', 'border-emerald-400');
+        }
+    });
+    if (countEl) countEl.innerText = `Izabrano: ${count} / ${adminUmgAreas.length}`;
+}
+
+function adminSaveNewPlan() {
+    const title = document.getElementById('admin-plan-title').value.trim();
+    const validFrom = document.getElementById('admin-plan-valid-from').value;
+    const validTo = document.getElementById('admin-plan-valid-to').value;
+    const docUrl = document.getElementById('admin-plan-doc-url').value.trim();
+
+    if (!title) {
+        return showToast("Unesite naziv nedeljnog programa!", "warning");
+    }
+
+    const selectedIds = Array.from(document.querySelectorAll('.admin-plan-cb:checked')).map(cb => parseInt(cb.value));
+    if (selectedIds.length === 0) {
+        return showToast("Izaberite bar jednu razvojnu oblast!", "warning");
+    }
+
+    const newPreset = {
+        id: 'plan-' + Date.now(),
+        name: title,
+        validFrom: validFrom,
+        validTo: validTo,
+        docUrl: docUrl,
+        theme: title,
+        activeAreaIds: selectedIds
+    };
+
+    appState.weeklyPresets.push(newPreset);
+    localStorage.setItem('umg_weekly_presets', JSON.stringify(appState.weeklyPresets));
+
+    if (useCloud && db) {
+        db.collection("weeklyPresets").doc(newPreset.id).set(newPreset)
+          .catch(err => console.error("Greška pri čuvanju plana u bazu:", err));
+    }
+
+    document.getElementById('admin-plan-title').value = '';
+    document.getElementById('admin-plan-doc-url').value = '';
+    adminClearPasteZone();
+    document.querySelectorAll('.admin-plan-cb').forEach(cb => cb.checked = false);
+    adminUpdateSelectedCount();
+    adminRenderPlansList();
+    showToast(`Nedeljni program "${title}" je sačuvan i objavljen!`);
+}
+
+function adminDeletePlan(planId) {
+    const plan = appState.weeklyPresets.find(p => p.id === planId);
+    if (!plan) return;
+
+    if (!confirm(`Da li ste sigurni da želite trajno da obrišete nedeljni program:\n"${plan.name}"?`)) {
+        return;
+    }
+
+    appState.weeklyPresets = appState.weeklyPresets.filter(p => p.id !== planId);
+    localStorage.setItem('umg_weekly_presets', JSON.stringify(appState.weeklyPresets));
+
+    if (useCloud && db) {
+        db.collection("weeklyPresets").doc(planId).delete()
+          .catch(err => console.error("Greška pri brisanju plana iz baze:", err));
+    }
+
+    adminRenderPlansList();
+    showToast("Nedeljni program je obrisan.", "warning");
+}
+
+function adminRenderPlansList() {
+    const listContainer = document.getElementById('admin-plans-list');
+    const counterEl = document.getElementById('admin-plans-counter');
+    if (!listContainer) return;
+
+    if (counterEl) counterEl.innerText = `Ukupno: ${appState.weeklyPresets.length}`;
+
+    if (appState.weeklyPresets.length === 0) {
+        listContainer.innerHTML = `
+            <div class="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-xs text-slate-400">
+                Trenutno nema unetih nedeljnih programa.
+            </div>
+        `;
+        return;
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    listContainer.innerHTML = '';
+
+    const sorted = [...appState.weeklyPresets].sort((a, b) => (b.validFrom || '').localeCompare(a.validFrom || ''));
+
+    sorted.forEach(plan => {
+        const isFrozen = plan.validTo && todayStr > plan.validTo;
+        const isCurrent = plan.validFrom && plan.validTo && todayStr >= plan.validFrom && todayStr <= plan.validTo;
+
+        let statusBadge = `<span class="px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 text-[10px] font-black">Planiran</span>`;
+        if (isFrozen) {
+            statusBadge = `<span class="px-2 py-0.5 rounded-lg bg-slate-200 text-slate-600 text-[10px] font-black"><i class="fa-solid fa-lock mr-1"></i>Zamrznut</span>`;
+        } else if (isCurrent) {
+            statusBadge = `<span class="px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 text-[10px] font-black"><i class="fa-solid fa-circle-check mr-1"></i>Aktivan</span>`;
+        }
+
+        const areaNames = (plan.activeAreaIds || [])
+            .map(id => adminUmgAreas.find(a => a.id === id)?.short)
+            .filter(Boolean)
+            .join(', ');
+
+        const item = document.createElement('div');
+        item.className = `p-3 rounded-xl border transition-all flex items-start justify-between gap-2.5 ${
+            isFrozen ? 'bg-slate-50 border-slate-200 opacity-75' : 'bg-white border-slate-200 shadow-sm'
+        }`;
+
+        item.innerHTML = `
+            <div class="space-y-1 min-w-0">
+                <div class="flex items-center flex-wrap gap-1.5">
+                    <span class="font-black text-xs text-slate-900 truncate">${plan.name}</span>
+                    ${statusBadge}
+                </div>
+                <p class="text-[10px] text-slate-500 font-semibold">
+                    Period: <span class="text-slate-700">${plan.validFrom || '—'}</span> do <span class="text-slate-700">${plan.validTo || '—'}</span>
+                </p>
+                <p class="text-[10px] text-slate-500 leading-snug">
+                    <strong>Oblasti (${(plan.activeAreaIds || []).length}):</strong> ${areaNames || 'Sve oblasti'}
+                </p>
+            </div>
+
+            <button type="button" onclick="adminDeletePlan('${plan.id}')" 
+                    class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 flex items-center justify-center transition-all cursor-pointer shrink-0" 
+                    title="Obriši ovaj nedeljni program">
+                <i class="fa-solid fa-trash-can text-[11px]"></i>
+            </button>
+        `;
+        listContainer.appendChild(item);
+    });
 }
 
 // ACCORDION KONTROLE
@@ -838,9 +1187,7 @@ function handleExcelImport(event) {
     }
 }
 
-// ==================================================================
-// NAPREDNA FUNKCIJA ZA PRIKAZ ČLANOVA (SA UŽIVO IZMENOM I RASKLAPANJEM)
-// ==================================================================
+// PRIKAZ ČLANOVA (SA UŽIVO IZMENOM I RASKLAPANJEM)
 function renderChildrenList(group) {
     const listEl = document.getElementById('editor-children-list');
     if (!listEl) return;
@@ -1103,7 +1450,7 @@ function saveAdminPin() {
 }
 
 // ==========================================
-// REZERVNE KOPIJE (NOVI SISTEM SA 3 DUGMETA)
+// REZERVNE KOPIJE (SA PODRŠKOM ZA NEDELJNE PROGRAME)
 // ==========================================
 function exportDatabaseFile() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState));
@@ -1121,42 +1468,51 @@ function importDatabaseFile(event, mode) {
         try {
             const importedData = JSON.parse(e.target.result);
             
-            if (importedData && (importedData.kindergartens || importedData.groups || importedData.educators)) {
+            if (importedData && (importedData.kindergartens || importedData.groups || importedData.educators || importedData.weeklyPresets)) {
                 
                 if (mode === 'merge') {
                     if (confirm("Da li želite da SPOJITE podatke iz ovog fajla sa postojećom bazom? Sistem će prepoznati razlike, dodati nove podatke i osvežiti stare bez dupliranja.")) {
                         
-                        // 1. Spajanje vrtića
                         if (importedData.kindergartens) {
                             importedData.kindergartens.forEach(newK => {
                                 const existingK = appState.kindergartens.find(k => k.id === newK.id);
                                 if (existingK) {
-                                    existingK.name = newK.name; // Osveži ime ako je menjano
+                                    existingK.name = newK.name;
                                 } else {
                                     appState.kindergartens.push(newK);
                                 }
                             });
                         }
 
-                        // 2. Spajanje grupa
                         if (importedData.groups) {
                             importedData.groups.forEach(newG => {
                                 const existingIdx = appState.groups.findIndex(g => g.id === newG.id);
                                 if (existingIdx === -1) {
                                     appState.groups.push(newG);
                                 } else {
-                                    appState.groups[existingIdx] = newG; // Potpuno osveži decu i podatke grupe
+                                    appState.groups[existingIdx] = newG;
                                 }
                                 if (typeof updateCloudGroup === 'function') updateCloudGroup(newG);
                             });
                         }
 
-                        // 3. Spajanje vaspitača
                         if (importedData.educators) {
                             importedData.educators.forEach(newE => {
                                 if (!appState.educators.includes(newE)) {
                                     appState.educators.push(newE);
                                 }
+                            });
+                        }
+
+                        if (importedData.weeklyPresets) {
+                            importedData.weeklyPresets.forEach(newP => {
+                                const existingPIdx = appState.weeklyPresets.findIndex(p => p.id === newP.id);
+                                if (existingPIdx === -1) {
+                                    appState.weeklyPresets.push(newP);
+                                } else {
+                                    appState.weeklyPresets[existingPIdx] = newP;
+                                }
+                                if (useCloud && db) db.collection("weeklyPresets").doc(newP.id).set(newP);
                             });
                         }
 
@@ -1168,24 +1524,26 @@ function importDatabaseFile(event, mode) {
                 } else if (mode === 'overwrite') {
                     if (confirm("PAŽNJA: Ovo će OBRISATI SVE trenutne podatke na uređaju i OČISTITI BAZU NA OBLAKU, a zatim ih zameniti podacima iz fajla. Da li ste sigurni?")) {
                         
-                        // KLJUČNA ISPRAVKA: Prvo brišemo svo "đubre" i duhove sa Firebase-a
                         if (useCloud && db) {
                             appState.groups.forEach(g => deleteCloudGroup(g.id));
+                            appState.weeklyPresets.forEach(p => db.collection("weeklyPresets").doc(p.id).delete());
                         }
 
-                        // Zatim učitavamo nove čiste podatke iz JSON-a
                         appState.kindergartens = importedData.kindergartens || [];
                         appState.groups = importedData.groups || [];
                         appState.educators = importedData.educators || [];
+                        appState.weeklyPresets = importedData.weeklyPresets || [];
                         appState.dailyRecords = importedData.dailyRecords || {};
                         appState.savedReports = importedData.savedReports || {};
                         if (importedData.pedagogPin) appState.pedagogPin = importedData.pedagogPin;
                         if (importedData.adminPin) appState.adminPin = importedData.adminPin;
 
-                        // Šaljemo samo čiste grupe nazad na oblak
                         appState.groups.forEach(g => {
                             if (typeof updateCloudGroup === 'function') updateCloudGroup(g);
                         });
+                        if (useCloud && db) {
+                            appState.weeklyPresets.forEach(p => db.collection("weeklyPresets").doc(p.id).set(p));
+                        }
 
                         finalizeImport("Baza je uspešno prebrisana i duhovi su obrisani!");
                     }
@@ -1220,6 +1578,7 @@ function finalizeImport(successMessage) {
     populateKindergartenSelects();
     populateEducatorSelects();
     renderSettingsEducatorList();
+    adminRenderPlansList();
     
     document.getElementById('settings-pedagog-pin').value = appState.pedagogPin;
     document.getElementById('settings-admin-pin').value = appState.adminPin;
@@ -1298,6 +1657,18 @@ function initFirebaseCloudSync() {
                     if (typeof renderGroupsGrid === 'function') renderGroupsGrid();
                 }
             }, (err) => console.error("Admin groups sync error:", err));
+
+            db.collection("weeklyPresets").onSnapshot((snapshot) => {
+                let cloudPresets = [];
+                snapshot.forEach(doc => {
+                    cloudPresets.push(doc.data());
+                });
+                if (cloudPresets.length > 0) {
+                    appState.weeklyPresets = cloudPresets;
+                    localStorage.setItem('umg_weekly_presets', JSON.stringify(appState.weeklyPresets));
+                }
+                adminRenderPlansList();
+            }, (err) => console.error("Admin weeklyPresets sync error:", err));
 
         }).catch(err => {
             console.error("Greška pri autentifikaciji admina:", err);
