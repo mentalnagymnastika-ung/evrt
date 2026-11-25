@@ -185,6 +185,15 @@
                             <span>Potvrdi</span>
                         </button>
                     </div>
+
+                    <!-- PREKIDAČ ZA PODELJENU GRUPU -->
+                    <label class="flex items-center justify-between p-3.5 rounded-2xl bg-amber-50/70 border-2 border-amber-200 cursor-pointer select-none mt-2">
+                        <div class="pr-2">
+                            <span class="block text-sm font-black text-amber-950">Podeljena grupa (po smenama)</span>
+                            <span class="block text-xs text-amber-800/80 font-medium">Uključi ako se grupa deli — sva deca kreću kao isključena dok ih ne potvrdiš</span>
+                        </div>
+                        <input type="checkbox" id="field-split-group-toggle" onchange="toggleSplitGroupMode(this.checked)" class="w-6 h-6 accent-amber-600 rounded cursor-pointer shrink-0">
+                    </label>
                 </div>
 
                 <!-- Nedeljni program (Čist izbor iz baze bez administratorskog unosa) -->
@@ -1074,6 +1083,63 @@
             }
         }
 
+        function getTargetAreaIdsForDefaults() {
+            if (!showAllAreasOverride && activeFilterAreaIds && activeFilterAreaIds.length > 0) {
+                return [...activeFilterAreaIds];
+            }
+            return [];
+        }
+
+        function applyDefault50ToChild(childRec) {
+            if (!childRec || !childRec.present) return;
+            const targetIds = getTargetAreaIdsForDefaults();
+            if (targetIds.length === 0) return;
+
+            if (!childRec.areaScores) childRec.areaScores = {};
+            if (!childRec.highlightAreas) childRec.highlightAreas = [];
+
+            targetIds.forEach(aId => {
+                if (!childRec.highlightAreas.includes(aId)) {
+                    childRec.highlightAreas.push(aId);
+                }
+                if (childRec.areaScores[aId] === undefined || childRec.areaScores[aId] === null) {
+                    childRec.areaScores[aId] = 50;
+                }
+            });
+        }
+
+        function toggleSplitGroupMode(isSplit) {
+            const key = getRecordKey();
+            const record = appState.dailyRecords[key];
+            const activeGroup = appState.groups.find(g => g.id === activeGroupId);
+            if (!record || !activeGroup) return;
+
+            record.isSplitGroup = isSplit;
+
+            activeGroup.children.forEach(child => {
+                if (!record.children[child.id]) {
+                    record.children[child.id] = { present: !isSplit, score: null, highlightAreas: [], areaScores: {}, note: "" };
+                }
+                const chRec = record.children[child.id];
+
+                if (isSplit) {
+                    chRec.present = false;
+                    chRec.score = null;
+                    chRec.highlightAreas = [];
+                    chRec.areaScores = {};
+                    delete selectedAreaByChild[child.id];
+                    expandedChildIds.delete(child.id);
+                } else {
+                    chRec.present = true;
+                    applyDefault50ToChild(chRec);
+                }
+            });
+
+            saveDailyRecord(false);
+            renderChildrenTrackingList();
+            showToast(isSplit ? "Podeljena grupa: svi su isključeni dok ih ne potvrdiš." : "Standardna grupa: svi prisutni sa 50%.");
+        }
+
         function changeActiveGroup() {
             const select = document.getElementById('field-group-select');
             if (select) {
@@ -1195,6 +1261,17 @@
                 if (headerDocBtn) headerDocBtn.classList.add('hidden');
             }
 
+            const key = getRecordKey();
+            const record = appState.dailyRecords[key];
+            if (record && record.children) {
+                Object.values(record.children).forEach(chRec => {
+                    if (chRec && chRec.present) {
+                        applyDefault50ToChild(chRec);
+                    }
+                });
+                saveDailyRecord(false);
+            }
+
             renderActiveAreasChips();
             renderChildrenTrackingList();
             updateSummaryBar();
@@ -1274,16 +1351,23 @@
                 if (alertBar) alertBar.classList.add('hidden');
             }
 
+            const splitToggleEl = document.getElementById('field-split-group-toggle');
+
             if (!appState.dailyRecords[key]) {
+                const isSplit = splitToggleEl ? splitToggleEl.checked : false;
                 const childTracking = {};
                 activeGroup.children.forEach(child => {
-                    childTracking[child.id] = {
-                        present: true,          
+                    const chObj = {
+                        present: !isSplit,          
                         score: null,            
                         highlightAreas: [],     
                         areaScores: {},         
                         note: ""                
                     };
+                    if (!isSplit) {
+                        applyDefault50ToChild(chObj);
+                    }
+                    childTracking[child.id] = chObj;
                 });
 
                 appState.dailyRecords[key] = {
@@ -1292,12 +1376,21 @@
                     groupName: activeGroup.name,
                     educator: activeGroup.educator || activeEducator, 
                     writer: activeEducator, 
+                    isSplitGroup: isSplit,
                     theme: document.getElementById('field-class-theme')?.value || "",
                     generalNote: "",
                     children: childTracking
                 };
             } else {
                 appState.dailyRecords[key].writer = activeEducator;
+                if (splitToggleEl) {
+                    splitToggleEl.checked = Boolean(appState.dailyRecords[key].isSplitGroup);
+                }
+                Object.values(appState.dailyRecords[key].children || {}).forEach(chObj => {
+                    if (chObj && chObj.present && (!chObj.highlightAreas || chObj.highlightAreas.length === 0)) {
+                        applyDefault50ToChild(chObj);
+                    }
+                });
             }
 
             const record = appState.dailyRecords[key];
@@ -1554,16 +1647,19 @@
             if (event) event.stopPropagation(); 
             const key = getRecordKey();
             if (appState.dailyRecords[key] && appState.dailyRecords[key].children[childId]) {
-                const current = appState.dailyRecords[key].children[childId].present;
-                appState.dailyRecords[key].children[childId].present = !current;
+                const chRec = appState.dailyRecords[key].children[childId];
+                const current = chRec.present;
+                chRec.present = !current;
                 
                 if (current === true) {
-                    appState.dailyRecords[key].children[childId].score = null;
-                    appState.dailyRecords[key].children[childId].highlightAreas = [];
-                    appState.dailyRecords[key].children[childId].areaScores = {};
-                    appState.dailyRecords[key].children[childId].note = "";
+                    chRec.score = null;
+                    chRec.highlightAreas = [];
+                    chRec.areaScores = {};
+                    chRec.note = "";
                     delete selectedAreaByChild[childId];
                     expandedChildIds.delete(childId); 
+                } else {
+                    applyDefault50ToChild(chRec);
                 }
                 saveDailyRecord(false);
                 renderChildrenTrackingList();
