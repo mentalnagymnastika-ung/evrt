@@ -212,13 +212,19 @@
                     <!-- Status izabranog programa (aktivan / zamrznut) -->
                     <div id="plan-status-banner" class="hidden text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center justify-between"></div>
 
-                    <!-- Direktno dugme za otvaranje pripreme -->
-                    <div id="plan-doc-link-container" class="hidden">
-                        <a id="plan-doc-link-anchor" href="#" target="_blank" rel="noopener noreferrer" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-800 border-2 border-blue-200 rounded-xl py-3 px-4 text-sm font-bold flex items-center justify-center gap-2 transition-all">
-                            <i class="fa-solid fa-file-lines text-blue-600"></i>
-                            <span>Otvori pripremu (Docs / Sajt)</span>
+                    <!-- Direktno dugme za otvaranje i brzu dopunu linka ka Google Disku -->
+                    <div id="plan-doc-link-container" class="space-y-2">
+                        <a id="plan-doc-link-anchor" href="#" target="_blank" rel="noopener noreferrer" class="hidden w-full bg-blue-50 hover:bg-blue-100 text-blue-800 border-2 border-blue-200 rounded-xl py-3 px-4 text-sm font-bold items-center justify-center gap-2 transition-all">
+                            <i class="fa-brands fa-google-drive text-blue-600 text-base"></i>
+                            <span>Otvori pripremu na Google Disku</span>
                             <i class="fa-solid fa-arrow-up-right-from-square text-xs ml-1"></i>
                         </a>
+                        <div class="flex items-center gap-1.5">
+                            <input type="url" id="quick-plan-gdrive-input" placeholder="Nalepi link ka Google Disku (opciono)..." class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-blue-400">
+                            <button type="button" onclick="saveQuickPlanDriveLink()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-2 rounded-xl text-xs shrink-0 cursor-pointer" title="Sačuvaj link za ovaj program">
+                                <i class="fa-solid fa-link"></i> Snimi
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Prikaz filtera oblasti koje se ocenjuju te nedelje -->
@@ -1163,6 +1169,17 @@
         // ========================================================
         // RAD SA NEDELJNIM PLANOVIMA (52 NEDELJE + ZAMRZAVANJE)
         // ========================================================
+        function getSortedWeeklyPresets() {
+            return [...appState.weeklyPresets].sort((a, b) => {
+                const dateA = a.validFrom || '';
+                const dateB = b.validFrom || '';
+                if (dateA && dateB && dateA !== dateB) {
+                    return dateA.localeCompare(dateB);
+                }
+                return (a.name || '').localeCompare(b.name || '', 'sr');
+            });
+        }
+
         function populateWeeklyPresetsSelect() {
             const select = document.getElementById('weekly-plan-select');
             if (!select) return;
@@ -1175,7 +1192,9 @@
             blankOpt.innerText = "-- Izaberi nedeljni plan iz programa --";
             select.appendChild(blankOpt);
 
-            appState.weeklyPresets.forEach(preset => {
+            const sortedPresets = getSortedWeeklyPresets();
+
+            sortedPresets.forEach(preset => {
                 const frozen = isPlanFrozen(preset);
                 const current = isPlanCurrentWeek(preset);
                 const opt = document.createElement('option');
@@ -1199,6 +1218,29 @@
             if (currentVal) select.value = currentVal;
         }
 
+        function saveQuickPlanDriveLink() {
+            const planSelect = document.getElementById('weekly-plan-select');
+            const urlInput = document.getElementById('quick-plan-gdrive-input');
+            if (!planSelect || !planSelect.value || planSelect.value === "__ALL__") {
+                showToast("Prvo izaberite nedeljni program iznad.", "warning");
+                return;
+            }
+            const preset = appState.weeklyPresets.find(p => p.id === planSelect.value);
+            if (!preset) return;
+
+            const cleanUrl = urlInput ? urlInput.value.trim() : '';
+            preset.docUrl = cleanUrl;
+            preset.docLink = cleanUrl;
+
+            localStorage.setItem('umg_weekly_presets', JSON.stringify(appState.weeklyPresets));
+            if (useCloud && db) {
+                db.collection("weeklyPresets").doc(preset.id).set({ docUrl: cleanUrl, docLink: cleanUrl }, { merge: true });
+            }
+
+            applyWeeklyPreset(preset.id, false);
+            showToast(cleanUrl ? "Link ka Google Disku je sačuvan!" : "Link je uklonjen.");
+        }
+
         function applyWeeklyPreset(presetId, notify = true) {
             const themeInput = document.getElementById('field-class-theme');
             const docContainer = document.getElementById('plan-doc-link-container');
@@ -1209,9 +1251,11 @@
             if (!presetId || presetId === "__ALL__") {
                 activeFilterAreaIds = [];
                 showAllAreasOverride = true;
-                if (docContainer) docContainer.classList.add('hidden');
+                if (docAnchor) docAnchor.classList.add('hidden');
                 if (headerDocBtn) headerDocBtn.classList.add('hidden');
                 if (statusBanner) statusBanner.classList.add('hidden');
+                const quickInput = document.getElementById('quick-plan-gdrive-input');
+                if (quickInput) quickInput.value = '';
                 renderActiveAreasChips();
                 renderChildrenTrackingList();
                 return;
@@ -1246,19 +1290,30 @@
                 }
             }
 
-            if (preset.docUrl && preset.docUrl.trim()) {
-                if (docContainer && docAnchor) {
-                    docAnchor.href = preset.docUrl;
-                    docContainer.classList.remove('hidden');
+            const driveUrl = (preset.docLink || preset.docUrl || '').trim();
+            const quickInput = document.getElementById('quick-plan-gdrive-input');
+            if (quickInput) quickInput.value = driveUrl;
+
+            if (driveUrl) {
+                if (docAnchor) {
+                    docAnchor.href = driveUrl;
+                    docAnchor.classList.remove('hidden');
+                    docAnchor.classList.add('flex');
                 }
                 if (headerDocBtn) {
-                    headerDocBtn.href = preset.docUrl;
+                    headerDocBtn.href = driveUrl;
                     headerDocBtn.classList.remove('hidden');
                     headerDocBtn.classList.add('flex');
                 }
             } else {
-                if (docContainer) docContainer.classList.add('hidden');
-                if (headerDocBtn) headerDocBtn.classList.add('hidden');
+                if (docAnchor) {
+                    docAnchor.classList.add('hidden');
+                    docAnchor.classList.remove('flex');
+                }
+                if (headerDocBtn) {
+                    headerDocBtn.classList.add('hidden');
+                    headerDocBtn.classList.remove('flex');
+                }
             }
 
             const key = getRecordKey();
