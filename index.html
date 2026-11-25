@@ -742,11 +742,11 @@
         ];
 
         const ratingLevels = [
-            { val: 120, label: "Iznad oček.", title: "120 - Iznad očekivanog (darovitost)", color: "from-purple-600 via-indigo-600 to-cyan-500", activeBg: "bg-gradient-to-r from-purple-600 to-indigo-600 text-white ring-4 ring-purple-200" },
-            { val: 100, label: "Odlično", title: "100 - Odlično postignuće", color: "from-indigo-500 to-purple-600", activeBg: "bg-gradient-to-r from-indigo-500 to-purple-600 text-white ring-4 ring-indigo-200" },
-            { val: 90, label: "Uobičajeno", title: "90 - Uobičajeni nivo", color: "from-emerald-500 to-teal-500", activeBg: "bg-gradient-to-r from-emerald-500 to-teal-500 text-white ring-4 ring-emerald-200" },
-            { val: 75, label: "Dobro", title: "75 - Dobro u skladu sa uzrastom", color: "from-blue-500 to-cyan-500", activeBg: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white ring-4 ring-blue-200" },
-            { val: 50, label: "Podrška", title: "50 - Potrebna dodatna podrška", color: "from-rose-500 to-red-500", activeBg: "bg-gradient-to-r from-rose-500 to-red-500 text-white ring-4 ring-rose-200" }
+            { val: 0, title: "0 - Potpuna samostalnost", activeBg: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white ring-4 ring-blue-200" },
+            { val: 25, title: "25 - Minimalna podrška", activeBg: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white ring-4 ring-blue-200" },
+            { val: 50, title: "50 - Srednji nivo podrške", activeBg: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white ring-4 ring-blue-200" },
+            { val: 75, title: "75 - Pojačana podrška", activeBg: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white ring-4 ring-blue-200" },
+            { val: 100, title: "100 - Maksimalna podrška", activeBg: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white ring-4 ring-blue-200" }
         ];
 
         let appState = {
@@ -769,6 +769,7 @@
         let showAllAreasOverride = false;
         let activeRecognition = null;
         let expandedChildIds = new Set();
+        let selectedAreaByChild = {};
         let qrCodeInstance = null;
         
         let db = null;
@@ -1115,8 +1116,7 @@
                 opt.value = preset.id;
                 
                 if (frozen) {
-                    opt.innerText = `🔒 ${preset.name} (Zamrznut - istekao rok)`;
-                    opt.disabled = true;
+                    opt.innerText = `⏪ ${preset.name} (Prošla nedelja - retroaktivni unos)`;
                 } else if (current) {
                     opt.innerText = `⭐ ${preset.name} (AKTUELNA NEDELJA)`;
                 } else {
@@ -1154,11 +1154,6 @@
             const preset = appState.weeklyPresets.find(p => p.id === presetId);
             if (!preset) return;
 
-            if (isPlanFrozen(preset)) {
-                showToast("Ovaj nedeljni program je zamrznut jer mu je istekao rok!", "warning");
-                return;
-            }
-
             showAllAreasOverride = false;
             activeFilterAreaIds = preset.activeAreaIds || [];
             
@@ -1168,7 +1163,11 @@
             }
 
             if (statusBanner) {
-                if (isPlanCurrentWeek(preset)) {
+                if (isPlanFrozen(preset)) {
+                    statusBanner.className = "text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center justify-between bg-purple-50 text-purple-900 border border-purple-200";
+                    statusBanner.innerHTML = `<span><i class="fa-solid fa-clock-rotate-left text-purple-600 mr-1.5"></i> Retroaktivni program (prošla nedelja)</span><span>${preset.validFrom || ''} – ${preset.validTo || ''}</span>`;
+                    statusBanner.classList.remove('hidden');
+                } else if (isPlanCurrentWeek(preset)) {
                     statusBanner.className = "text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center justify-between bg-emerald-50 text-emerald-800 border border-emerald-200";
                     statusBanner.innerHTML = `<span><i class="fa-solid fa-circle-dot text-emerald-600 mr-1.5"></i> Aktivan program za tekuću nedelju</span><span>Do: ${preset.validTo}</span>`;
                     statusBanner.classList.remove('hidden');
@@ -1282,6 +1281,7 @@
                         present: true,          
                         score: null,            
                         highlightAreas: [],     
+                        areaScores: {},         
                         note: ""                
                     };
                 });
@@ -1330,7 +1330,8 @@
                 : areas.filter(a => activeFilterAreaIds.includes(a.id));
 
             activeGroup.children.forEach(child => {
-                const tr = record.children[child.id] || { present: true, score: null, highlightAreas: [], note: "" };
+                const tr = record.children[child.id] || { present: true, score: null, highlightAreas: [], areaScores: {}, note: "" };
+                if (!tr.areaScores) tr.areaScores = {};
                 if (tr.present) presentCount++; else absentCount++;
 
                 const card = document.createElement('div');
@@ -1340,28 +1341,51 @@
                     const isExpanded = expandedChildIds.has(child.id);
                     card.className = "bg-white rounded-3xl border border-slate-200/90 shadow-sm transition-all duration-200 overflow-hidden";
 
-                    let ratingButtonsHTML = '<div class="grid grid-cols-5 gap-1.5 sm:gap-3 py-1">';
+                    let activeAreaId = selectedAreaByChild[child.id];
+                    if (activeAreaId && !tr.highlightAreas.includes(activeAreaId)) {
+                        activeAreaId = null;
+                        selectedAreaByChild[child.id] = null;
+                    }
+
+                    const activeAreaObj = activeAreaId ? areas.find(a => a.id === activeAreaId) : null;
+                    const currentAreaScore = activeAreaObj && tr.areaScores[activeAreaObj.id] !== undefined ? tr.areaScores[activeAreaObj.id] : 50;
+
+                    let ratingButtonsHTML = '<div class="grid grid-cols-5 gap-2 sm:gap-3 py-1">';
                     ratingLevels.forEach(level => {
-                        const isActive = (tr.score === level.val);
+                        const isActive = activeAreaObj && (currentAreaScore === level.val);
                         ratingButtonsHTML += `
-                            <div class="flex flex-col items-center">
-                                <button type="button" onclick="setQuickScore('${child.id}', ${level.val})" 
-                                        class="w-full aspect-square max-w-[64px] rounded-2xl border-2 flex items-center justify-center font-black text-base sm:text-lg transition-all transform active:scale-90 cursor-pointer shadow-sm ${
-                                            isActive 
-                                            ? level.activeBg + ' scale-105 border-transparent shadow-md' 
-                                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
-                                        }" title="${level.title}">
-                                    ${level.val}
-                                </button>
-                                <span class="text-[11px] sm:text-xs font-bold mt-1.5 text-slate-600 tracking-tight text-center leading-tight">${level.label}</span>
-                            </div>
+                            <button type="button" ${activeAreaObj ? `onclick="setAreaScore('${child.id}', ${activeAreaObj.id}, ${level.val})"` : 'disabled'} 
+                                    class="w-full h-14 sm:h-16 rounded-2xl border-2 flex items-center justify-center font-black text-lg sm:text-xl transition-all transform active:scale-95 shadow-sm ${
+                                        activeAreaObj
+                                        ? (isActive 
+                                            ? level.activeBg + ' scale-[1.03] border-transparent shadow-md cursor-pointer' 
+                                            : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-100 hover:border-slate-300 cursor-pointer')
+                                        : 'bg-slate-100 text-slate-400 border-slate-200 cursor-default'
+                                    }" title="${level.title}">
+                                ${level.val}
+                            </button>
                         `;
                     });
                     ratingButtonsHTML += '</div>';
 
+                    const topScaleSectionHTML = `
+                        <div class="space-y-2.5 pb-1">
+                            <div class="flex items-center gap-2 px-1 min-h-[24px]">
+                                ${activeAreaObj 
+                                    ? `<span class="w-3.5 h-3.5 rounded-full ${activeAreaObj.circleBg} inline-block shrink-0"></span>
+                                       <span class="text-sm sm:text-base font-black uppercase tracking-wider text-slate-900">${activeAreaObj.short}</span>`
+                                    : `<span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400">Izaberi oblast ispod</span>`
+                                }
+                            </div>
+                            ${ratingButtonsHTML}
+                        </div>
+                    `;
+
                     let areasGridHTML = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 py-1">';
                     visibleAreas.forEach(area => {
                         const isSelected = tr.highlightAreas.includes(area.id);
+                        const isFocused = (activeAreaId === area.id);
+                        const areaScoreVal = tr.areaScores[area.id] !== undefined ? tr.areaScores[area.id] : 50;
                         
                         let iconInnerContent = '';
                         if (area.customType === 'fx') {
@@ -1388,17 +1412,17 @@
                             <button type="button" onclick="toggleAreaHighlight('${child.id}', ${area.id})"
                                     class="relative flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all active:scale-95 cursor-pointer min-h-[112px] ${
                                         isSelected 
-                                        ? 'bg-emerald-50/95 border-emerald-500 text-emerald-950 ring-2 ring-emerald-400/40 shadow-md scale-[1.02]' 
+                                        ? (isFocused ? 'bg-amber-50/90 border-amber-500 text-slate-900 ring-2 ring-amber-400/50 shadow-md scale-[1.02]' : 'bg-emerald-50/95 border-emerald-500 text-emerald-950 shadow-sm')
                                         : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                                     }" title="${area.name}">
                                 
-                                ${isSelected ? '<span class="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-check"></i></span>' : ''}
+                                ${isSelected ? `<span class="absolute -top-2 -right-2 min-w-[28px] h-7 px-1.5 ${isFocused ? 'bg-amber-500' : 'bg-emerald-600'} text-white rounded-full flex items-center justify-center text-xs font-black shadow-md">${areaScoreVal}</span>` : ''}
 
                                 <div class="w-16 h-16 rounded-full ${area.circleBg} flex items-center justify-center shadow-sm shrink-0">
                                     ${iconInnerContent}
                                 </div>
 
-                                <span class="text-xs sm:text-sm font-black mt-2 text-center leading-snug line-clamp-2 w-full ${isSelected ? 'text-emerald-900 font-extrabold' : 'text-slate-800'}">
+                                <span class="text-xs sm:text-sm font-black mt-2 text-center leading-snug line-clamp-2 w-full ${isSelected ? 'text-slate-900 font-extrabold' : 'text-slate-800'}">
                                     ${area.short}
                                 </span>
                             </button>
@@ -1406,16 +1430,15 @@
                     });
                     areasGridHTML += '</div>';
 
-                    let scoreBadge = tr.score 
-                        ? `<span class="bg-amber-100 text-amber-900 border border-amber-300 text-xs sm:text-sm font-black px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm">Ocena: ${tr.score}</span>`
+                    const evaluatedCount = tr.highlightAreas.length;
+                    let scoreBadge = evaluatedCount > 0
+                        ? `<span class="bg-amber-100 text-amber-900 border border-amber-300 text-xs sm:text-sm font-black px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm">Oblasti: ${evaluatedCount}</span>`
                         : `<span class="bg-slate-100 text-slate-500 text-xs font-bold px-2.5 py-1 rounded-lg">Nije ocenjen</span>`;
 
                     card.innerHTML = `
-                        <div class="flex items-center justify-between p-3.5 sm:p-4 relative bg-white">
-                            <div class="absolute inset-0 z-0 cursor-pointer" onclick="toggleChildCollapse('${child.id}', event)"></div>
-                            
-                            <div class="flex items-center space-x-3.5 relative z-10 min-w-0 pr-2">
-                                <button type="button" onclick="togglePresence('${child.id}', event)" class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-700 border-2 border-emerald-300 font-black flex items-center justify-center text-xl shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0" title="Dodirni da označiš dete kao odsutno">
+                        <div class="flex items-center justify-between p-3.5 sm:p-4 relative bg-white cursor-pointer" onclick="toggleChildCollapse('${child.id}', event)">
+                            <div class="flex items-center space-x-4 relative z-10 min-w-0 pr-2 pointer-events-none">
+                                <button type="button" onclick="togglePresence('${child.id}', event)" class="pointer-events-auto w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-emerald-50 text-emerald-700 border-2 border-emerald-300 font-black flex items-center justify-center text-2xl sm:text-3xl shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0" title="Dodirni da označiš dete kao odsutno">
                                     ${child.name.charAt(0)}
                                 </button>
                                 <div class="min-w-0">
@@ -1433,12 +1456,7 @@
                         </div>
 
                         <div id="details-child-${child.id}" class="${isExpanded ? '' : 'hidden'} border-t border-slate-100 p-3 sm:p-4 bg-slate-50/50 space-y-4">
-                            <div>
-                                <span class="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5 flex items-center">
-                                    <i class="fa-solid fa-star text-amber-500 mr-1.5"></i> UMG Procena časa:
-                                </span>
-                                ${ratingButtonsHTML}
-                            </div>
+                            ${topScaleSectionHTML}
 
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
@@ -1475,8 +1493,8 @@
                     card.className = "bg-slate-100 rounded-2xl shadow-sm border border-slate-200/80 opacity-65 transition-all duration-200";
                     card.innerHTML = `
                         <div class="flex justify-between items-center p-3.5 sm:p-4 gap-2">
-                            <button type="button" onclick="togglePresence('${child.id}', event)" class="flex items-center space-x-3.5 cursor-pointer text-left flex-1 min-w-0 outline-none">
-                                <div class="w-14 h-14 rounded-2xl bg-slate-300 text-slate-600 font-black flex items-center justify-center text-xl shadow-inner shrink-0">
+                            <button type="button" onclick="togglePresence('${child.id}', event)" class="flex items-center space-x-4 cursor-pointer text-left flex-1 min-w-0 outline-none">
+                                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-slate-300 text-slate-600 font-black flex items-center justify-center text-2xl sm:text-3xl shadow-inner shrink-0">
                                     ${child.name.charAt(0)}
                                 </div>
                                 <div class="min-w-0">
@@ -1517,10 +1535,19 @@
             }
         }
 
-        function confirmAndCloseChild(childId) {
-            saveDailyRecord(false);
-            toggleChildCollapse(childId);
-            showToast("Podaci za dete uspešno sačuvani!");
+        function setAreaScore(childId, areaId, score) {
+            const key = getRecordKey();
+            const childRec = appState.dailyRecords[key]?.children?.[childId];
+            if (childRec) {
+                if (!childRec.areaScores) childRec.areaScores = {};
+                childRec.areaScores[areaId] = score;
+                if (!childRec.highlightAreas.includes(areaId)) {
+                    childRec.highlightAreas.push(areaId);
+                }
+                selectedAreaByChild[childId] = areaId;
+                saveDailyRecord(false);
+                renderChildrenTrackingList();
+            }
         }
 
         function togglePresence(childId, event) {
@@ -1533,7 +1560,9 @@
                 if (current === true) {
                     appState.dailyRecords[key].children[childId].score = null;
                     appState.dailyRecords[key].children[childId].highlightAreas = [];
+                    appState.dailyRecords[key].children[childId].areaScores = {};
                     appState.dailyRecords[key].children[childId].note = "";
+                    delete selectedAreaByChild[childId];
                     expandedChildIds.delete(childId); 
                 }
                 saveDailyRecord(false);
@@ -1541,26 +1570,37 @@
             }
         }
 
-        function setQuickScore(childId, score) {
-            const key = getRecordKey();
-            if (appState.dailyRecords[key] && appState.dailyRecords[key].children[childId]) {
-                const current = appState.dailyRecords[key].children[childId].score;
-                appState.dailyRecords[key].children[childId].score = (current === score) ? null : score;
-                saveDailyRecord(false);
-                renderChildrenTrackingList();
-            }
+        function confirmAndCloseChild(childId) {
+            selectedAreaByChild[childId] = null;
+            saveDailyRecord(false);
+            renderChildrenTrackingList();
+            toggleChildCollapse(childId);
+            showToast("Podaci za dete uspešno sačuvani!");
         }
 
         function toggleAreaHighlight(childId, areaId) {
             const key = getRecordKey();
-            if (appState.dailyRecords[key] && appState.dailyRecords[key].children[childId]) {
-                let list = appState.dailyRecords[key].children[childId].highlightAreas || [];
-                if (list.includes(areaId)) {
-                    list = list.filter(id => id !== areaId);
-                } else {
+            const childRec = appState.dailyRecords[key]?.children?.[childId];
+            if (childRec) {
+                if (!childRec.areaScores) childRec.areaScores = {};
+                let list = childRec.highlightAreas || [];
+                const currentlyFocused = selectedAreaByChild[childId];
+
+                if (!list.includes(areaId)) {
                     list.push(areaId);
+                    if (childRec.areaScores[areaId] === undefined) {
+                        childRec.areaScores[areaId] = 50;
+                    }
+                    selectedAreaByChild[childId] = areaId;
+                } else if (currentlyFocused !== areaId) {
+                    selectedAreaByChild[childId] = areaId;
+                } else {
+                    list = list.filter(id => id !== areaId);
+                    delete childRec.areaScores[areaId];
+                    selectedAreaByChild[childId] = list.length > 0 ? list[list.length - 1] : null;
                 }
-                appState.dailyRecords[key].children[childId].highlightAreas = list;
+
+                childRec.highlightAreas = list;
                 saveDailyRecord(false);
                 renderChildrenTrackingList();
             }
